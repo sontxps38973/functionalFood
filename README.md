@@ -2,18 +2,6 @@
 
 Đây là dự án API Laravel quản lý sản phẩm và danh mục cho trang web bán **thực phẩm chức năng**.
 
----
-
-## 🚀 Tính năng
-
-- Quản lý **danh mục** (CRUD)
-- Quản lý **sản phẩm** (CRUD)
-- **Tìm kiếm** sản phẩm theo tên
-- **Lọc** sản phẩm theo danh mục, giá, tên
-- **Phân trang**
-- **Tài liệu API** bằng Swagger
-
----
 
 ## ⚙️ Yêu cầu hệ thống
 
