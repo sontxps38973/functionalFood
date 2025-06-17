@@ -2,6 +2,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\UserAuthController;
+use App\Http\Controllers\Api\ForgotPasswordController;
 
 Route::prefix('v1')->group(function () {
     // Category CRUD
@@ -16,6 +18,17 @@ Route::prefix('v1')->group(function () {
     // Product filter
     Route::get('products-filter', [ProductController::class, 'filter']);
 });
-Route::get('/test-api', function () {
-    return 'API đang hoạt động';
+
+// Authentication routes
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [UserAuthController::class, 'register']);
+    Route::post('/login', [UserAuthController::class, 'login']);
+    Route::post('/logout', [UserAuthController::class, 'logout'])->middleware('auth:sanctum');
+});
+
+// Password reset routes
+Route::prefix('password')->group(function () {
+    Route::post('/request-otp', [ForgotPasswordController::class, 'requestOtp']);
+    Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOtp']);
+    Route::post('/reset', [ForgotPasswordController::class, 'resetPassword']);
 });

@@ -20,6 +20,8 @@ return new class extends Migration
             $table->boolean('status')->default(true);
             $table->enum('product_type', ['simple', 'variable'])->default('simple');
             $table->decimal('price', 10, 2)->nullable();
+            $table->decimal('discount', 8, 2)->nullable()->default(0);
+
             $table->integer('stock_quantity')->nullable();
             $table->string('image')->nullable();
             $table->timestamps();

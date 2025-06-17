@@ -8,6 +8,11 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ProductView;
 /**
  * @OA\Tag(name="Products")
  */
@@ -40,6 +45,7 @@ public function index(Request $request)
      *             required={"name", "price", "category_id"},
      *             @OA\Property(property="name", type="string"),
      *             @OA\Property(property="price", type="number"),
+     *          @OA\Property(property="discount", type="number", nullable=true),
      *             @OA\Property(property="category_id", type="integer")
      *         )
      *     ),
@@ -47,12 +53,54 @@ public function index(Request $request)
      * )
      */
     public function store(StoreProductRequest $request)
-    {
-        $data = $request->validated();
-        $data['slug'] = Str::slug($data['name']);
-        $product = Product::create($data);
-        return new ProductResource($product);
+{
+    $data = $request->validated();
+    $data['slug'] = Str::slug($data['name']);
+
+    // Tạo sản phẩm (tạm thời chưa có ảnh chính)
+    $product = Product::create($data);
+
+    // Lưu ảnh phụ và gán ảnh đầu tiên làm ảnh chính
+    if ($request->hasFile('images')) {
+        $isFirst = true;
+        foreach ($request->file('images') as $file) {
+            $path = $file->store('public/products');
+            $imageUrl = Storage::url($path);
+
+            // Lưu vào bảng product_images
+            $product->images()->create([
+                'image' => $imageUrl,
+            ]);
+
+            // Ảnh đầu tiên sẽ là ảnh chính
+            if ($isFirst) {
+                $product->image = $imageUrl;
+                $product->save();
+                $isFirst = false;
+            }
+        }
     }
+
+    // Lưu biến thể (nếu có)
+    if ($request->has('variants')) {
+        foreach ($request->input('variants') as $index => $variantData) {
+            $variant = $product->variants()->create([
+                'name'         => $variantData['name'],
+                'price'        => $variantData['price'],
+                'stock'        => $variantData['stock'] ?? 0,
+                'sku'          => $variantData['sku'] ?? null,
+            ]);
+
+            if ($request->hasFile("variants.$index.image")) {
+                $variantImage = $request->file("variants.$index.image")->store('public/variants');
+                $variant->image = Storage::url($variantImage);
+                $variant->save();
+            }
+        }
+    }
+
+    return new ProductResource($product->load(['images', 'variants']));
+}
 
     /**
      * @OA\Get(
@@ -63,10 +111,33 @@ public function index(Request $request)
      *     @OA\Response(response=200, description="Thành công")
      * )
      */
-    public function show(Product $product)
-    {
-        return new ProductResource($product->load(['category', 'images', 'variants', 'reviews']));
+public function show(Product $product)
+{
+    $userId = Auth::check() ? Auth::id() : null;
+    $ip = Request::ip();
+
+    // Tạo key cache duy nhất theo user hoặc IP
+    $cacheKey = 'viewed_product_' . $product->id . '_' . ($userId ?? $ip);
+
+    // Kiểm tra nếu đã xem trong 24h
+    if (!Cache::has($cacheKey)) {
+        // Tăng view và lưu lịch sử
+        ProductView::create([
+            'product_id' => $product->id,
+            'user_id'    => $userId,
+            'ip_address' => $ip,
+        ]);
+
+        // Set cache tồn tại 24h
+        Cache::put($cacheKey, true, now()->addHours(24));
     }
+
+    // Trả về chi tiết sản phẩm (kèm category, variants, reviews...)
+    return new ProductResource(
+        $product->load(['category', 'images', 'variants', 'reviews'])
+    );
+}
+
 
     /**
      * @OA\Put(
@@ -86,12 +157,68 @@ public function index(Request $request)
      * )
      */
     public function update(UpdateProductRequest $request, Product $product)
-    {
+{
+    DB::beginTransaction();
+    try {
         $data = $request->validated();
         $data['slug'] = Str::slug($data['name']);
+
+        // Cập nhật thông tin cơ bản sản phẩm
         $product->update($data);
-        return new ProductResource($product);
+
+        // Xử lý ảnh sản phẩm
+        if ($request->hasFile('images')) {
+            // Xóa ảnh cũ
+            $product->images()->delete();
+
+            foreach ($request->file('images') as $index => $imageFile) {
+                $path = $imageFile->store('products', 'public');
+
+                $product->images()->create([
+                    'image_path' => $path
+                ]);
+
+                // Cập nhật ảnh đại diện là ảnh đầu tiên
+                if ($index === 0) {
+                    $product->image = $path;
+                    $product->save();
+                }
+            }
+        }
+
+        // Xử lý biến thể
+        if ($request->has('variants')) {
+            // Xóa biến thể cũ
+            $product->variants()->delete();
+
+            foreach ($request->variants as $variantData) {
+                $variant = $product->variants()->create([
+                    'name' => $variantData['name'],
+                    'price' => $variantData['price'],
+                    'stock' => $variantData['stock'] ?? 0,
+                ]);
+
+                // Lưu ảnh biến thể nếu có
+                if (isset($variantData['image']) && $variantData['image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $variantPath = $variantData['image']->store('variants', 'public');
+                    $variant->update(['image' => $variantPath]);
+                }
+            }
+        }
+
+        DB::commit();
+        return new ProductResource($product->fresh([
+            'category', 'images', 'variants', 'reviews', 'views'
+        ]));
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'message' => 'Lỗi khi cập nhật sản phẩm.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
     /**
      * @OA\Delete(

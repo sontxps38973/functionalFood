@@ -17,6 +17,7 @@ return new class extends Migration
                 $table->string('sku')->unique();
                 $table->json('attribute_json');
                 $table->decimal('price', 10, 2);
+                // $table->decimal('discount', 8, 2)->nullable()->default(0);
                 $table->integer('stock_quantity')->default(0);
                 $table->string('image')->nullable();
                 $table->timestamps();
