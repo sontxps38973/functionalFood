@@ -52,7 +52,7 @@ public function index(Request $request)
      *     @OA\Response(response=201, description="Đã tạo")
      * )
      */
-   public function store(StoreProductRequest $request)
+public function store(StoreProductRequest $request)
 {
     $data = $request->validated();
     $data['slug'] = Str::slug($data['name']);
@@ -60,7 +60,7 @@ public function index(Request $request)
     // Tạo sản phẩm
     $product = Product::create($data);
 
-    // Lưu ảnh phụ và ảnh chính
+    // Lưu ảnh sản phẩm (ảnh chính + ảnh phụ)
     if ($request->hasFile('images')) {
         $isFirst = true;
         foreach ($request->file('images') as $file) {
@@ -68,9 +68,12 @@ public function index(Request $request)
             $url = Storage::url($path);
 
             $product->images()->create([
-                'image' => $url,
+                'image_path' => $url,
+                'alt_text'   => $product->name,
+                'is_main'    => $isFirst,
             ]);
 
+            // Gán ảnh đầu tiên làm ảnh đại diện cho bảng products
             if ($isFirst) {
                 $product->image = $url;
                 $product->save();
@@ -79,17 +82,18 @@ public function index(Request $request)
         }
     }
 
-    // Lưu biến thể
+    // Lưu biến thể nếu có
     if ($request->has('variants')) {
         foreach ($request->input('variants') as $index => $variantData) {
             $variant = $product->variants()->create([
-                'sku' => $variantData['sku'],
-                'attribute_json' => json_encode($variantData['attributes']),
-                'price' => $variantData['price'],
-                'discount' => $variantData['discount'] ?? 0,
-                'stock_quantity' => $variantData['stock_quantity'] ?? 0,
+                'sku'             => $variantData['sku'],
+                'attribute_json'  => json_encode($variantData['attributes']),
+                'price'           => $variantData['price'],
+                'discount'        => $variantData['discount'] ?? 0,
+                'stock_quantity'  => $variantData['stock_quantity'] ?? 0,
             ]);
 
+            // Ảnh biến thể nếu có
             if ($request->hasFile("variants.$index.image")) {
                 $variantImage = $request->file("variants.$index.image")->store('public/variants');
                 $variant->image = Storage::url($variantImage);
