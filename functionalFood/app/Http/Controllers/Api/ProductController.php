@@ -52,43 +52,42 @@ public function index(Request $request)
      *     @OA\Response(response=201, description="Đã tạo")
      * )
      */
-    public function store(StoreProductRequest $request)
+   public function store(StoreProductRequest $request)
 {
     $data = $request->validated();
     $data['slug'] = Str::slug($data['name']);
 
-    // Tạo sản phẩm (tạm thời chưa có ảnh chính)
+    // Tạo sản phẩm
     $product = Product::create($data);
 
-    // Lưu ảnh phụ và gán ảnh đầu tiên làm ảnh chính
+    // Lưu ảnh phụ và ảnh chính
     if ($request->hasFile('images')) {
         $isFirst = true;
         foreach ($request->file('images') as $file) {
             $path = $file->store('public/products');
-            $imageUrl = Storage::url($path);
+            $url = Storage::url($path);
 
-            // Lưu vào bảng product_images
             $product->images()->create([
-                'image' => $imageUrl,
+                'image' => $url,
             ]);
 
-            // Ảnh đầu tiên sẽ là ảnh chính
             if ($isFirst) {
-                $product->image = $imageUrl;
+                $product->image = $url;
                 $product->save();
                 $isFirst = false;
             }
         }
     }
 
-    // Lưu biến thể (nếu có)
+    // Lưu biến thể
     if ($request->has('variants')) {
         foreach ($request->input('variants') as $index => $variantData) {
             $variant = $product->variants()->create([
-                'name'         => $variantData['name'],
-                'price'        => $variantData['price'],
-                'stock'        => $variantData['stock'] ?? 0,
-                'sku'          => $variantData['sku'] ?? null,
+                'sku' => $variantData['sku'],
+                'attribute_json' => json_encode($variantData['attributes']),
+                'price' => $variantData['price'],
+                'discount' => $variantData['discount'] ?? 0,
+                'stock_quantity' => $variantData['stock_quantity'] ?? 0,
             ]);
 
             if ($request->hasFile("variants.$index.image")) {
@@ -131,7 +130,7 @@ public function show(Product $product)
         // Set cache tồn tại 24h
         Cache::put($cacheKey, true, now()->addHours(24));
     }
-
+    
     // Trả về chi tiết sản phẩm (kèm category, variants, reviews...)
     return new ProductResource(
         $product->load(['category', 'images', 'variants', 'reviews'])
