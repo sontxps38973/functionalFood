@@ -117,7 +117,7 @@ public function store(StoreProductRequest $request)
 public function show(Product $product)
 {
     $userId = Auth::check() ? Auth::id() : null;
-    $ip = Request::ip();
+    $ip = request()->ip();
 
     // Tạo key cache duy nhất theo user hoặc IP
     $cacheKey = 'viewed_product_' . $product->id . '_' . ($userId ?? $ip);
