@@ -48,4 +48,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function orders()
+{
+    return $this->hasMany(Order::class);
+}
+
+public function usedCoupons()
+{
+    return $this->belongsToMany(Coupon::class, 'coupon_user')
+                ->withPivot('order_id', 'usage_count', 'used_at')
+                ->withTimestamps();
+}
+public function rank()
+{
+    return $this->belongsTo(CustomerRank::class, 'customer_rank_id');
+}
+
 }

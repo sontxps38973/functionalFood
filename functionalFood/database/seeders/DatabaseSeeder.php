@@ -6,7 +6,7 @@ use App\Models\Category;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\ProductSeeder;
+
 
 
 class DatabaseSeeder extends Seeder
@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             // Example: CategorySeeder::class,
             ProductSeeder::class,
             CategorySeeder::class,
+           OrderSeeder::class,
             // ProductImageSeeder::class,
             // ProductViewSeeder::class,
             // WishlistSeeder::class,
