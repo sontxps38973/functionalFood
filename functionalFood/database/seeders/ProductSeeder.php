@@ -27,9 +27,9 @@ class ProductSeeder extends Seeder
                 'slug' => 'san-pham-so-' . $i,
                 'description' => 'Mô tả cho sản phẩm số ' . $i,
                 'product_type' => $isVariable ? 'variable' : 'simple',
-                'price' => $isVariable ? null : rand(100000, 300000),
-                'stock_quantity' => $isVariable ? null : rand(10, 100),
-                'image' => $isVariable ? null : 'products/product' . $i . '.jpg',
+                'price' =>  rand(100000, 300000),
+                'stock_quantity' =>  rand(10, 100),
+                'image' =>  'products/product' . $i . '.jpg',
             ]);
 
             ProductImage::create([

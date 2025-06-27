@@ -31,7 +31,7 @@ class CreateCouponsTable extends Migration
             $table->boolean('first_time_only')->default(false);
 
             // Giới hạn cho nhóm người dùng (VIP,...)
-            $table->json('allowed_user_groups')->nullable(); // ví dụ: ["vip", "gold"]
+            $table->json('allowed_rank_ids')->nullable(); // ví dụ: ["vip", "gold"]
 
             // Thời gian áp dụng
             $table->timestamp('start_at')->nullable();

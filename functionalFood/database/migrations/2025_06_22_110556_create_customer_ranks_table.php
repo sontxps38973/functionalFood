@@ -26,8 +26,13 @@ return new class extends Migration
     /** 
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-        Schema::dropIfExists('customer_ranks');
-    }
+public function down(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->dropForeign(['customer_rank_id']);
+        $table->dropColumn('customer_rank_id');
+    });
+
+    Schema::dropIfExists('customer_ranks');
+}
 };

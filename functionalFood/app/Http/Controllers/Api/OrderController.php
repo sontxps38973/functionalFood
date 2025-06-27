@@ -40,7 +40,6 @@ class OrderController extends Controller
         return response()->json(['message' => 'Mã không hợp lệ hoặc đã hết hạn.'], 422);
     }
 
-    // ✅ Rank-based check
     if ($coupon->allowed_rank_ids) {
         $allowed = json_decode($coupon->allowed_rank_ids, true);
         if (!in_array($user->customer_rank_id, $allowed)) {
@@ -83,7 +82,6 @@ class OrderController extends Controller
         return response()->json(['message' => 'Giá trị đơn hàng chưa đủ để áp mã.'], 422);
     }
 
-    // ✅ Tính phần đủ điều kiện theo scope
     $eligibleSubtotal = $subtotal;
 
     if ($coupon->scope === 'product') {
@@ -113,7 +111,6 @@ class OrderController extends Controller
         }
     }
 
-    // ✅ Tính giảm giá
     $discount = 0;
     if ($coupon->type === 'percent') {
         $discount = $eligibleSubtotal * ($coupon->value / 100);

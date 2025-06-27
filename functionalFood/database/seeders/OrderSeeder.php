@@ -12,7 +12,12 @@ class OrderSeeder extends Seeder
 {
     public function run()
     {
-        $user = User::inRandomOrder()->first() ?? User::factory()->create();
+        $user = User::inRandomOrder()->first() ?? User::factory()->create([
+            'name' => 'Trinh son',
+            'email' => 'test2@example.com',
+            'phone' => '12345678903',
+            'password' => 'passs',
+        ]);
         $coupon = Coupon::factory()->create([
             'type' => 'percent',
             'value' => 10,
