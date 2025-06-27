@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Models\Admin;
 
 class UserAuthController extends Controller
 {
@@ -36,7 +37,13 @@ class UserAuthController extends Controller
     $user = User::where('email', $credentials['email'])->first();
 
     // Kiểm tra password
-    if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+    if (! $user) {
+        return response()->json([
+            'message' => 'Email hoặc mật khẩu không đúng!'
+        ], 401);
+    }
+
+    if (! Hash::check($credentials['password'], $user->password)) {
         return response()->json([
             'message' => 'Email hoặc mật khẩu không đúng!'
         ], 401);
@@ -59,6 +66,36 @@ public function logout(Request $request)
         'message' => 'Đăng xuất thành công.'
     ]);
 }
+    public function adminLogin(LoginRequest $request)
+    {
+        $credentials = $request->validated();
+
+        // Tìm user theo email
+        $user = Admin::where('email', $credentials['email'])->first();
+
+        // Kiểm tra password
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Email hoặc mật khẩu không đúng!'
+            ], 401);
+        }
+
+        // Tạo token đăng nhập
+        $token = $user->createToken('remember_token')->plainTextToken;
+
+        return response()->json([
+            'user'  => $user,
+            'token' => $token,
+        ]);
+    }
+    public function adminLogout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Đăng xuất thành công.'
+        ]);
+    }
 
 
 }

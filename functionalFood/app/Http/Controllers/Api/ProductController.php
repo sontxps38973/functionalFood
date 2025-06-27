@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\ProductView;
+
 /**
  * @OA\Tag(name="Products")
  */
@@ -54,6 +56,7 @@ public function index(Request $request)
      */
 public function store(StoreProductRequest $request)
 {
+    
     $data = $request->validated();
     $data['slug'] = Str::slug($data['name']);
 
@@ -137,7 +140,7 @@ public function show(Product $product)
     
     // Trả về chi tiết sản phẩm (kèm category, variants, reviews...)
     return new ProductResource(
-        $product->load(['category', 'images', 'variants', 'reviews'])
+        $product->load(['category', 'images', 'variants', 'reviews', 'relatedProducts'])
     );
 }
 

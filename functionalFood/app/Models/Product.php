@@ -40,4 +40,10 @@ class Product extends Model
     {
         return $this->hasMany(ProductView::class);
     }
+    public function relatedProducts()
+{
+    return $this->hasMany(Product::class, 'category_id', 'category_id')
+                ->where('id', '!=', $this->id)
+                ->limit(8);
+}
 }

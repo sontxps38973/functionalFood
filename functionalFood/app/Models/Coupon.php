@@ -9,10 +9,26 @@ class Coupon extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'code', 'type', 'value', 'max_discount',
-        'min_order_value', 'usage_limit', 'used_count',
-        'only_once_per_user', 'start_at', 'end_at', 'is_active'
+        'code',
+        'description',
+        'type',
+        'value',
+        'max_discount',
+        'scope',
+        'target_ids',
+        'min_order_value',
+        'usage_limit',
+        'used_count',
+        'only_once_per_user',
+        'first_time_only',
+        'allowed_rank_ids',
+        'start_at',
+        'end_at',
+        'time_rules',
+        'is_active',
+        'allowed_payment_methods'
     ];
+
 
     public function orders()
     {
@@ -22,7 +38,7 @@ class Coupon extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'coupon_user')
-                    ->withPivot('order_id', 'usage_count', 'used_at')
-                    ->withTimestamps();
+            ->withPivot('order_id', 'usage_count', 'used_at')
+            ->withTimestamps();
     }
 }

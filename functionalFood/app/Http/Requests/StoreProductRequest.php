@@ -16,11 +16,12 @@ class StoreProductRequest extends FormRequest
         return [
             'name'           => 'required|string|max:255',
             'description'    => 'nullable|string',
-            'status'         => 'required|in:0,1',
+            'status'         => 'required|in:0,1|default:1', // 0: inactive, 1: active
             'product_type'   => 'required|in:simple,variable',
             'price'          => 'required|numeric|min:0',
             'discount'       => 'nullable|numeric|min:0|lt:price',
             'stock_quantity' => 'nullable|integer|min:0',
+            // 'image'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'category_id'    => 'required|exists:categories,id',
 
             // Validate mảng ảnh phụ

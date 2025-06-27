@@ -35,6 +35,7 @@ class ProductResource extends JsonResource
         'images'          => ProductImageResource::collection($this->whenLoaded('images')),
         'variants'        => ProductVariantResource::collection($this->whenLoaded('variants')),
         'reviews'         => ProductReviewResource::collection($this->whenLoaded('reviews')),
+        'related_products' => ProductResource::collection($this->whenLoaded('relatedProducts')),
 
         'average_rating'  => round($this->reviews->avg('rating'), 1),
         'views_count'     => $this->views()->count(),

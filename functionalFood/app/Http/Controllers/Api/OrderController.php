@@ -16,6 +16,7 @@ class OrderController extends Controller
 {
     $request->validate([
         'coupon_code' => 'required|string',
+        'payment_method' => 'required|string|in:cod,bank_transfer,online_payment', // Thêm phương thức thanh toán
         'subtotal' => 'required|numeric|min:0',
         'items' => 'required|array|min:1',
         'items.*.product_id' => 'required|integer',
@@ -80,6 +81,13 @@ class OrderController extends Controller
 
     if ($coupon->min_order_value && $subtotal < $coupon->min_order_value) {
         return response()->json(['message' => 'Giá trị đơn hàng chưa đủ để áp mã.'], 422);
+    }
+    // kiểm tra phuơng thức thanh toán
+    if ($coupon->allowed_payment_methods) {
+        $allowedMethods = json_decode($coupon->allowed_payment_methods, true);
+        if (!in_array($request->payment_method, $allowedMethods)) {
+            return response()->json(['message' => 'Phương thức thanh toán không được áp dụng mã này.'], 422);
+        }
     }
 
     $eligibleSubtotal = $subtotal;

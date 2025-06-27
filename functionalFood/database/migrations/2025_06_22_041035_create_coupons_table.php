@@ -40,9 +40,8 @@ class CreateCouponsTable extends Migration
 
             // Trạng thái
             $table->boolean('is_active')->default(true);
-
-            // Hình thức áp dụng
-            $table->boolean('requires_code_input')->default(true);
+            // Phương thức thanh toán
+            $table->json('allowed_payment_methods')->nullable(); 
 
             $table->timestamps();
         });
