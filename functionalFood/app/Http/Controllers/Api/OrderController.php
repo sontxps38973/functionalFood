@@ -17,8 +17,10 @@ class OrderController extends Controller
 {
     $request->validate([
         'coupon_code' => 'required|string',
-        'payment_method' => 'required|string|in:cod,bank_transfer,online_payment', // Thêm phương thức thanh toán
+        'payment_method' => 'required|string|in:cod,bank_transfer,online_payment',
         'subtotal' => 'required|numeric|min:0',
+        'shipping_fee' => 'nullable|numeric|min:0',
+        'tax' => 'nullable|numeric|min:0',
         'items' => 'required|array|min:1',
         'items.*.product_id' => 'required|integer',
         'items.*.price' => 'required|numeric|min:0',
@@ -27,6 +29,8 @@ class OrderController extends Controller
 
     $user = $request->user();
     $subtotal = $request->subtotal;
+    $shippingFee = $request->shipping_fee ?? 0;
+    $tax = $request->tax ?? 0;
     $items = collect($request->items);
 
     $coupon = Coupon::where('code', $request->coupon_code)
@@ -42,25 +46,23 @@ class OrderController extends Controller
         return response()->json(['message' => 'Mã không hợp lệ hoặc đã hết hạn.'], 422);
     }
 
-    if ($coupon->allowed_rank_ids) {
-        $allowed = json_decode($coupon->allowed_rank_ids, true);
-        if (!in_array($user->customer_rank_id, $allowed)) {
+    // Kiểm tra điều kiện sử dụng
+    if (!$coupon->canBeUsedByUser($user)) {
+        if ($coupon->allowed_rank_ids && !in_array($user->customer_rank_id, $coupon->allowed_rank_ids)) {
             return response()->json(['message' => 'Hạng thành viên của bạn không đủ điều kiện.'], 422);
+        }
+        if ($coupon->first_time_only && $user->orders()->exists()) {
+            return response()->json(['message' => 'Mã chỉ áp dụng cho đơn hàng đầu tiên.'], 422);
+        }
+        if ($coupon->only_once_per_user && $coupon->users()->where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'Bạn đã sử dụng mã này rồi.'], 422);
+        }
+        if ($coupon->usage_limit !== null && $coupon->used_count >= $coupon->usage_limit) {
+            return response()->json(['message' => 'Mã đã hết lượt sử dụng.'], 422);
         }
     }
 
-    if ($coupon->first_time_only && $user->orders()->exists()) {
-        return response()->json(['message' => 'Mã chỉ áp dụng cho đơn hàng đầu tiên.'], 422);
-    }
-
-    if ($coupon->only_once_per_user && $coupon->users()->where('user_id', $user->id)->exists()) {
-        return response()->json(['message' => 'Bạn đã sử dụng mã này rồi.'], 422);
-    }
-
-    if ($coupon->usage_limit !== null && $coupon->used_count >= $coupon->usage_limit) {
-        return response()->json(['message' => 'Mã đã hết lượt sử dụng.'], 422);
-    }
-
+    // Kiểm tra thời gian áp dụng
     if ($coupon->time_rules) {
         $rules = json_decode($coupon->time_rules, true);
         $now = now();
@@ -80,10 +82,16 @@ class OrderController extends Controller
         }
     }
 
-    if ($coupon->min_order_value && $subtotal < $coupon->min_order_value) {
+    // Kiểm tra giá trị đơn hàng
+    $orderValue = $subtotal + $shippingFee + $tax;
+    if ($coupon->min_order_value && $orderValue < $coupon->min_order_value) {
         return response()->json(['message' => 'Giá trị đơn hàng chưa đủ để áp mã.'], 422);
     }
-    // kiểm tra phuơng thức thanh toán
+    if ($coupon->max_order_value && $orderValue > $coupon->max_order_value) {
+        return response()->json(['message' => 'Giá trị đơn hàng vượt quá giới hạn áp dụng mã.'], 422);
+    }
+
+    // Kiểm tra phương thức thanh toán
     if ($coupon->allowed_payment_methods) {
         $allowedMethods = json_decode($coupon->allowed_payment_methods, true);
         if (!in_array($request->payment_method, $allowedMethods)) {
@@ -91,6 +99,8 @@ class OrderController extends Controller
         }
     }
 
+    // Tính toán discount cho sản phẩm
+    $productDiscount = 0;
     $eligibleSubtotal = $subtotal;
 
     if ($coupon->scope === 'product') {
@@ -120,25 +130,40 @@ class OrderController extends Controller
         }
     }
 
-    $discount = 0;
+    // Tính discount cho sản phẩm
     if ($coupon->type === 'percent') {
-        $discount = $eligibleSubtotal * ($coupon->value / 100);
+        $productDiscount = $eligibleSubtotal * ($coupon->value / 100);
         if ($coupon->max_discount) {
-            $discount = min($discount, $coupon->max_discount);
+            $productDiscount = min($productDiscount, $coupon->max_discount);
         }
     } elseif ($coupon->type === 'fixed') {
-        $discount = $coupon->value;
+        $productDiscount = $coupon->value;
     }
 
-    $total = max(0, $subtotal - $discount);
+    // Tính discount cho vận chuyển
+    $shippingDiscount = 0;
+    if ($coupon->isShippingCoupon()) {
+        $shippingDiscount = $coupon->calculateShippingDiscount($shippingFee);
+    }
+
+    // Tổng discount
+    $totalDiscount = $productDiscount + $shippingDiscount;
+    $finalShippingFee = max(0, $shippingFee - $shippingDiscount);
+    $total = max(0, $orderValue - $totalDiscount);
 
     return response()->json([
         'message' => 'Áp mã thành công.',
-        'discount' => $discount,
+        'product_discount' => $productDiscount,
+        'shipping_discount' => $shippingDiscount,
+        'total_discount' => $totalDiscount,
+        'final_shipping_fee' => $finalShippingFee,
         'total' => $total,
         'coupon_id' => $coupon->id,
         'coupon_type' => $coupon->type,
         'coupon_value' => $coupon->value,
+        'free_shipping' => $coupon->free_shipping,
+        'shipping_discount_amount' => $coupon->shipping_discount,
+        'shipping_discount_percent' => $coupon->shipping_discount_percent,
     ]);
 }
 
@@ -155,6 +180,8 @@ public function placeOrder(Request $request)
         'payment_method' => 'required|string|in:cod,bank_transfer,online_payment',
         'coupon_id' => 'nullable|integer|exists:coupons,id',
         'subtotal' => 'required|numeric|min:0',
+        'shipping_fee' => 'nullable|numeric|min:0',
+        'tax' => 'nullable|numeric|min:0',
         'discount' => 'nullable|numeric|min:0',
         'total' => 'required|numeric|min:0',
         'notes' => 'nullable|string|max:1000',
@@ -180,7 +207,9 @@ public function placeOrder(Request $request)
         $variants[] = [
             'variant' => $variant,
             'quantity' => $item['quantity'],
-            'price' => $price
+            'price' => $variant->price,
+            'discount_price' => $variant->discount,
+            'final_price' => $price
         ];
     }
     if (!empty($stockErrors)) {
@@ -210,15 +239,24 @@ public function placeOrder(Request $request)
         }
     }
 
-    // Kiểm tra discount và total gửi lên (chỉ kiểm tra không âm, không lớn hơn subtotal)
+    // Tính toán các giá trị
+    $shippingFee = $request->shipping_fee ?? 0;
+    $tax = $request->tax ?? 0;
     $finalDiscount = $request->discount ?? 0;
     $finalTotal = $request->total;
+
+    // Kiểm tra discount và total gửi lên
     if ($finalDiscount < 0 || $finalDiscount > $calculatedSubtotal) {
         return response()->json(['message' => 'Giá trị giảm giá không hợp lệ.'], 422);
     }
-    if ($finalTotal < 0 || abs($finalTotal - ($calculatedSubtotal - $finalDiscount)) > 0.01) {
+    
+    $expectedTotal = $calculatedSubtotal + $shippingFee + $tax - $finalDiscount;
+    if ($finalTotal < 0 || abs($finalTotal - $expectedTotal) > 0.01) {
         return response()->json(['message' => 'Tổng tiền cuối cùng không hợp lệ.'], 422);
     }
+
+    // Xác định payment_status dựa trên payment_method
+    $paymentStatus = $request->payment_method === 'cod' ? 'pending' : 'paid';
 
     DB::beginTransaction();
     try {
@@ -229,27 +267,42 @@ public function placeOrder(Request $request)
             'address' => $request->address,
             'email' => $request->email,
             'subtotal' => $calculatedSubtotal,
+            'shipping_fee' => $shippingFee,
+            'tax' => $tax,
             'discount' => $finalDiscount,
             'total' => $finalTotal,
             'coupon_id' => $coupon?->id,
-            'status' => $request->payment_method === 'cod' ? 'pending' : 'paid',
+            'status' => 'pending',
+            'payment_status' => $paymentStatus,
             'payment_method' => $request->payment_method,
+            'notes' => $request->notes,
         ]);
+
         foreach ($variants as $item) {
             $variant = $item['variant'];
             $product = $variant->product;
+            
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $product->id,
                 'product_variant_id' => $variant->id,
                 'product_name' => $product->name,
                 'variant_name' => $variant->attribute_name_text,
+                'sku' => $variant->sku,
+                'product_image' => $variant->image ?? $product->image,
                 'price' => $item['price'],
+                'discount_price' => $item['discount_price'],
+                'final_price' => $item['final_price'],
                 'quantity' => $item['quantity'],
-                'total' => $item['price'] * $item['quantity'],
+                'total' => $item['final_price'] * $item['quantity'],
+                'weight' => $product->weight ?? null,
+                'dimensions' => $product->dimensions ?? null,
+                'status' => 'pending',
             ]);
+
             $variant->decrement('stock_quantity', $item['quantity']);
         }
+
         // Nếu có mã giảm giá → ghi lại và tăng lượt
         if ($coupon) {
             CouponUser::create([
@@ -261,20 +314,27 @@ public function placeOrder(Request $request)
             ]);
             $coupon->increment('used_count');
         }
+
         $this->updateUserRank($user);
         \App\Models\CartItem::where('user_id', $user->id)->delete();
+
         DB::commit();
+
         return response()->json([
             'message' => 'Đặt hàng thành công',
             'order_id' => $order->id,
+            'order_number' => $order->order_number,
             'order' => [
                 'id' => $order->id,
+                'order_number' => $order->order_number,
                 'total' => $order->total,
                 'status' => $order->status,
+                'payment_status' => $order->payment_status,
                 'payment_method' => $order->payment_method,
                 'created_at' => $order->created_at
             ]
         ], 201);
+
     } catch (\Throwable $e) {
         DB::rollBack();
         Log::error('Order placement error: ' . $e->getMessage(), [
@@ -282,6 +342,7 @@ public function placeOrder(Request $request)
             'request' => $request->all(),
             'trace' => $e->getTraceAsString()
         ]);
+        
         return response()->json([
             'message' => 'Lỗi khi đặt hàng. Vui lòng thử lại sau.',
             'error' => config('app.debug') ? $e->getMessage() : null

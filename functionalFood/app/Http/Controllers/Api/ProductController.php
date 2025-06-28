@@ -15,20 +15,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\ProductView;
 
-/**
- * @OA\Tag(name="Products")
- */
 class ProductController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/v1/products",
-     *     summary="Lấy danh sách sản phẩm (có phân trang)",
-     *     tags={"Products"},
-     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Thành công")
-     * )
-     */
+
 public function index(Request $request)
 {
     $perPage = $request->query('per_page', 10);
@@ -36,24 +25,7 @@ public function index(Request $request)
         Product::with(['category'])->paginate($perPage)
     );
 }
- /**
-     * @OA\Post(
-     *     path="/api/v1/products",
-     *     summary="Tạo sản phẩm mới",
-     *     tags={"Products"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name", "price", "category_id"},
-     *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="price", type="number"),
-     *          @OA\Property(property="discount", type="number", nullable=true),
-     *             @OA\Property(property="category_id", type="integer")
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Đã tạo")
-     * )
-     */
+
 public function store(StoreProductRequest $request)
 {
     
@@ -108,15 +80,7 @@ public function store(StoreProductRequest $request)
     return new ProductResource($product->load(['images', 'variants']));
 }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/products/{id}",
-     *     summary="Chi tiết sản phẩm",
-     *     tags={"Products"},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Thành công")
-     * )
-     */
+
 public function show(Product $product)
 {
     $userId = Auth::check() ? Auth::id() : null;
@@ -145,23 +109,7 @@ public function show(Product $product)
 }
 
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/products/{id}",
-     *     summary="Cập nhật sản phẩm",
-     *     tags={"Products"},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="price", type="number"),
-     *             @OA\Property(property="category_id", type="integer")
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Đã cập nhật")
-     * )
-     */
+
     public function update(UpdateProductRequest $request, Product $product)
 {
     DB::beginTransaction();
@@ -226,29 +174,13 @@ public function show(Product $product)
     }
 }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/products/{id}",
-     *     summary="Xóa sản phẩm",
-     *     tags={"Products"},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=204, description="Đã xóa")
-     * )
-     */
+
     public function destroy(Product $product)
     {
         $product->delete();
         return response()->noContent();
     }
-  /**
-     * @OA\Get(
-     *     path="/api/v1/products-search",
-     *     summary="Tìm kiếm sản phẩm theo tên",
-     *     tags={"Products"},
-     *     @OA\Parameter(name="query", in="query", required=true, @OA\Schema(type="string")),
-     *     @OA\Response(response=200, description="Kết quả tìm kiếm")
-     * )
-     */
+
  public function search(Request $request)
     {
         $keyword = $request->query('q');
@@ -257,16 +189,7 @@ public function show(Product $product)
             ->paginate(10);
         return ProductResource::collection($products);
     }
-/**
-     * @OA\Get(
-     *     path="/api/v1/products-filter",
-     *     summary="Lọc sản phẩm nâng cao",
-     *     tags={"Products"},
-     *     @OA\Parameter(name="category_id", in="query", required=false, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="sort", in="query", required=false, @OA\Schema(type="string", enum={"price_asc", "price_desc", "name_asc", "name_desc"})),
-     *     @OA\Response(response=200, description="Kết quả lọc")
-     * )
-     */
+
     public function filter(Request $request)
     {
         $query = Product::query()->with('category');

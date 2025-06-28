@@ -24,6 +24,8 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'status',
+        'customer_rank_id',
     ];
 
     /**
@@ -59,6 +61,11 @@ public function usedCoupons()
                 ->withPivot('order_id', 'usage_count', 'used_at')
                 ->withTimestamps();
 }
+public function customerRank()
+{
+    return $this->belongsTo(CustomerRank::class, 'customer_rank_id');
+}
+
 public function rank()
 {
     return $this->belongsTo(CustomerRank::class, 'customer_rank_id');

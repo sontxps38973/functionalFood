@@ -1,8 +1,11 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Functional Food API",
-        "description": "Tài liệu API cho website bán thực phẩm chức năng",
+        "title": "Functional Food API Documentation",
+        "description": "API documentation for Functional Food E-commerce Platform",
+        "contact": {
+            "email": "admin@functionalfood.com"
+        },
         "version": "1.0.0"
     },
     "servers": [
@@ -12,165 +15,13 @@
         }
     ],
     "paths": {
-        "/api/v1/categories": {
-            "get": {
-                "tags": [
-                    "Categories"
-                ],
-                "summary": "Lấy danh sách danh mục",
-                "operationId": "52c3c8d702572c2b4347b0ecf7573e54",
-                "responses": {
-                    "200": {
-                        "description": "Thành công"
-                    }
-                }
-            },
+        "/api/v1/auth/register": {
             "post": {
                 "tags": [
-                    "Categories"
+                    "Authentication"
                 ],
-                "summary": "Tạo danh mục mới",
-                "operationId": "f9171669d626697cd543f9f421cff718",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Đã tạo"
-                    }
-                }
-            }
-        },
-        "/api/v1/categories/{id}": {
-            "get": {
-                "tags": [
-                    "Categories"
-                ],
-                "summary": "Lấy chi tiết danh mục",
-                "operationId": "11d2d45398d538612b1a4156d210652e",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Thành công"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Categories"
-                ],
-                "summary": "Cập nhật danh mục",
-                "operationId": "8edd529bf8c5d2c024f479805defe8b6",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Đã cập nhật"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Categories"
-                ],
-                "summary": "Xóa danh mục",
-                "operationId": "91c938105382f9b2d833cb18706e6694",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Đã xóa"
-                    }
-                }
-            }
-        },
-        "/api/v1/products": {
-            "get": {
-                "tags": [
-                    "Products"
-                ],
-                "summary": "Lấy danh sách sản phẩm (có phân trang)",
-                "operationId": "072fd15d3be55577bb08c19d19f1e75c",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Thành công"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Products"
-                ],
-                "summary": "Tạo sản phẩm mới",
-                "operationId": "eda0d526a50c0273ae224eb766440226",
+                "summary": "Register a new user",
+                "operationId": "b616b4969bc7c162211f9db89c0e8142",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -178,18 +29,32 @@
                             "schema": {
                                 "required": [
                                     "name",
-                                    "price",
-                                    "category_id"
+                                    "email",
+                                    "phone",
+                                    "password",
+                                    "password_confirmation"
                                 ],
                                 "properties": {
                                     "name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "John Doe"
                                     },
-                                    "price": {
-                                        "type": "number"
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
                                     },
-                                    "category_id": {
-                                        "type": "integer"
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "password123"
                                     }
                                 },
                                 "type": "object"
@@ -199,64 +64,58 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Đã tạo"
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User registered successfully"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 }
             }
         },
-        "/api/v1/products/{id}": {
-            "get": {
+        "/api/v1/auth/login": {
+            "post": {
                 "tags": [
-                    "Products"
+                    "Authentication"
                 ],
-                "summary": "Chi tiết sản phẩm",
-                "operationId": "e607d06420046014759462af284aeb59",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Thành công"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Products"
-                ],
-                "summary": "Cập nhật sản phẩm",
-                "operationId": "d3addbe72313169741e652404694ef9d",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
+                "summary": "User login",
+                "operationId": "3e38bd35c60156cdb1fd9abd4ae8ebce",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
                                 "properties": {
-                                    "name": {
-                                        "type": "string"
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
                                     },
-                                    "price": {
-                                        "type": "number"
-                                    },
-                                    "category_id": {
-                                        "type": "integer"
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
                                     }
                                 },
                                 "type": "object"
@@ -266,44 +125,209 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Đã cập nhật"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Products"
-                ],
-                "summary": "Xóa sản phẩm",
-                "operationId": "bbf520f1a23d6a5f3dfb12813b5930d6",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
                         }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Đã xóa"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
                     }
                 }
             }
         },
-        "/api/v1/products-search": {
+        "/api/v1/admin/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Admin login",
+                "operationId": "d03bfd043cf194437561ce12b6af1f97",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "admin": {
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/public/categories": {
             "get": {
                 "tags": [
-                    "Products"
+                    "Public"
                 ],
-                "summary": "Tìm kiếm sản phẩm theo tên",
-                "operationId": "742765a2e7de688174266d755770d515",
+                "summary": "Get all categories",
+                "operationId": "1b0fa7e9ac51ed47e5c454b1070bd4b6",
                 "parameters": [
                     {
-                        "name": "query",
+                        "name": "per_page",
                         "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of categories",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/public/products": {
+            "get": {
+                "tags": [
+                    "Public"
+                ],
+                "summary": "Get all products",
+                "operationId": "a06ef05b5f481c710aa1f428258715f0",
+                "parameters": [
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Filter by category ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search products by name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/public/products-search": {
+            "get": {
+                "tags": [
+                    "Public"
+                ],
+                "summary": "Search products",
+                "operationId": "45d83cd39500afb877d5e68ee9d108a8",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search query",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -312,56 +336,1722 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Kết quả tìm kiếm"
+                        "description": "Search results",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
-        "/api/v1/products-filter": {
+        "/api/v1/public/products-filter": {
             "get": {
                 "tags": [
-                    "Products"
+                    "Public"
                 ],
-                "summary": "Lọc sản phẩm nâng cao",
-                "operationId": "100530fe980a0297fdf29d1afe6b2455",
+                "summary": "Filter products",
+                "operationId": "684c1dc13ebe99ab5e46e03c9a0a7684",
                 "parameters": [
                     {
                         "name": "category_id",
                         "in": "query",
+                        "description": "Filter by category",
                         "required": false,
                         "schema": {
                             "type": "integer"
                         }
                     },
                     {
-                        "name": "sort",
+                        "name": "min_price",
                         "in": "query",
+                        "description": "Minimum price",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "max_price",
+                        "in": "query",
+                        "description": "Maximum price",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Filtered products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/public/coupons/valid": {
+            "get": {
+                "tags": [
+                    "Public"
+                ],
+                "summary": "Get valid coupons",
+                "operationId": "a348169ae0693e7a671ef6876fbd8a21",
+                "responses": {
+                    "200": {
+                        "description": "List of valid coupons",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "coupons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/orders/apply-coupon": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Apply coupon to order",
+                "operationId": "99fa813a20cc1a0c65f3b2806f40a1d6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "coupon_code",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "coupon_code": {
+                                        "type": "string",
+                                        "example": "SAVE20"
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "product_id": {
+                                                    "type": "integer"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer"
+                                                },
+                                                "variant_id": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Coupon applied successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "discount_amount": {
+                                            "type": "number"
+                                        },
+                                        "final_total": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/orders/place-order": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Place a new order",
+                "operationId": "664dd937326186f729a3b5ca233d7ad3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "items",
+                                    "name",
+                                    "phone",
+                                    "address",
+                                    "email",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Main St"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "example": "cod"
+                                    },
+                                    "coupon_code": {
+                                        "type": "string",
+                                        "example": "SAVE20"
+                                    },
+                                    "note": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order placed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "order": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/orders": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user orders",
+                "operationId": "05111f7b298223292e1a2689b724c1b7",
+                "responses": {
+                    "200": {
+                        "description": "List of user orders",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "orders": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/orders/{id}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get order detail",
+                "operationId": "1c8f3908687ba89ad77679194003433c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order detail",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "order": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/orders/{id}/cancel": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Cancel order",
+                "operationId": "37373d3faf2d4e3b8ae00d3d067910a3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order cancelled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/users": {
+            "get": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Get all users (Admin only)",
+                "operationId": "f8e1cf6d256eb7a9c6a2f844735e55de",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by user status",
                         "required": false,
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "price_asc",
-                                "price_desc",
-                                "name_asc",
-                                "name_desc"
+                                "active",
+                                "inactive",
+                                "suspended"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name, email, or phone",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "customer_rank_id",
+                        "in": "query",
+                        "description": "Filter by customer rank",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of users",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "users": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/users/stats": {
+            "get": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Get user statistics (Admin only)",
+                "operationId": "da69033b74abb45b87e177d15bd07acf",
+                "responses": {
+                    "200": {
+                        "description": "User statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "stats": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/users/export": {
+            "get": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Export users data (Admin only)",
+                "operationId": "15f62153e1d915ba063b26d21321f959",
+                "responses": {
+                    "200": {
+                        "description": "Users data for export",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/users/customer-ranks": {
+            "get": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Get customer ranks (Admin only)",
+                "operationId": "62da6102f24ffa3b4497f3fd88660f57",
+                "responses": {
+                    "200": {
+                        "description": "List of customer ranks",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ranks": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/admins": {
+            "post": {
+                "tags": [
+                    "Admin - Admins"
+                ],
+                "summary": "Create new admin (Super Admin only)",
+                "operationId": "a619941794514792404ab8ca6f331b30",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Admin User"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "admin",
+                                            "super_admin"
+                                        ],
+                                        "example": "admin"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ],
+                                        "example": "active"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Admin created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "admin": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/admins/profile": {
+            "get": {
+                "tags": [
+                    "Admin - Admins"
+                ],
+                "summary": "Get admin profile",
+                "operationId": "530ca186afb19b3ba8afbec51b76f83e",
+                "responses": {
+                    "200": {
+                        "description": "Admin profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "admin": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/admins/change-password": {
+            "post": {
+                "tags": [
+                    "Admin - Admins"
+                ],
+                "summary": "Change admin password",
+                "operationId": "fa7d531db1579f2790df8d425ad072e0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "new_password",
+                                    "new_password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string"
+                                    },
+                                    "new_password": {
+                                        "type": "string"
+                                    },
+                                    "new_password_confirmation": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/events": {
+            "get": {
+                "tags": [
+                    "Admin - Events"
+                ],
+                "summary": "Get all events (Admin only)",
+                "operationId": "c04799c1e8a5fa898aa3028d9b05191c",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by event status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "active",
+                                "paused",
+                                "ended"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by event name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Filter featured events",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of events",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Events"
+                ],
+                "summary": "Create new event (Admin only)",
+                "operationId": "1c2ccd6f55e4e083e456e133ebf6156e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "start_time",
+                                    "end_time",
+                                    "discount_type",
+                                    "discount_value"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Flash Sale Weekend"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Special weekend sale with great discounts"
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-01T00:00:00Z"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-03T23:59:59Z"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "active",
+                                            "paused",
+                                            "ended"
+                                        ],
+                                        "example": "draft"
+                                    },
+                                    "banner_image": {
+                                        "type": "string",
+                                        "example": "banner.jpg"
+                                    },
+                                    "discount_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "percentage",
+                                            "fixed"
+                                        ],
+                                        "example": "percentage"
+                                    },
+                                    "discount_value": {
+                                        "type": "number",
+                                        "example": 20
+                                    },
+                                    "is_featured": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Event created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/events/{id}/change-status": {
+            "post": {
+                "tags": [
+                    "Admin - Events"
+                ],
+                "summary": "Change event status (Admin only)",
+                "operationId": "eaa0365dd8062da5be103dbeabc93367",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "active",
+                                            "paused",
+                                            "ended"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Event status changed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/events/{eventId}/products": {
+            "post": {
+                "tags": [
+                    "Admin - Events"
+                ],
+                "summary": "Add product to event (Admin only)",
+                "operationId": "f5f4f20174cacbad4e379105798cbc93",
+                "parameters": [
+                    {
+                        "name": "eventId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "event_price",
+                                    "original_price",
+                                    "discount_price",
+                                    "quantity_limit"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "event_price": {
+                                        "type": "number",
+                                        "example": 80
+                                    },
+                                    "original_price": {
+                                        "type": "number",
+                                        "example": 100
+                                    },
+                                    "discount_price": {
+                                        "type": "number",
+                                        "example": 80
+                                    },
+                                    "quantity_limit": {
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive",
+                                            "sold_out"
+                                        ],
+                                        "example": "active"
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Product added to event successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/coupons": {
+            "get": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Get all coupons (Admin only)",
+                "operationId": "c00462d5a11f62a81022c0ecc2cd37af",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by coupon status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "inactive"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter by coupon type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "percentage",
+                                "fixed"
                             ]
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Kết quả lọc"
+                        "description": "List of coupons",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Create new coupon (Admin only)",
+                "operationId": "10f99cd032aebccb154f6bceef17280d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code",
+                                    "type",
+                                    "value",
+                                    "min_order_amount",
+                                    "max_uses",
+                                    "valid_from",
+                                    "valid_to"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "example": "SAVE20"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Save 20%"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Get 20% off on orders above $50"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "percentage",
+                                            "fixed"
+                                        ],
+                                        "example": "percentage"
+                                    },
+                                    "value": {
+                                        "type": "number",
+                                        "example": 20
+                                    },
+                                    "min_order_amount": {
+                                        "type": "number",
+                                        "example": 50
+                                    },
+                                    "max_uses": {
+                                        "type": "integer",
+                                        "example": 100
+                                    },
+                                    "valid_from": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "valid_to": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "free_shipping": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "shipping_discount": {
+                                        "type": "number",
+                                        "example": 0
+                                    },
+                                    "shipping_discount_percent": {
+                                        "type": "number",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Coupon created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "coupon": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/coupons/{id}/toggle-status": {
+            "post": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Toggle coupon status (Admin only)",
+                "operationId": "a2cc10ae182de63f0b8b059c50140db6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon status toggled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/coupons/{id}/stats": {
+            "get": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Get coupon statistics (Admin only)",
+                "operationId": "c57435277d9b659a63f3c5f28af46029",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "stats": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/orders": {
+            "get": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Get all orders (Admin only)",
+                "operationId": "04bd72afaba6172a9bb727edc02c55b9",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by order status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "confirmed",
+                                "processing",
+                                "shipped",
+                                "delivered",
+                                "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "payment_status",
+                        "in": "query",
+                        "description": "Filter by payment status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "paid",
+                                "failed"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by order number, customer name, or email",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of orders",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "orders": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/orders/stats": {
+            "get": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Get order statistics (Admin only)",
+                "operationId": "55c349a978f7b2623c2ad96ae986915d",
+                "responses": {
+                    "200": {
+                        "description": "Order statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "stats": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/orders/{id}/status": {
+            "put": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Update order status (Admin only)",
+                "operationId": "6bc168b0575c508f1f35a3f6a752d109",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "confirmed",
+                                            "processing",
+                                            "shipped",
+                                            "delivered",
+                                            "cancelled"
+                                        ]
+                                    },
+                                    "tracking_number": {
+                                        "type": "string"
+                                    },
+                                    "note": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "order": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/password/request-otp": {
+            "post": {
+                "tags": [
+                    "Password Reset"
+                ],
+                "summary": "Request OTP for password reset",
+                "operationId": "9da61bfd31a91763eb7548eb86567b21",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent to your email"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/password/verify-otp": {
+            "post": {
+                "tags": [
+                    "Password Reset"
+                ],
+                "summary": "Verify OTP for password reset",
+                "operationId": "b163f955ad3e0a8582039d79fceb79b4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP verified successfully"
+                                        },
+                                        "reset_token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/password/reset": {
+            "post": {
+                "tags": [
+                    "Password Reset"
+                ],
+                "summary": "Reset password with token",
+                "operationId": "64955facb007e5fd3a8c0c64f4fb1744",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "reset_token",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "reset_token": {
+                                        "type": "string",
+                                        "example": "token123"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password reset successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
     "tags": [
         {
-            "name": "Categories"
+            "name": "Authentication",
+            "description": "User and Admin authentication endpoints"
         },
         {
-            "name": "Products"
+            "name": "Public",
+            "description": "Public endpoints for categories, products, and coupons"
+        },
+        {
+            "name": "User",
+            "description": "User authenticated endpoints for orders and profile"
+        },
+        {
+            "name": "Admin - Users",
+            "description": "Admin endpoints for user management"
+        },
+        {
+            "name": "Admin - Admins",
+            "description": "Admin endpoints for admin management"
+        },
+        {
+            "name": "Admin - Coupons",
+            "description": "Admin endpoints for coupon management"
+        },
+        {
+            "name": "Admin - Orders",
+            "description": "Admin endpoints for order management"
+        },
+        {
+            "name": "Admin - Events",
+            "description": "Admin endpoints for event management"
+        },
+        {
+            "name": "Password Reset",
+            "description": "Password reset endpoints"
         }
     ]
 }

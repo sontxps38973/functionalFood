@@ -19,12 +19,18 @@ class CreateCouponsTable extends Migration
             $table->decimal('value', 12, 2);
             $table->decimal('max_discount', 12, 2)->nullable();
 
-            // Phạm vi áp dụng: toàn đơn, sản phẩm, danh mục
-            $table->enum('scope', ['order', 'product', 'category'])->default('order');
+            // Phạm vi áp dụng: toàn đơn, sản phẩm, danh mục, vận chuyển
+            $table->enum('scope', ['order', 'product', 'category', 'shipping'])->default('order');
             $table->json('target_ids')->nullable();
+
+            // Giảm giá vận chuyển
+            $table->boolean('free_shipping')->default(false); // Miễn phí vận chuyển
+            $table->decimal('shipping_discount', 12, 2)->nullable(); // Giảm giá vận chuyển cố định
+            $table->decimal('shipping_discount_percent', 5, 2)->nullable(); // Giảm giá vận chuyển theo %
 
             // Điều kiện sử dụng
             $table->decimal('min_order_value', 12, 2)->nullable();
+            $table->decimal('max_order_value', 12, 2)->nullable(); // Giới hạn giá trị đơn hàng tối đa
             $table->integer('usage_limit')->nullable(); // tổng số lượt dùng toàn hệ thống
             $table->integer('used_count')->default(0); // đã dùng bao nhiêu lần
             $table->boolean('only_once_per_user')->default(false);
@@ -40,8 +46,12 @@ class CreateCouponsTable extends Migration
 
             // Trạng thái
             $table->boolean('is_active')->default(true);
+            
             // Phương thức thanh toán
             $table->json('allowed_payment_methods')->nullable(); 
+            
+            // Khu vực áp dụng
+            $table->json('allowed_regions')->nullable(); // Tỉnh/thành phố được áp dụng
 
             $table->timestamps();
         });

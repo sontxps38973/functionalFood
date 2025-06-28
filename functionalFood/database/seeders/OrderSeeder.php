@@ -4,6 +4,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\Coupon;
 use Illuminate\Support\Facades\DB;
@@ -18,40 +19,72 @@ class OrderSeeder extends Seeder
             'phone' => '12345678903',
             'password' => 'passs',
         ]);
-        $coupon = Coupon::factory()->create([
+
+        $coupon = Coupon::inRandomOrder()->first() ?? Coupon::factory()->create([
+            'code' => 'SEEDER10',
             'type' => 'percent',
             'value' => 10,
             'max_discount' => 50000,
             'min_order_value' => 200000,
+            'scope' => 'order',
         ]);
 
-        $products = Product::inRandomOrder()->limit(2)->get();
+        // Lấy variants thay vì products
+        $variants = ProductVariant::with('product')->inRandomOrder()->limit(2)->get();
 
-        $subtotal = $products->sum(fn($product) => $product->price * 2);
+        if ($variants->isEmpty()) {
+            $this->command->info('No product variants found. Skipping order seeding.');
+            return;
+        }
+
+        $subtotal = $variants->sum(fn($variant) => $variant->price * 2);
+        $shippingFee = 30000;
+        $tax = 15000;
         $discount = min($subtotal * ($coupon->value / 100), $coupon->max_discount);
-        $total = $subtotal - $discount;
+        $total = $subtotal + $shippingFee + $tax - $discount;
 
         $order = Order::create([
             'user_id' => $user->id,
+            'name' => 'Nguyễn Văn Test',
+            'phone' => '0123456789',
+            'address' => '123 Đường Test, Quận 1, TP.HCM',
+            'email' => 'test@example.com',
             'subtotal' => $subtotal,
+            'shipping_fee' => $shippingFee,
+            'tax' => $tax,
             'discount' => $discount,
             'total' => $total,
             'coupon_id' => $coupon->id,
             'status' => 'pending',
+            'payment_status' => 'pending',
             'payment_method' => 'cod',
+            'notes' => 'Đơn hàng test từ seeder',
         ]);
 
-        foreach ($products as $product) {
+        foreach ($variants as $variant) {
+            $product = $variant->product;
+            $finalPrice = $variant->discount > 0 ? $variant->price - $variant->discount : $variant->price;
+            
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $product->id,
+                'product_variant_id' => $variant->id,
                 'product_name' => $product->name,
-                'price' => $product->price,
+                'variant_name' => $variant->attribute_name_text,
+                'sku' => $variant->sku,
+                'product_image' => $variant->image ?? $product->image,
+                'price' => $variant->price,
+                'discount_price' => $variant->discount,
+                'final_price' => $finalPrice,
                 'quantity' => 2,
-                'total' => $product->price * 2,
+                'total' => $finalPrice * 2,
+                'weight' => $product->weight ?? null,
+                'dimensions' => $product->dimensions ?? null,
+                'status' => 'pending',
             ]);
         }
 
+        // Ghi nhận sử dụng coupon
         DB::table('coupon_user')->insert([
             'coupon_id' => $coupon->id,
             'user_id' => $user->id,
@@ -61,5 +94,10 @@ class OrderSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        // Tăng lượt sử dụng coupon
+        $coupon->increment('used_count');
+
+        $this->command->info('Order seeder completed successfully!');
     }
 }
