@@ -11,6 +11,10 @@ class CreateOrdersTable extends Migration
             $table->id();
 
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('name');
+            $table->string('phone');
+            $table->string('address');
+            $table->string('email');
 
             $table->decimal('subtotal', 12, 2);
             $table->decimal('discount', 12, 2)->default(0); // Giá trị giảm giá
