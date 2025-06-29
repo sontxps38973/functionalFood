@@ -1,0 +1,340 @@
+{
+  "calculate_values_samples": {
+    "basic_calculation": {
+      "description": "Tính toán giá trị đơn hàng cơ bản",
+      "request": {
+        "items": [
+          {
+            "variant_id": 1,
+            "quantity": 2
+          },
+          {
+            "variant_id": 3,
+            "quantity": 1
+          }
+        ]
+      },
+      "expected_response": {
+        "subtotal": 250000,
+        "items": [
+          {
+            "variant_id": 1,
+            "product_id": 1,
+            "product_name": "Sản phẩm A",
+            "variant_name": "Màu đỏ, Size M",
+            "sku": "SPA-RED-M",
+            "price": 100000,
+            "discount_price": 0,
+            "final_price": 100000,
+            "quantity": 2,
+            "item_total": 200000,
+            "stock_quantity": 10
+          }
+        ],
+        "calculation_breakdown": {
+          "total_items": 2,
+          "total_quantity": 3,
+          "subtotal": 250000
+        }
+      }
+    }
+  },
+
+  "samples": {
+    "basic_order": {
+      "description": "Đơn hàng cơ bản không có coupon",
+      "request": {
+        "items": [
+          {
+            "variant_id": 1,
+            "quantity": 2
+          },
+          {
+            "variant_id": 3,
+            "quantity": 1
+          }
+        ],
+        "name": "Nguyễn Văn A",
+        "phone": "0123456789",
+        "address": "123 Đường ABC, Quận 1, TP.HCM",
+        "email": "nguyenvana@email.com",
+        "payment_method": "cod",
+        "subtotal": 200000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "discount": 0,
+        "total": 235000,
+        "notes": "Giao hàng giờ hành chính"
+      }
+    },
+
+    "order_with_coupon": {
+      "description": "Đơn hàng có áp dụng coupon",
+      "request": {
+        "items": [
+          {
+            "variant_id": 2,
+            "quantity": 3
+          }
+        ],
+        "name": "Trần Thị B",
+        "phone": "0987654321",
+        "address": "456 Đường XYZ, Quận 3, TP.HCM",
+        "email": "tranthib@email.com",
+        "payment_method": "bank_transfer",
+        "coupon_id": 1,
+        "subtotal": 150000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "discount": 20000,
+        "total": 165000,
+        "notes": "Thanh toán chuyển khoản"
+      }
+    },
+
+    "order_with_free_shipping": {
+      "description": "Đơn hàng có coupon miễn phí vận chuyển",
+      "request": {
+        "items": [
+          {
+            "variant_id": 1,
+            "quantity": 1
+          },
+          {
+            "variant_id": 4,
+            "quantity": 2
+          }
+        ],
+        "name": "Lê Văn C",
+        "phone": "0369852147",
+        "address": "789 Đường DEF, Quận 7, TP.HCM",
+        "email": "levanc@email.com",
+        "payment_method": "online_payment",
+        "coupon_id": 2,
+        "subtotal": 300000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "discount": 30000,
+        "total": 305000,
+        "notes": "Thanh toán online"
+      }
+    },
+
+    "large_order": {
+      "description": "Đơn hàng lớn với nhiều sản phẩm",
+      "request": {
+        "items": [
+          {
+            "variant_id": 1,
+            "quantity": 5
+          },
+          {
+            "variant_id": 2,
+            "quantity": 3
+          },
+          {
+            "variant_id": 3,
+            "quantity": 2
+          },
+          {
+            "variant_id": 4,
+            "quantity": 4
+          }
+        ],
+        "name": "Phạm Thị D",
+        "phone": "0521478963",
+        "address": "321 Đường GHI, Quận 10, TP.HCM",
+        "email": "phamthid@email.com",
+        "payment_method": "bank_transfer",
+        "coupon_id": 3,
+        "subtotal": 800000,
+        "shipping_fee": 0,
+        "tax": 8000,
+        "discount": 80000,
+        "total": 728000,
+        "notes": "Đơn hàng công ty, cần hóa đơn VAT"
+      }
+    },
+
+    "minimal_order": {
+      "description": "Đơn hàng tối thiểu",
+      "request": {
+        "items": [
+          {
+            "variant_id": 1,
+            "quantity": 1
+          }
+        ],
+        "name": "Võ Văn E",
+        "phone": "0147852369",
+        "address": "654 Đường JKL, Quận 5, TP.HCM",
+        "email": "vovane@email.com",
+        "payment_method": "cod",
+        "subtotal": 50000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "discount": 0,
+        "total": 85000
+      }
+    },
+
+    "order_with_notes": {
+      "description": "Đơn hàng có ghi chú chi tiết",
+      "request": {
+        "items": [
+          {
+            "variant_id": 2,
+            "quantity": 2
+          }
+        ],
+        "name": "Hoàng Thị F",
+        "phone": "0789632145",
+        "address": "987 Đường MNO, Quận 2, TP.HCM",
+        "email": "hoangthif@email.com",
+        "payment_method": "cod",
+        "subtotal": 100000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "discount": 0,
+        "total": 135000,
+        "notes": "Giao hàng từ 14h-17h, gọi điện trước khi giao, để ở cổng nếu không có ai ở nhà"
+      }
+    }
+  },
+
+  "apply_coupon_samples": {
+    "percent_discount": {
+      "description": "Áp dụng coupon giảm giá phần trăm",
+      "request": {
+        "coupon_code": "SAVE20",
+        "payment_method": "cod",
+        "subtotal": 200000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "items": [
+          {
+            "product_id": 1,
+            "price": 100000,
+            "quantity": 2
+          }
+        ]
+      }
+    },
+
+    "fixed_discount": {
+      "description": "Áp dụng coupon giảm giá cố định",
+      "request": {
+        "coupon_code": "SAVE50K",
+        "payment_method": "bank_transfer",
+        "subtotal": 150000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "items": [
+          {
+            "product_id": 2,
+            "price": 75000,
+            "quantity": 2
+          }
+        ]
+      }
+    },
+
+    "free_shipping": {
+      "description": "Áp dụng coupon miễn phí vận chuyển",
+      "request": {
+        "coupon_code": "FREESHIP",
+        "payment_method": "online_payment",
+        "subtotal": 300000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "items": [
+          {
+            "product_id": 1,
+            "price": 100000,
+            "quantity": 3
+          }
+        ]
+      }
+    },
+
+    "category_specific": {
+      "description": "Áp dụng coupon cho danh mục cụ thể",
+      "request": {
+        "coupon_code": "CATEGORY30",
+        "payment_method": "cod",
+        "subtotal": 250000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "items": [
+          {
+            "product_id": 3,
+            "price": 125000,
+            "quantity": 2
+          }
+        ]
+      }
+    }
+  },
+
+  "workflow": {
+    "step1": "Gọi API /calculate-order-values để lấy subtotal chính xác",
+    "step2": "Sử dụng subtotal từ step 1 để gọi API /apply-coupon (nếu có)",
+    "step3": "Sử dụng kết quả từ step 1 và 2 để gọi API /place-order",
+    "example": {
+      "step1_request": {
+        "url": "POST /api/v1/user/orders/calculate-values",
+        "body": {
+          "items": [
+            {"variant_id": 1, "quantity": 2},
+            {"variant_id": 3, "quantity": 1}
+          ]
+        }
+      },
+      "step1_response": {
+        "subtotal": 250000,
+        "items": []
+      },
+      "step2_request": {
+        "url": "POST /api/v1/user/orders/apply-coupon",
+        "body": {
+          "coupon_code": "SAVE20",
+          "payment_method": "cod",
+          "subtotal": 250000,
+          "shipping_fee": 30000,
+          "tax": 5000,
+          "items": []
+        }
+      },
+      "step2_response": {
+        "total_discount": 50000,
+        "total": 235000
+      },
+      "step3_request": {
+        "url": "POST /api/v1/user/orders/place-order",
+        "body": {
+          "items": [
+            {"variant_id": 1, "quantity": 2},
+            {"variant_id": 3, "quantity": 1}
+          ],
+          "subtotal": 250000,
+          "discount": 50000,
+          "total": 235000,
+          "name": "Nguyễn Văn A",
+          "phone": "0123456789",
+          "address": "123 ABC",
+          "email": "test@email.com",
+          "payment_method": "cod"
+        }
+      }
+    }
+  },
+
+  "notes": {
+    "variant_ids": "Các variant_id này cần tồn tại trong database. Kiểm tra bảng product_variants để lấy ID thực tế.",
+    "coupon_ids": "Các coupon_id này cần tồn tại trong database. Kiểm tra bảng coupons để lấy ID thực tế.",
+    "authentication": "Tất cả request cần có Bearer token trong header Authorization",
+    "validation": "Hệ thống sẽ tự động validate: tồn kho, giá trị, coupon hợp lệ, v.v.",
+    "total_calculation": "total = subtotal + shipping_fee + tax - discount",
+    "price_calculation": "final_price = price - discount_price (nếu có discount)"
+  }
+} 

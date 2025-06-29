@@ -319,15 +319,20 @@ class OpenApiSpec extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"coupon_code","items"},
-     *             @OA\Property(property="coupon_code", type="string", example="SAVE20"),
+     *             required={"coupon_code","payment_method","subtotal","items"},
+     *             @OA\Property(property="coupon_code", type="string", example="SAVE20", description="Mã coupon"),
+     *             @OA\Property(property="payment_method", type="string", enum={"cod","bank_transfer","online_payment"}, example="cod", description="Phương thức thanh toán"),
+     *             @OA\Property(property="subtotal", type="number", example=100000, description="Tổng tiền hàng"),
+     *             @OA\Property(property="shipping_fee", type="number", example=30000, description="Phí vận chuyển"),
+     *             @OA\Property(property="tax", type="number", example=5000, description="Thuế"),
      *             @OA\Property(
      *                 property="items",
      *                 type="array",
+     *                 description="Danh sách sản phẩm",
      *                 @OA\Items(
-     *                     @OA\Property(property="product_id", type="integer"),
-     *                     @OA\Property(property="quantity", type="integer"),
-     *                     @OA\Property(property="variant_id", type="integer")
+     *                     @OA\Property(property="product_id", type="integer", example=1, description="ID sản phẩm"),
+     *                     @OA\Property(property="price", type="number", example=50000, description="Giá sản phẩm"),
+     *                     @OA\Property(property="quantity", type="integer", example=2, description="Số lượng")
      *                 )
      *             )
      *         )
@@ -336,9 +341,25 @@ class OpenApiSpec extends Controller
      *         response=200,
      *         description="Coupon applied successfully",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="discount_amount", type="number"),
-     *             @OA\Property(property="final_total", type="number")
+     *             @OA\Property(property="message", type="string", example="Áp mã thành công."),
+     *             @OA\Property(property="product_discount", type="number", example=20000, description="Giảm giá sản phẩm"),
+     *             @OA\Property(property="shipping_discount", type="number", example=0, description="Giảm giá vận chuyển"),
+     *             @OA\Property(property="total_discount", type="number", example=20000, description="Tổng giảm giá"),
+     *             @OA\Property(property="final_shipping_fee", type="number", example=30000, description="Phí vận chuyển cuối cùng"),
+     *             @OA\Property(property="total", type="number", example=115000, description="Tổng tiền cuối cùng"),
+     *             @OA\Property(property="coupon_id", type="integer", example=1, description="ID coupon"),
+     *             @OA\Property(property="coupon_type", type="string", enum={"percent","fixed"}, example="percent", description="Loại coupon"),
+     *             @OA\Property(property="coupon_value", type="number", example=20, description="Giá trị coupon"),
+     *             @OA\Property(property="free_shipping", type="boolean", example=false, description="Miễn phí vận chuyển"),
+     *             @OA\Property(property="shipping_discount_amount", type="number", example=0, description="Số tiền giảm vận chuyển"),
+     *             @OA\Property(property="shipping_discount_percent", type="number", example=0, description="Phần trăm giảm vận chuyển")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error or coupon not valid",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Mã không hợp lệ hoặc đã hết hạn.", description="Các thông báo lỗi có thể gặp: Mã không hợp lệ hoặc đã hết hạn, Hạng thành viên của bạn không đủ điều kiện, Mã chỉ áp dụng cho đơn hàng đầu tiên, Bạn đã sử dụng mã này rồi, Mã đã hết lượt sử dụng, Mã chỉ áp dụng vào một số ngày nhất định, Mã chỉ áp dụng trong khung giờ quy định, Giá trị đơn hàng chưa đủ để áp mã, Giá trị đơn hàng vượt quá giới hạn áp dụng mã, Phương thức thanh toán không được áp dụng mã này, Không có sản phẩm phù hợp để áp mã, Không có sản phẩm thuộc danh mục áp dụng mã")
      *         )
      *     )
      * )

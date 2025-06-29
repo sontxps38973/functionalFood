@@ -457,25 +457,60 @@
                             "schema": {
                                 "required": [
                                     "coupon_code",
+                                    "payment_method",
+                                    "subtotal",
                                     "items"
                                 ],
                                 "properties": {
                                     "coupon_code": {
+                                        "description": "Mã coupon",
                                         "type": "string",
                                         "example": "SAVE20"
                                     },
+                                    "payment_method": {
+                                        "description": "Phương thức thanh toán",
+                                        "type": "string",
+                                        "enum": [
+                                            "cod",
+                                            "bank_transfer",
+                                            "online_payment"
+                                        ],
+                                        "example": "cod"
+                                    },
+                                    "subtotal": {
+                                        "description": "Tổng tiền hàng",
+                                        "type": "number",
+                                        "example": 100000
+                                    },
+                                    "shipping_fee": {
+                                        "description": "Phí vận chuyển",
+                                        "type": "number",
+                                        "example": 30000
+                                    },
+                                    "tax": {
+                                        "description": "Thuế",
+                                        "type": "number",
+                                        "example": 5000
+                                    },
                                     "items": {
+                                        "description": "Danh sách sản phẩm",
                                         "type": "array",
                                         "items": {
                                             "properties": {
                                                 "product_id": {
-                                                    "type": "integer"
+                                                    "description": "ID sản phẩm",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "description": "Giá sản phẩm",
+                                                    "type": "number",
+                                                    "example": 50000
                                                 },
                                                 "quantity": {
-                                                    "type": "integer"
-                                                },
-                                                "variant_id": {
-                                                    "type": "integer"
+                                                    "description": "Số lượng",
+                                                    "type": "integer",
+                                                    "example": 2
                                                 }
                                             },
                                             "type": "object"
@@ -495,13 +530,84 @@
                                 "schema": {
                                     "properties": {
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "example": "Áp mã thành công."
                                         },
-                                        "discount_amount": {
-                                            "type": "number"
+                                        "product_discount": {
+                                            "description": "Giảm giá sản phẩm",
+                                            "type": "number",
+                                            "example": 20000
                                         },
-                                        "final_total": {
-                                            "type": "number"
+                                        "shipping_discount": {
+                                            "description": "Giảm giá vận chuyển",
+                                            "type": "number",
+                                            "example": 0
+                                        },
+                                        "total_discount": {
+                                            "description": "Tổng giảm giá",
+                                            "type": "number",
+                                            "example": 20000
+                                        },
+                                        "final_shipping_fee": {
+                                            "description": "Phí vận chuyển cuối cùng",
+                                            "type": "number",
+                                            "example": 30000
+                                        },
+                                        "total": {
+                                            "description": "Tổng tiền cuối cùng",
+                                            "type": "number",
+                                            "example": 115000
+                                        },
+                                        "coupon_id": {
+                                            "description": "ID coupon",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "coupon_type": {
+                                            "description": "Loại coupon",
+                                            "type": "string",
+                                            "enum": [
+                                                "percent",
+                                                "fixed"
+                                            ],
+                                            "example": "percent"
+                                        },
+                                        "coupon_value": {
+                                            "description": "Giá trị coupon",
+                                            "type": "number",
+                                            "example": 20
+                                        },
+                                        "free_shipping": {
+                                            "description": "Miễn phí vận chuyển",
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "shipping_discount_amount": {
+                                            "description": "Số tiền giảm vận chuyển",
+                                            "type": "number",
+                                            "example": 0
+                                        },
+                                        "shipping_discount_percent": {
+                                            "description": "Phần trăm giảm vận chuyển",
+                                            "type": "number",
+                                            "example": 0
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or coupon not valid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Các thông báo lỗi có thể gặp: Mã không hợp lệ hoặc đã hết hạn, Hạng thành viên của bạn không đủ điều kiện, Mã chỉ áp dụng cho đơn hàng đầu tiên, Bạn đã sử dụng mã này rồi, Mã đã hết lượt sử dụng, Mã chỉ áp dụng vào một số ngày nhất định, Mã chỉ áp dụng trong khung giờ quy định, Giá trị đơn hàng chưa đủ để áp mã, Giá trị đơn hàng vượt quá giới hạn áp dụng mã, Phương thức thanh toán không được áp dụng mã này, Không có sản phẩm phù hợp để áp mã, Không có sản phẩm thuộc danh mục áp dụng mã",
+                                            "type": "string",
+                                            "example": "Mã không hợp lệ hoặc đã hết hạn."
                                         }
                                     },
                                     "type": "object"

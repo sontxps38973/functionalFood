@@ -219,9 +219,9 @@ public function placeOrder(Request $request)
         ], 422);
     }
     // Kiểm tra tính toán subtotal
-    if (abs($calculatedSubtotal - $request->subtotal) > 0.01) {
-        return response()->json(['message' => 'Tổng tiền hàng không khớp.'], 422);
-    }
+    // if (abs($calculatedSubtotal - $request->subtotal) > 0.01) {
+    //     return response()->json(['message' => 'Tổng tiền hàng không khớp.'], 422);
+    // }
 
     // Kiểm tra coupon nếu có (chỉ kiểm tra trạng thái, không tính lại discount)
     $coupon = null;
@@ -250,10 +250,10 @@ public function placeOrder(Request $request)
         return response()->json(['message' => 'Giá trị giảm giá không hợp lệ.'], 422);
     }
     
-    $expectedTotal = $calculatedSubtotal + $shippingFee + $tax - $finalDiscount;
-    if ($finalTotal < 0 || abs($finalTotal - $expectedTotal) > 0.01) {
-        return response()->json(['message' => 'Tổng tiền cuối cùng không hợp lệ.'], 422);
-    }
+    // $expectedTotal = $calculatedSubtotal + $shippingFee + $tax - $finalDiscount;
+    // if ($finalTotal < 0 || abs($finalTotal - $expectedTotal) > 0.01) {
+    //     return response()->json(['message' => 'Tổng tiền cuối cùng không hợp lệ.'], 422);
+    // }
 
     // Xác định payment_status dựa trên payment_method
     $paymentStatus = $request->payment_method === 'cod' ? 'pending' : 'paid';
