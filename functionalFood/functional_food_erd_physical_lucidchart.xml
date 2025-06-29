@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="5.0" etag="xxx" version="22.1.16" type="device">
+  <diagram name="Functional Food ERD - Physical (Table Names)" id="physical-erd-table-names">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Users Table -->
+        <mxCell id="users_table" value="<b>users</b>\n-------------------\nid (PK)\nname\nemail\nphone\npassword\nstatus\ncustomer_rank_id (FK)\nemail_verified_at\nremember_token\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="180" height="220" as="geometry" />
+        </mxCell>
+        
+        <!-- Admins Table -->
+        <mxCell id="admins_table" value="<b>admins</b>\n-------------------\nid (PK)\nname\nemail\npassword\nrole\nstatus\nlast_login_at\nremember_token\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="180" height="180" as="geometry" />
+        </mxCell>
+        
+        <!-- Customer Ranks Table -->
+        <mxCell id="customer_ranks_table" value="<b>customer_ranks</b>\n-------------------\nid (PK)\nname\nmin_total_spent\ndiscount_percent\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Categories Table -->
+        <mxCell id="categories_table" value="<b>categories</b>\n-------------------\nid (PK)\nname\ndescription\nimage\nis_active\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="260" y="40" width="180" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Products Table -->
+        <mxCell id="products_table" value="<b>products</b>\n-------------------\nid (PK)\ncategory_id (FK)\nname\ndescription\nprice\nimage\nweight\ndimensions\nis_active\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="260" y="200" width="180" height="180" as="geometry" />
+        </mxCell>
+        
+        <!-- Product Variants Table -->
+        <mxCell id="variants_table" value="<b>product_variants</b>\n-------------------\nid (PK)\nproduct_id (FK)\nsku\nattribute_name\nattribute_value\nprice\ndiscount\nstock_quantity\nimage\nis_active\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="260" y="420" width="180" height="180" as="geometry" />
+        </mxCell>
+        
+        <!-- Orders Table -->
+        <mxCell id="orders_table" value="<b>orders</b>\n-------------------\nid (PK)\nuser_id (FK)\nname\nphone\naddress\nemail\norder_number\nsubtotal\nshipping_fee\ntax\ndiscount\ntotal\ncoupon_id (FK)\nstatus\npayment_status\npayment_method\ntracking_number\nnotes\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="480" y="40" width="200" height="260" as="geometry" />
+        </mxCell>
+        
+        <!-- Order Items Table -->
+        <mxCell id="order_items_table" value="<b>order_items</b>\n-------------------\nid (PK)\norder_id (FK)\nproduct_id (FK)\nproduct_variant_id (FK)\nproduct_name\nvariant_name\nsku\nprice\ndiscount_price\nfinal_price\nquantity\ntotal\nweight\ndimensions\nstatus\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="480" y="320" width="200" height="220" as="geometry" />
+        </mxCell>
+        
+        <!-- Coupons Table -->
+        <mxCell id="coupons_table" value="<b>coupons</b>\n-------------------\nid (PK)\ncode\nname\ndescription\ntype\nvalue\nscope\ntarget_ids\nmin_order_value\nmax_order_value\nusage_limit\nused_count\nstart_at\nend_at\nis_active\nfree_shipping\nshipping_discount\nshipping_discount_percent\nallowed_rank_ids\nallowed_payment_methods\nfirst_time_only\nonly_once_per_user\ntime_rules\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="40" width="220" height="320" as="geometry" />
+        </mxCell>
+        
+        <!-- Coupon Users Table -->
+        <mxCell id="coupon_users_table" value="<b>coupon_user</b>\n-------------------\nid (PK)\ncoupon_id (FK)\nuser_id (FK)\nusage_count\nused_at\norder_id (FK)\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="380" width="220" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Events Table -->
+        <mxCell id="events_table" value="<b>events</b>\n-------------------\nid (PK)\nname\ndescription\nstart_at\nend_at\nis_active\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="980" y="40" width="180" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Event Products Table -->
+        <mxCell id="event_products_table" value="<b>event_products</b>\n-------------------\nid (PK)\nevent_id (FK)\nproduct_id (FK)\ndiscount_percent\ndiscount_amount\nmax_quantity\nsold_quantity\nis_active\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="980" y="180" width="180" height="140" as="geometry" />
+        </mxCell>
+        
+        <!-- Cart Items Table -->
+        <mxCell id="cart_items_table" value="<b>cart_items</b>\n-------------------\nid (PK)\nuser_id (FK)\nproduct_variant_id (FK)\nquantity\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="980" y="340" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Wishlist Table -->
+        <mxCell id="wishlist_table" value="<b>wishlists</b>\n-------------------\nid (PK)\nuser_id (FK)\nproduct_id (FK)\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="980" y="460" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Product Reviews Table -->
+        <mxCell id="reviews_table" value="<b>product_reviews</b>\n-------------------\nid (PK)\nproduct_id (FK)\nuser_id (FK)\nrating\ncomment\nis_approved\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="40" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Product Views Table -->
+        <mxCell id="views_table" value="<b>product_views</b>\n-------------------\nid (PK)\nproduct_id (FK)\nuser_id (FK)\nip_address\nuser_agent\nviewed_at\ncreated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="160" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Spin Game Table -->
+        <mxCell id="spin_game_table" value="<b>spin_games</b>\n-------------------\nid (PK)\nuser_id (FK)\nresult\nprize_type\nprize_value\ncoupon_id (FK)\nis_used\nspinned_at\ncreated_at\nupdated_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="280" width="180" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Relationships -->
+        
+        <!-- Users - Customer Ranks -->
+        <mxCell id="rel1" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="users_table" target="customer_ranks_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Categories - Products -->
+        <mxCell id="rel2" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="categories_table" target="products_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Products - Variants -->
+        <mxCell id="rel3" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="products_table" target="variants_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Users - Orders -->
+        <mxCell id="rel4" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="users_table" target="orders_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Orders - Order Items -->
+        <mxCell id="rel5" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="orders_table" target="order_items_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Variants - Order Items -->
+        <mxCell id="rel6" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="variants_table" target="order_items_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Products - Order Items -->
+        <mxCell id="rel7" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="products_table" target="order_items_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Orders - Coupons -->
+        <mxCell id="rel8" value="N:1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="orders_table" target="coupons_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Coupons - Coupon Users -->
+        <mxCell id="rel9" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="coupons_table" target="coupon_users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Users - Coupon Users -->
+        <mxCell id="rel10" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="users_table" target="coupon_users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Users - Cart Items -->
+        <mxCell id="rel11" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="users_table" target="cart_items_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Variants - Cart Items -->
+        <mxCell id="rel12" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="variants_table" target="cart_items_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Users - Wishlist -->
+        <mxCell id="rel13" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="users_table" target="wishlist_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Products - Wishlist -->
+        <mxCell id="rel14" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="products_table" target="wishlist_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Products - Reviews -->
+        <mxCell id="rel15" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="products_table" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Users - Reviews -->
+        <mxCell id="rel16" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="users_table" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Products - Views -->
+        <mxCell id="rel17" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="products_table" target="views_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Users - Views -->
+        <mxCell id="rel18" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="users_table" target="views_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Events - Event Products -->
+        <mxCell id="rel19" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="events_table" target="event_products_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Products - Event Products -->
+        <mxCell id="rel20" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="products_table" target="event_products_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Users - Spin Game -->
+        <mxCell id="rel21" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="users_table" target="spin_game_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Coupons - Spin Game -->
+        <mxCell id="rel22" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="coupons_table" target="spin_game_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend&#xa;&#xa;🔵 User Management&#xa;🟢 Product Management&#xa;🟡 Order Management&#xa;🟠 Marketing & Events&#xa;🟣 Customer Ranks&#xa;🔴 Shopping Features&#xa;&#xa;PK = Primary Key&#xa;FK = Foreign Key&#xa;1:N = One-to-Many&#xa;N:1 = Many-to-One" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="760" width="200" height="160" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile> 

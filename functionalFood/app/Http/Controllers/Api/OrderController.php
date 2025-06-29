@@ -171,7 +171,8 @@ public function placeOrder(Request $request)
 {
     $request->validate([
         'items' => 'required|array|min:1',
-        'items.*.variant_id' => 'required|integer|exists:product_variants,id',
+        'items.*.product_id' => 'required|integer|exists:products,id',
+        'items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
         'items.*.quantity' => 'required|integer|min:1',
         'name' => 'required|string|max:255',
         'phone' => 'required|string|max:20',
@@ -191,37 +192,71 @@ public function placeOrder(Request $request)
 
     // Kiểm tra tồn kho trước khi đặt hàng
     $stockErrors = [];
-    $variants = [];
+    $orderItems = [];
     $calculatedSubtotal = 0;
 
     foreach ($request->items as $item) {
-        $variant = \App\Models\ProductVariant::with('product')->find($item['variant_id']);
-        if (!$variant) {
+        $product = \App\Models\Product::find($item['product_id']);
+        if (!$product) {
             return response()->json(['message' => 'Sản phẩm không tồn tại.'], 422);
         }
-        if ($variant->stock_quantity < $item['quantity']) {
-            $stockErrors[] = "Sản phẩm {$variant->product->name} chỉ còn {$variant->stock_quantity} trong kho.";
+
+        // Xử lý sản phẩm có variant
+        if (!empty($item['variant_id'])) {
+            $variant = \App\Models\ProductVariant::where('id', $item['variant_id'])
+                ->where('product_id', $item['product_id'])
+                ->first();
+            
+            if (!$variant) {
+                return response()->json(['message' => 'Biến thể sản phẩm không tồn tại.'], 422);
+            }
+
+            if ($variant->stock_quantity < $item['quantity']) {
+                $stockErrors[] = "Sản phẩm {$product->name} ({$variant->attribute_name_text}) chỉ còn {$variant->stock_quantity} trong kho.";
+            }
+
+            $price = $variant->discount > 0 ? $variant->price - $variant->discount : $variant->price;
+            $calculatedSubtotal += $price * $item['quantity'];
+
+            $orderItems[] = [
+                'type' => 'variant',
+                'product' => $product,
+                'variant' => $variant,
+                'quantity' => $item['quantity'],
+                'price' => $variant->price,
+                'discount_price' => $variant->discount,
+                'final_price' => $price,
+                'stock_quantity' => $variant->stock_quantity
+            ];
+
+        } else {
+            // Xử lý sản phẩm không có variant
+            if ($product->stock_quantity < $item['quantity']) {
+                $stockErrors[] = "Sản phẩm {$product->name} chỉ còn {$product->stock_quantity} trong kho.";
+            }
+
+            $price = $product->discount > 0 ? $product->price - $product->discount : $product->price;
+            $calculatedSubtotal += $price * $item['quantity'];
+
+            $orderItems[] = [
+                'type' => 'product',
+                'product' => $product,
+                'variant' => null,
+                'quantity' => $item['quantity'],
+                'price' => $product->price,
+                'discount_price' => $product->discount,
+                'final_price' => $price,
+                'stock_quantity' => $product->stock_quantity
+            ];
         }
-        $price = $variant->discount > 0 ? $variant->price - $variant->discount : $variant->price;
-        $calculatedSubtotal += $price * $item['quantity'];
-        $variants[] = [
-            'variant' => $variant,
-            'quantity' => $item['quantity'],
-            'price' => $variant->price,
-            'discount_price' => $variant->discount,
-            'final_price' => $price
-        ];
     }
+
     if (!empty($stockErrors)) {
         return response()->json([
             'message' => 'Một số sản phẩm không đủ số lượng trong kho.',
             'errors' => $stockErrors
         ], 422);
     }
-    // Kiểm tra tính toán subtotal
-    // if (abs($calculatedSubtotal - $request->subtotal) > 0.01) {
-    //     return response()->json(['message' => 'Tổng tiền hàng không khớp.'], 422);
-    // }
 
     // Kiểm tra coupon nếu có (chỉ kiểm tra trạng thái, không tính lại discount)
     $coupon = null;
@@ -249,11 +284,6 @@ public function placeOrder(Request $request)
     if ($finalDiscount < 0 || $finalDiscount > $calculatedSubtotal) {
         return response()->json(['message' => 'Giá trị giảm giá không hợp lệ.'], 422);
     }
-    
-    // $expectedTotal = $calculatedSubtotal + $shippingFee + $tax - $finalDiscount;
-    // if ($finalTotal < 0 || abs($finalTotal - $expectedTotal) > 0.01) {
-    //     return response()->json(['message' => 'Tổng tiền cuối cùng không hợp lệ.'], 422);
-    // }
 
     // Xác định payment_status dựa trên payment_method
     $paymentStatus = $request->payment_method === 'cod' ? 'pending' : 'paid';
@@ -278,18 +308,18 @@ public function placeOrder(Request $request)
             'notes' => $request->notes,
         ]);
 
-        foreach ($variants as $item) {
+        foreach ($orderItems as $item) {
+            $product = $item['product'];
             $variant = $item['variant'];
-            $product = $variant->product;
             
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $product->id,
-                'product_variant_id' => $variant->id,
+                'product_variant_id' => $variant?->id,
                 'product_name' => $product->name,
-                'variant_name' => $variant->attribute_name_text,
-                'sku' => $variant->sku,
-                'product_image' => $variant->image ?? $product->image,
+                'variant_name' => $variant ? $variant->attribute_name_text : null,
+                'sku' => $variant ? $variant->sku : $product->sku,
+                'product_image' => $variant ? ($variant->image ?? $product->image) : $product->image,
                 'price' => $item['price'],
                 'discount_price' => $item['discount_price'],
                 'final_price' => $item['final_price'],
@@ -300,7 +330,12 @@ public function placeOrder(Request $request)
                 'status' => 'pending',
             ]);
 
-            $variant->decrement('stock_quantity', $item['quantity']);
+            // Cập nhật tồn kho
+            if ($variant) {
+                $variant->decrement('stock_quantity', $item['quantity']);
+            } else {
+                $product->decrement('stock_quantity', $item['quantity']);
+            }
         }
 
         // Nếu có mã giảm giá → ghi lại và tăng lượt
@@ -468,9 +503,16 @@ public function cancelOrder(Request $request, $orderId)
         // Hoàn trả tồn kho
         foreach ($order->items as $item) {
             if ($item->product_variant_id) {
+                // Hoàn trả tồn kho cho sản phẩm có variant
                 $variant = \App\Models\ProductVariant::find($item->product_variant_id);
                 if ($variant) {
                     $variant->increment('stock_quantity', $item->quantity);
+                }
+            } else {
+                // Hoàn trả tồn kho cho sản phẩm không có variant
+                $product = \App\Models\Product::find($item->product_id);
+                if ($product) {
+                    $product->increment('stock_quantity', $item->quantity);
                 }
             }
         }

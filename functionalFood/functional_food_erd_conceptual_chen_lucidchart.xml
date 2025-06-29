@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="5.0" etag="xxx" version="22.1.16" type="device">
+  <diagram name="Functional Food ERD - Conceptual (Chen)" id="conceptual-erd-chen">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Entity: User -->
+        <mxCell id="user" value="User" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="user_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="170" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="user_name" value="name" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="220" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="user_email" value="email" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="260" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="user_phone" value="phone" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="170" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="user_address" value="address" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="260" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Customer Rank -->
+        <mxCell id="rank" value="CustomerRank" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="320" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rank_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="320" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="rank_name" value="name" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="320" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Category -->
+        <mxCell id="category" value="Category" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="80" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cat_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="80" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cat_name" value="name" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="80" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Product -->
+        <mxCell id="product" value="Product" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="200" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="prod_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="200" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="prod_name" value="name" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="200" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="prod_price" value="price" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="250" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Order -->
+        <mxCell id="order" value="Order" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="80" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="order_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="80" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="order_total" value="total" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="130" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Order Item -->
+        <mxCell id="order_item" value="OrderItem" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="200" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="oi_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="200" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="oi_qty" value="quantity" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="250" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Coupon -->
+        <mxCell id="coupon" value="Coupon" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="80" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="coupon_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="80" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="coupon_code" value="code" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="130" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Event -->
+        <mxCell id="event" value="Event" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="200" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="event_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="200" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="event_name" value="name" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="250" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Cart Item -->
+        <mxCell id="cart_item" value="CartItem" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="320" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ci_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="320" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ci_qty" value="quantity" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="320" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Wishlist -->
+        <mxCell id="wishlist" value="Wishlist" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="320" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="wl_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="660" y="320" width="50" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Product Review -->
+        <mxCell id="review" value="ProductReview" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="320" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rv_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="920" y="320" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="rv_rating" value="rating" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="370" width="60" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Product View -->
+        <mxCell id="view" value="ProductView" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="320" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pv_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="320" width="50" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Entity: Spin Game -->
+        <mxCell id="spin_game" value="SpinGame" style="shape=rectangle;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="320" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sg_id" value="id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="320" width="50" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Relationships (hình thoi) -->
+        <mxCell id="rel_user_order" value="Tạo" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="120" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_order_orderitem" value="Gồm" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="140" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_orderitem_product" value="Thuộc" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="440" y="220" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_product_category" value="Thuộc" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="140" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_order_coupon" value="Dùng" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="100" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_event_product" value="Gồm" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="180" width="40" height="40" as="geometry" />
+        </mxCell>
+        <!-- ... (có thể thêm các relationship khác nếu cần) ... -->
+        
+        <!-- Edges (nối entity, thuộc tính, relationship) -->
+        <mxCell id="edge_user_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="user" target="user_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_user_name" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="user" target="user_name"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_user_email" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="user" target="user_email"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_user_phone" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="user" target="user_phone"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_user_address" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="user" target="user_address"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rank_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="rank" target="rank_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rank_name" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="rank" target="rank_name"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_cat_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="category" target="cat_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_cat_name" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="category" target="cat_name"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_prod_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="product" target="prod_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_prod_name" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="product" target="prod_name"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_prod_price" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="product" target="prod_price"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_order_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="order" target="order_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_order_total" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="order" target="order_total"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_oi_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="order_item" target="oi_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_oi_qty" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="order_item" target="oi_qty"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_coupon_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="coupon" target="coupon_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_coupon_code" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="coupon" target="coupon_code"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_event_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="event" target="event_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_event_name" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="event" target="event_name"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_ci_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="cart_item" target="ci_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_ci_qty" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="cart_item" target="ci_qty"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_wl_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="wishlist" target="wl_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rv_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="review" target="rv_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rv_rating" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="review" target="rv_rating"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_pv_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="view" target="pv_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_sg_id" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="spin_game" target="sg_id"><mxGeometry relative="1" as="geometry" /></mxCell>
+        
+        <!-- Edges nối các relationship -->
+        <mxCell id="edge_user_rel_user_order" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="user" target="rel_user_order"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rel_user_order_order" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="rel_user_order" target="order"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_order_rel_order_orderitem" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="order" target="rel_order_orderitem"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rel_order_orderitem_orderitem" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="rel_order_orderitem" target="order_item"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_orderitem_rel_orderitem_product" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="order_item" target="rel_orderitem_product"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rel_orderitem_product_product" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="rel_orderitem_product" target="product"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_product_rel_product_category" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="product" target="rel_product_category"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rel_product_category_category" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="rel_product_category" target="category"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_order_rel_order_coupon" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="order" target="rel_order_coupon"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rel_order_coupon_coupon" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="rel_order_coupon" target="coupon"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_event_rel_event_product" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="event" target="rel_event_product"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="edge_rel_event_product_product" style="edgeStyle=elbowEdgeStyle;endArrow=none;html=1;" edge="1" parent="1" source="rel_event_product" target="product"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <!-- ... (có thể thêm các edge cho các relationship khác nếu cần) ... -->
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile> 
