@@ -80,6 +80,16 @@ use App\Http\Controllers\Controller;
  *     name="Password Reset",
  *     description="Password reset endpoints"
  * )
+ * 
+ * @OA\Tag(
+ *     name="Admin - Reviews",
+ *     description="Admin endpoints for review management"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Product Reviews",
+ *     description="Endpoints for product reviews"
+ * )
  */
 class OpenApiSpec extends Controller
 {
@@ -1041,4 +1051,613 @@ class OpenApiSpec extends Controller
      * )
      */
     public function resetPassword() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/user/coupons/{coupon_id}/save",
+     *     tags={"User"},
+     *     summary="Save or receive a coupon for the user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="coupon_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Coupon saved",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Coupon already saved"
+     *     )
+     * )
+     */
+    public function saveUserCoupon() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/user/coupons",
+     *     tags={"User"},
+     *     summary="Get list of coupons the user currently has (not used)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of user coupons",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     */
+    public function listUserCoupons() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/user/coupons/{user_coupon_id}/use",
+     *     tags={"User"},
+     *     summary="Mark a coupon as used for the user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="user_coupon_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Coupon marked as used",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function useUserCoupon() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/categories",
+     *     tags={"Admin - Categories"},
+     *     summary="Get all categories (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of categories",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     */
+    public function adminGetCategories() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/admin/categories",
+     *     tags={"Admin - Categories"},
+     *     summary="Create a new category (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Beverages"),
+     *             @OA\Property(property="description", type="string", example="All kinds of drinks")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Category created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function adminCreateCategory() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/categories/{id}",
+     *     tags={"Admin - Categories"},
+     *     summary="Get category detail (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Category detail",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function adminShowCategory() {}
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/admin/categories/{id}",
+     *     tags={"Admin - Categories"},
+     *     summary="Update a category (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Beverages"),
+     *             @OA\Property(property="description", type="string", example="All kinds of drinks")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Category updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function adminUpdateCategory() {}
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/admin/categories/{id}",
+     *     tags={"Admin - Categories"},
+     *     summary="Delete a category (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Category deleted successfully"
+     *     )
+     * )
+     */
+    public function adminDeleteCategory() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/products",
+     *     tags={"Admin - Products"},
+     *     summary="Get all products (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of products",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     */
+    public function adminGetProducts() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/admin/products",
+     *     tags={"Admin - Products"},
+     *     summary="Create a new product (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","category_id","price"},
+     *             @OA\Property(property="name", type="string", example="Green Tea"),
+     *             @OA\Property(property="category_id", type="integer", example=1),
+     *             @OA\Property(property="price", type="number", example=10.5),
+     *             @OA\Property(property="description", type="string", example="A healthy green tea drink")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Product created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function adminCreateProduct() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/products/{id}",
+     *     tags={"Admin - Products"},
+     *     summary="Get product detail (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Product detail",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function adminShowProduct() {}
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/admin/products/{id}",
+     *     tags={"Admin - Products"},
+     *     summary="Update a product (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","category_id","price"},
+     *             @OA\Property(property="name", type="string", example="Green Tea"),
+     *             @OA\Property(property="category_id", type="integer", example=1),
+     *             @OA\Property(property="price", type="number", example=10.5),
+     *             @OA\Property(property="description", type="string", example="A healthy green tea drink")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Product updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function adminUpdateProduct() {}
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/admin/products/{id}",
+     *     tags={"Admin - Products"},
+     *     summary="Delete a product (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Product deleted successfully"
+     *     )
+     * )
+     */
+    public function adminDeleteProduct() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/user/wishlist",
+     *     tags={"User"},
+     *     summary="Get user's wishlist",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of wishlist items",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     */
+    public function getWishlist() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/user/wishlist",
+     *     tags={"User"},
+     *     summary="Add product to wishlist",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"product_id"},
+     *             @OA\Property(property="product_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Added to wishlist",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function addWishlist() {}
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/user/wishlist/{product_id}",
+     *     tags={"User"},
+     *     summary="Remove product from wishlist",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Removed from wishlist",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not found in wishlist"
+     *     )
+     * )
+     */
+    public function removeWishlist() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/reviews",
+     *     tags={"Admin - Reviews"},
+     *     summary="Get all product reviews (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by review status (pending, approved, rejected)",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"pending","approved","rejected"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="query",
+     *         description="Filter by product ID",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         description="Filter by user ID",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of product reviews",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     */
+    public function adminGetReviews() {}
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/admin/reviews/{review_id}/status",
+     *     tags={"Admin - Reviews"},
+     *     summary="Approve or reject a product review (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="review_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"action"},
+     *             @OA\Property(property="action", type="string", enum={"approve","reject"}, example="approve"),
+     *             @OA\Property(property="admin_note", type="string", example="Contains inappropriate language.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Review status updated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="review", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function adminUpdateReviewStatus() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/products/{product_id}/reviews",
+     *     tags={"Product Reviews"},
+     *     summary="Get approved reviews for a product",
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of approved reviews",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     */
+    public function getProductReviews() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/products/{product_id}/reviews",
+     *     tags={"Product Reviews"},
+     *     summary="Submit a review for a product (user must be authenticated and have purchased the product)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"rating"},
+     *             @OA\Property(property="rating", type="integer", minimum=1, maximum=5, example=5),
+     *             @OA\Property(property="comment", type="string", example="Great product!")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Review submitted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Review contains inappropriate content and was rejected"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="User has not purchased this product"
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="User has already reviewed this product"
+     *     )
+     * )
+     */
+    public function submitProductReview() {}
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/products/{product_id}/reviews/{review_id}",
+     *     tags={"Product Reviews"},
+     *     summary="Update your review for a product (user must be authenticated)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="review_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"rating"},
+     *             @OA\Property(property="rating", type="integer", minimum=1, maximum=5, example=4),
+     *             @OA\Property(property="comment", type="string", example="Updated review comment.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Review updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function updateProductReview() {}
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/products/{product_id}/reviews/{review_id}",
+     *     tags={"Product Reviews"},
+     *     summary="Delete your review for a product (user must be authenticated)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="review_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Review deleted"
+     *     )
+     * )
+     */
+    public function deleteProductReview() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/reviews/{review_id}/report",
+     *     tags={"Product Reviews"},
+     *     summary="Report a product review (user must be authenticated)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="review_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"reason"},
+     *             @OA\Property(property="reason", type="string", example="Spam or inappropriate content.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Report submitted",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="You have already reported this review"
+     *     )
+     * )
+     */
+    public function reportProductReview() {}
 }

@@ -336,5 +336,293 @@
     "validation": "Hệ thống sẽ tự động validate: tồn kho, giá trị, coupon hợp lệ, v.v.",
     "total_calculation": "total = subtotal + shipping_fee + tax - discount",
     "price_calculation": "final_price = price - discount_price (nếu có discount)"
+  },
+
+  "place_order_samples": {
+    "sample_1_products_with_variants": {
+      "description": "Đặt hàng sản phẩm có variant (ví dụ: áo thun với size, màu)",
+      "request": {
+        "items": [
+          {
+            "product_id": 1,
+            "variant_id": 1,
+            "quantity": 2
+          },
+          {
+            "product_id": 2,
+            "variant_id": 3,
+            "quantity": 1
+          }
+        ],
+        "name": "Nguyễn Văn A",
+        "phone": "0123456789",
+        "address": "123 Đường ABC, Quận 1, TP.HCM",
+        "email": "nguyenvana@example.com",
+        "payment_method": "cod",
+        "subtotal": 250000,
+        "shipping_fee": 30000,
+        "tax": 5000,
+        "discount": 20000,
+        "total": 265000,
+        "notes": "Giao hàng giờ hành chính"
+      }
+    },
+
+    "sample_2_products_without_variants": {
+      "description": "Đặt hàng sản phẩm không có variant (ví dụ: sách, thực phẩm đóng gói)",
+      "request": {
+        "items": [
+          {
+            "product_id": 5,
+            "quantity": 3
+          },
+          {
+            "product_id": 6,
+            "quantity": 2
+          }
+        ],
+        "name": "Trần Thị B",
+        "phone": "0987654321",
+        "address": "456 Đường XYZ, Quận 2, TP.HCM",
+        "email": "tranthib@example.com",
+        "payment_method": "bank_transfer",
+        "subtotal": 180000,
+        "shipping_fee": 25000,
+        "tax": 3000,
+        "discount": 0,
+        "total": 208000,
+        "notes": "Giao hàng buổi chiều"
+      }
+    },
+
+    "sample_3_mixed_products": {
+      "description": "Đặt hàng hỗn hợp: sản phẩm có variant và không có variant",
+      "request": {
+        "items": [
+          {
+            "product_id": 1,
+            "variant_id": 2,
+            "quantity": 1
+          },
+          {
+            "product_id": 5,
+            "quantity": 2
+          },
+          {
+            "product_id": 3,
+            "variant_id": 5,
+            "quantity": 1
+          }
+        ],
+        "name": "Lê Văn C",
+        "phone": "0369852147",
+        "address": "789 Đường DEF, Quận 3, TP.HCM",
+        "email": "levanc@example.com",
+        "payment_method": "online_payment",
+        "coupon_id": 1,
+        "subtotal": 320000,
+        "shipping_fee": 35000,
+        "tax": 8000,
+        "discount": 25000,
+        "total": 338000,
+        "notes": "Giao hàng nhanh"
+      }
+    },
+
+    "sample_4_single_product_no_variant": {
+      "description": "Đặt hàng 1 sản phẩm không có variant",
+      "request": {
+        "items": [
+          {
+            "product_id": 7,
+            "quantity": 1
+          }
+        ],
+        "name": "Phạm Thị D",
+        "phone": "0521478963",
+        "address": "321 Đường GHI, Quận 4, TP.HCM",
+        "email": "phamthid@example.com",
+        "payment_method": "cod",
+        "subtotal": 150000,
+        "shipping_fee": 20000,
+        "tax": 2000,
+        "discount": 0,
+        "total": 172000,
+        "notes": ""
+      }
+    },
+
+    "sample_5_with_coupon": {
+      "description": "Đặt hàng với mã giảm giá",
+      "request": {
+        "items": [
+          {
+            "product_id": 2,
+            "variant_id": 4,
+            "quantity": 2
+          },
+          {
+            "product_id": 8,
+            "quantity": 1
+          }
+        ],
+        "name": "Hoàng Văn E",
+        "phone": "0147852369",
+        "address": "654 Đường JKL, Quận 5, TP.HCM",
+        "email": "hoangvane@example.com",
+        "payment_method": "online_payment",
+        "coupon_id": 2,
+        "subtotal": 450000,
+        "shipping_fee": 40000,
+        "tax": 10000,
+        "discount": 45000,
+        "total": 455000,
+        "notes": "Áp dụng mã giảm giá"
+      }
+    },
+
+    "sample_6_large_order": {
+      "description": "Đặt hàng số lượng lớn",
+      "request": {
+        "items": [
+          {
+            "product_id": 1,
+            "variant_id": 1,
+            "quantity": 5
+          },
+          {
+            "product_id": 1,
+            "variant_id": 2,
+            "quantity": 3
+          },
+          {
+            "product_id": 5,
+            "quantity": 10
+          },
+          {
+            "product_id": 6,
+            "quantity": 8
+          }
+        ],
+        "name": "Công ty ABC",
+        "phone": "02812345678",
+        "address": "123 Đường MNO, Quận 6, TP.HCM",
+        "email": "contact@abc.com",
+        "payment_method": "bank_transfer",
+        "subtotal": 1200000,
+        "shipping_fee": 50000,
+        "tax": 25000,
+        "discount": 100000,
+        "total": 1175000,
+        "notes": "Đơn hàng công ty, giao hàng giờ hành chính"
+      }
+    },
+
+    "error_samples": {
+      "sample_1_invalid_variant": {
+        "description": "Lỗi: variant_id không tồn tại",
+        "request": {
+          "items": [
+            {
+              "product_id": 1,
+              "variant_id": 999,
+              "quantity": 1
+            }
+          ],
+          "name": "Test User",
+          "phone": "0123456789",
+          "address": "Test Address",
+          "email": "test@example.com",
+          "payment_method": "cod",
+          "subtotal": 100000,
+          "total": 100000
+        },
+        "expected_error": "Biến thể sản phẩm không tồn tại."
+      },
+
+      "sample_2_insufficient_stock": {
+        "description": "Lỗi: không đủ tồn kho",
+        "request": {
+          "items": [
+            {
+              "product_id": 1,
+              "variant_id": 1,
+              "quantity": 999
+            }
+          ],
+          "name": "Test User",
+          "phone": "0123456789",
+          "address": "Test Address",
+          "email": "test@example.com",
+          "payment_method": "cod",
+          "subtotal": 100000,
+          "total": 100000
+        },
+        "expected_error": "Sản phẩm không đủ số lượng trong kho."
+      },
+
+      "sample_3_missing_product_id": {
+        "description": "Lỗi: thiếu product_id",
+        "request": {
+          "items": [
+            {
+              "variant_id": 1,
+              "quantity": 1
+            }
+          ],
+          "name": "Test User",
+          "phone": "0123456789",
+          "address": "Test Address",
+          "email": "test@example.com",
+          "payment_method": "cod",
+          "subtotal": 100000,
+          "total": 100000
+        },
+        "expected_error": "The items.0.product_id field is required."
+      },
+
+      "sample_4_invalid_coupon": {
+        "description": "Lỗi: mã giảm giá không hợp lệ",
+        "request": {
+          "items": [
+            {
+              "product_id": 1,
+              "quantity": 1
+            }
+          ],
+          "name": "Test User",
+          "phone": "0123456789",
+          "address": "Test Address",
+          "email": "test@example.com",
+          "payment_method": "cod",
+          "coupon_id": 999,
+          "subtotal": 100000,
+          "total": 100000
+        },
+        "expected_error": "Mã giảm giá không hợp lệ."
+      }
+    },
+
+    "testing_notes": {
+      "prerequisites": [
+        "Đảm bảo có dữ liệu sản phẩm trong database",
+        "Đảm bảo có dữ liệu variant cho sản phẩm có variant",
+        "Đảm bảo có dữ liệu coupon nếu test với coupon_id",
+        "Đảm bảo user đã đăng nhập và có token hợp lệ"
+      ],
+      "test_scenarios": [
+        "Test đặt hàng sản phẩm chỉ có variant",
+        "Test đặt hàng sản phẩm không có variant",
+        "Test đặt hàng hỗn hợp cả hai loại",
+        "Test với mã giảm giá",
+        "Test các trường hợp lỗi",
+        "Test hủy đơn hàng và hoàn trả tồn kho"
+      ],
+      "api_endpoint": "POST /api/v1/user/orders/place-order",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {user_token}"
+      }
+    }
   }
 } 

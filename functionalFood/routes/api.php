@@ -9,12 +9,19 @@ use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Middleware\CheckAdminToken;
+use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\UserCouponController;
+use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\ProductReviewController;
+use App\Http\Controllers\Api\ReviewReportController;
+use App\Http\Controllers\Api\ProductReviewAdminController;
+
 
 Route::prefix('v1')->group(function () {
     // Public routes
     Route::prefix('public')->group(function () {
         // Category CRUD
-        Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+        Route::apiResource('categories', CategoryController::class)->only(['index', 'store', 'show']);
         
         // Product CRUD
         Route::apiResource('products', ProductController::class)->only(['index', 'show']);
@@ -52,6 +59,21 @@ Route::prefix('v1')->group(function () {
             Route::get('/{id}', [OrderController::class, 'getOrderDetail']);
             Route::post('/{id}/cancel', [OrderController::class, 'cancelOrder']);
         });
+        // User coupon routes
+        Route::post('coupons/{coupon_id}/save', [UserCouponController::class, 'saveCoupon']);
+        Route::get('coupons', [UserCouponController::class, 'listCoupons']);
+        Route::post('coupons/{user_coupon_id}/use', [UserCouponController::class, 'useCoupon']);
+        // Wishlist routes
+        Route::get('wishlist', [WishlistController::class, 'index']);
+        Route::post('wishlist', [WishlistController::class, 'store']);
+        Route::delete('wishlist/{product_id}', [WishlistController::class, 'destroy']);
+        // Product review routes
+        Route::get('products/{product_id}/reviews', [ProductReviewController::class, 'index']);
+        Route::post('products/{product_id}/reviews', [ProductReviewController::class, 'store']);
+        Route::put('products/{product_id}/reviews/{review_id}', [ProductReviewController::class, 'update']);
+        Route::delete('products/{product_id}/reviews/{review_id}', [ProductReviewController::class, 'destroy']);
+        // Review report (user)
+        Route::post('reviews/{review_id}/report', [ReviewReportController::class, 'report']);
     });
 
     // Admin routes
@@ -116,18 +138,25 @@ Route::prefix('v1')->group(function () {
 
             // Event management
             Route::prefix('events')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Api\EventController::class, 'index']);
-                Route::post('/', [\App\Http\Controllers\Api\EventController::class, 'store']);
-                Route::get('/{id}', [\App\Http\Controllers\Api\EventController::class, 'show']);
-                Route::put('/{id}', [\App\Http\Controllers\Api\EventController::class, 'update']);
-                Route::delete('/{id}', [\App\Http\Controllers\Api\EventController::class, 'destroy']);
-                Route::post('/{id}/change-status', [\App\Http\Controllers\Api\EventController::class, 'changeStatus']);
+                Route::get('/', [EventController::class, 'index']);
+                Route::post('/', [EventController::class, 'store']);
+                Route::get('/{id}', [EventController::class, 'show']);
+                Route::put('/{id}', [EventController::class, 'update']);
+                Route::delete('/{id}', [EventController::class, 'destroy']);
+                Route::post('/{id}/change-status', [EventController::class, 'changeStatus']);
                 // Event products
-                Route::get('/{eventId}/products', [\App\Http\Controllers\Api\EventController::class, 'products']);
-                Route::post('/{eventId}/products', [\App\Http\Controllers\Api\EventController::class, 'addProduct']);
-                Route::put('/{eventId}/products/{eventProductId}', [\App\Http\Controllers\Api\EventController::class, 'updateProduct']);
-                Route::delete('/{eventId}/products/{eventProductId}', [\App\Http\Controllers\Api\EventController::class, 'removeProduct']);
+                Route::get('/{eventId}/products', [EventController::class, 'products']);
+                Route::post('/{eventId}/products', [EventController::class, 'addProduct']);
+                Route::put('/{eventId}/products/{eventProductId}', [EventController::class, 'updateProduct']);
+                Route::delete('/{eventId}/products/{eventProductId}', [EventController::class, 'removeProduct']);
             });
+
+            // Review report (admin)
+            Route::get('review-reports', [ReviewReportController::class, 'index']);
+            Route::put('review-reports/{report_id}/resolve', [ReviewReportController::class, 'resolve']);
+            // Product review (admin)
+            Route::get('reviews', [ProductReviewAdminController::class, 'index']);
+            Route::put('reviews/{review_id}/status', [ProductReviewAdminController::class, 'updateStatus']);
         });
     });
 });
