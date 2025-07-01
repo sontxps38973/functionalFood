@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->tinyInteger('rating')->unsigned();
             $table->text('comment')->nullable();
-            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

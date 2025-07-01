@@ -21,7 +21,7 @@ Route::prefix('v1')->group(function () {
     // Public routes
     Route::prefix('public')->group(function () {
         // Category CRUD
-        Route::apiResource('categories', CategoryController::class)->only(['index', 'store', 'show']);
+        Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
         
         // Product CRUD
         Route::apiResource('products', ProductController::class)->only(['index', 'show']);
