@@ -23,7 +23,6 @@ return new class extends Migration
     public function down()
     {
         Schema::table('product_reviews', function (Blueprint $table) {
-            $table->boolean('status')->default(true);
             $table->dropColumn(['admin_note', 'flagged', 'status']);
         });
     }
