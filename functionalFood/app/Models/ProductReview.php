@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\ReviewReport;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductReview extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id', 'product_id', 'rating', 'comment', 'status', 'flagged', 'admin_note'
     ];
