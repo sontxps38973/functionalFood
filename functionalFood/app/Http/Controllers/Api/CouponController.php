@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Coupon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use App\Models\CouponUser;
 
 class CouponController extends Controller
 {
@@ -357,6 +358,12 @@ class CouponController extends Controller
         $paymentMethod = $request->get('payment_method');
 
         $query = Coupon::valid();
+
+        // Loại bỏ coupon đã tặng riêng cho user (chỉ lấy coupon chưa có trong user_coupons)
+        $assignedCouponIds = CouponUser::where('user_id', $user->id)->pluck('coupon_id');
+        if ($assignedCouponIds->isNotEmpty()) {
+            $query->whereNotIn('id', $assignedCouponIds);
+        }
 
         // Filter theo điều kiện user
         $query->where(function ($q) use ($user) {

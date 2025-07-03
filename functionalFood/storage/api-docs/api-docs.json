@@ -322,7 +322,7 @@
                     "Public"
                 ],
                 "summary": "Search products",
-                "operationId": "45d83cd39500afb877d5e68ee9d108a8",
+                "operationId": "6d5552f676382b4a3580c1f1975ede1e",
                 "parameters": [
                     {
                         "name": "q",
@@ -2957,13 +2957,13 @@
                 ]
             }
         },
-        "/api/v1/products/{product_id}/reviews": {
+        "/api/v1/user/products/{product_id}/reviews": {
             "get": {
                 "tags": [
                     "Product Reviews"
                 ],
                 "summary": "Get approved reviews for a product",
-                "operationId": "328d6b0d02923f614ef15a688dc7c86a",
+                "operationId": "54cc15e70e22cf4adbf5630a43f9b3f8",
                 "parameters": [
                     {
                         "name": "product_id",
@@ -2993,8 +2993,15 @@
                             }
                         }
                     }
-                }
-            },
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products/{product_id}/reviews": {
             "post": {
                 "tags": [
                     "Product Reviews"

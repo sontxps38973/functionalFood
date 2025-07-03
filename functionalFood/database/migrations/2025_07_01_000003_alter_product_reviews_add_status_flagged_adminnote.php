@@ -18,10 +18,6 @@ return new class extends Migration
         // Cập nhật dữ liệu cũ
         DB::statement("UPDATE product_reviews SET status = 'approved' WHERE status = 1");
         DB::statement("UPDATE product_reviews SET status = 'rejected' WHERE status = 0");
-        // Xóa cột status cũ
-        Schema::table('product_reviews', function (Blueprint $table) {
-            $table->dropColumn('status');
-        });
     }
 
     public function down()

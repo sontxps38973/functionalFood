@@ -265,6 +265,33 @@ class OpenApiSpec extends Controller
      *     )
      * )
      */
+
+     public function getProductById() {
+        // This method is intentionally left empty as a placeholder for the OpenAPI spec.
+        // Actual implementation would go here to retrieve a product by its ID.
+        // Example implementation could be:
+        // return Product::find($id);
+        /**
+         * @OA\Get(
+         *     path="/api/v1/public/products/{id}",
+         *    tags={"Public"},
+         *    summary="Get product by ID",
+         *    @OA\Parameter(
+         *        name="id",
+         *       in="path",
+         *       required=true,
+         *      @OA\Schema(type="integer")
+         *     ),
+         *    @OA\Response(
+         *       response=200,
+         *      description="Product details",
+         *    @OA\JsonContent(
+         *           @OA\Property(property="data", type="object")
+         *        )
+         *    )
+         *     )
+         */
+     }
     public function searchProducts() {}
 
     /**
@@ -1498,9 +1525,10 @@ class OpenApiSpec extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/products/{product_id}/reviews",
+     *     path="/api/v1/user/products/{product_id}/reviews",
      *     tags={"Product Reviews"},
      *     summary="Get approved reviews for a product",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="product_id",
      *         in="path",

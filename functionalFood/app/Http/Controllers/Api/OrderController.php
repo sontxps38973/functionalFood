@@ -46,6 +46,16 @@ class OrderController extends Controller
         return response()->json(['message' => 'Mã không hợp lệ hoặc đã hết hạn.'], 422);
     }
 
+    // Nếu coupon là loại tặng riêng (có trong bảng user_coupons), chỉ cho phép user đã được tặng sử dụng
+    if (CouponUser::where('coupon_id', $coupon->id)->exists()) {
+        $hasCoupon = CouponUser::where('coupon_id', $coupon->id)
+            ->where('user_id', $user->id)
+            ->exists();
+        if (!$hasCoupon) {
+            return response()->json(['message' => 'Bạn không được phép sử dụng mã này.'], 422);
+        }
+    }
+
     // Kiểm tra điều kiện sử dụng
     if (!$coupon->canBeUsedByUser($user)) {
         if ($coupon->allowed_rank_ids && !in_array($user->customer_rank_id, $coupon->allowed_rank_ids)) {
