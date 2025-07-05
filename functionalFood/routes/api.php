@@ -95,13 +95,13 @@ Route::prefix('v1')->group(function () {
             
             // User management
             Route::prefix('users')->group(function () {
+                Route::get('/customer-ranks', [UserController::class, 'getCustomerRanks']);
                 Route::get('/', [UserController::class, 'index']);
                 Route::get('/stats', [UserController::class, 'getStats']);
+                Route::get('/export', [UserController::class, 'export']);
                 Route::get('/{id}', [UserController::class, 'show']);
                 Route::put('/{id}', [UserController::class, 'update']);
                 Route::delete('/{id}', [UserController::class, 'destroy']);
-                Route::get('/export', [UserController::class, 'export']);
-                Route::get('/customer-ranks', [UserController::class, 'getCustomerRanks']);
             });
             
             // Admin management

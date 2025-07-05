@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // Add other seeders here
             // Example: CategorySeeder::class,
+            CustomerRankSeeder::class,
             ProductSeeder::class,
             CategorySeeder::class,
            OrderSeeder::class,
