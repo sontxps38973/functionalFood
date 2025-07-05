@@ -36,6 +36,7 @@ Route::prefix('v1')->group(function () {
 
     // Authentication routes
     Route::prefix('auth')->group(function () {
+        Route::post('update-avatar', [UserAuthController::class, 'updateAvatar'])->middleware('auth:sanctum');
         Route::post('/register', [UserAuthController::class, 'register']);
         Route::post('/login', [UserAuthController::class, 'login']);
         Route::post('/logout', [UserAuthController::class, 'logout'])->middleware('auth:sanctum');

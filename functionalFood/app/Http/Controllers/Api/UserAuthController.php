@@ -48,6 +48,8 @@ class UserAuthController extends Controller
             'message' => 'Email hoặc mật khẩu không đúng!'
         ], 401);
     }
+    // xử lí avatar
+    $user->avatar = $user->avatar ? asset('storage/' . $user->avatar) : asset('images/default-avatar.jpg');
 
     // Tạo token đăng nhập
     $token = $user->createToken('user-token')->plainTextToken;
@@ -55,6 +57,28 @@ class UserAuthController extends Controller
     return response()->json([
         'user'  => $user,
         'token' => $token,
+    ]);
+}
+
+// Cập nhật avatar
+public function updateAvatar(Request $request)
+{
+    $user = $request->user();
+    $request->validate([
+        'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+    // Xử lý upload avatar
+    if ($request->hasFile('avatar')) {
+        $avatarPath = $request->file('avatar')->store('users', 'public');
+        $user->avatar = $avatarPath;
+        $user->save();
+    }
+    // Lấy lại thông tin người dùng sau khi cập nhật
+    $user->refresh();
+    // Trả về thông tin người dùng đã cập nhật
+    return response()->json([
+        'message' => 'Cập nhật avatar thành công.',
+        'user' => $user,
     ]);
 }
 public function logout(Request $request)
