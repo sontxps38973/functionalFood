@@ -620,4 +620,50 @@ public function adminGetOrders(Request $request)
     ]);
 }
 
+/**
+ * Lấy chi tiết đơn hàng cho admin
+ */
+public function adminGetOrderDetail($id)
+{
+    $order = Order::with(['user', 'items.product', 'items.variant', 'coupon'])->find($id);
+    if (!$order) {
+        return response()->json(['message' => 'Đơn hàng không tồn tại.'], 404);
+    }
+    return response()->json(['order' => $order]);
+}
+
+/**
+ * Cập nhật trạng thái đơn hàng cho admin
+ */
+public function updateOrderStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|string|in:pending,paid,shipped,delivered,cancelled',
+    ]);
+    $order = Order::find($id);
+    if (!$order) {
+        return response()->json(['message' => 'Đơn hàng không tồn tại.'], 404);
+    }
+    $order->status = $request->status;
+    $order->save();
+    return response()->json(['message' => 'Cập nhật trạng thái thành công.', 'order' => $order]);
+}
+
+/**
+ * Thống kê đơn hàng cho admin
+ */
+public function adminGetOrderStats(Request $request)
+{
+    $stats = [
+        'total_orders' => Order::count(),
+        'pending_orders' => Order::where('status', 'pending')->count(),
+        'paid_orders' => Order::where('status', 'paid')->count(),
+        'shipped_orders' => Order::where('status', 'shipped')->count(),
+        'delivered_orders' => Order::where('status', 'delivered')->count(),
+        'cancelled_orders' => Order::where('status', 'cancelled')->count(),
+        'total_revenue' => Order::where('status', 'paid')->sum('total'),
+    ];
+    return response()->json(['stats' => $stats]);
+}
+
 }
