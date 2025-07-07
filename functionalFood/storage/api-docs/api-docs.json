@@ -2490,34 +2490,99 @@
                 "tags": [
                     "Admin - Products"
                 ],
-                "summary": "Create a new product (Admin only)",
+                "summary": "Thêm sản phẩm mới (Admin)",
                 "operationId": "642ea8e2c62a884ec958bcbe594ae0f6",
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "name",
-                                    "category_id",
-                                    "price"
+                                    "status",
+                                    "product_type",
+                                    "price",
+                                    "category_id"
                                 ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "Green Tea"
+                                        "example": "Sữa hạt óc chó"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Thức uống bổ dưỡng từ hạt óc chó"
+                                    },
+                                    "status": {
+                                        "description": "0: ẩn, 1: hiển thị",
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ],
+                                        "example": 1
+                                    },
+                                    "product_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "simple",
+                                            "variable"
+                                        ],
+                                        "example": "simple"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50000
+                                    },
+                                    "discount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10000
+                                    },
+                                    "stock_quantity": {
+                                        "type": "integer",
+                                        "example": 100
                                     },
                                     "category_id": {
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "price": {
-                                        "type": "number",
-                                        "example": 10.5
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
                                     },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "A healthy green tea drink"
+                                    "variants": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Socola"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 30000
+                                                },
+                                                "stock": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "sku": {
+                                                    "type": "string",
+                                                    "example": "SOC-001"
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "format": "binary"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -2527,12 +2592,78 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Product created successfully",
+                        "description": "Tạo sản phẩm thành công",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Sữa hạt óc chó"
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "sua-hat-oc-cho"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Thức uống bổ dưỡng từ hạt óc chó"
+                                                },
+                                                "status": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "product_type": {
+                                                    "type": "string",
+                                                    "example": "simple"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "example": 50000
+                                                },
+                                                "discount": {
+                                                    "type": "number",
+                                                    "example": 10000
+                                                },
+                                                "stock_quantity": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "category_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "/storage/products/abcxyz.jpg"
+                                                },
+                                                "images": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "variants": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2024-07-01T10:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2024-07-01T10:00:00.000000Z"
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -2540,6 +2671,12 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "description": "Lỗi validate hoặc thiếu trường bắt buộc"
+                    },
+                    "401": {
+                        "description": "Không có hoặc sai token admin"
                     }
                 },
                 "security": [

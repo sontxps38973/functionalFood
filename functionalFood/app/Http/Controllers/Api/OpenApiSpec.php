@@ -1284,26 +1284,76 @@ class OpenApiSpec extends Controller
     /**
      * @OA\Post(
      *     path="/api/v1/admin/products",
+     *     summary="Thêm sản phẩm mới (Admin)",
      *     tags={"Admin - Products"},
-     *     summary="Create a new product (Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name","category_id","price"},
-     *             @OA\Property(property="name", type="string", example="Green Tea"),
-     *             @OA\Property(property="category_id", type="integer", example=1),
-     *             @OA\Property(property="price", type="number", example=10.5),
-     *             @OA\Property(property="description", type="string", example="A healthy green tea drink")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name","status","product_type","price","category_id"},
+     *                 @OA\Property(property="name", type="string", example="Sữa hạt óc chó"),
+     *                 @OA\Property(property="description", type="string", example="Thức uống bổ dưỡng từ hạt óc chó"),
+     *                 @OA\Property(property="status", type="integer", enum={0,1}, example=1, description="0: ẩn, 1: hiển thị"),
+     *                 @OA\Property(property="product_type", type="string", enum={"simple","variable"}, example="simple"),
+     *                 @OA\Property(property="price", type="number", format="float", example=50000),
+     *                 @OA\Property(property="discount", type="number", format="float", example=10000),
+     *                 @OA\Property(property="stock_quantity", type="integer", example=100),
+     *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(
+     *                     property="images",
+     *                     type="array",
+     *                     @OA\Items(type="string", format="binary")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="variants",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="name", type="string", example="Socola"),
+     *                         @OA\Property(property="price", type="number", format="float", example=30000),
+     *                         @OA\Property(property="stock", type="integer", example=50),
+     *                         @OA\Property(property="sku", type="string", example="SOC-001"),
+     *                         @OA\Property(property="image", type="string", format="binary")
+     *                     )
+     *                 )
+     *             )
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Product created successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="data", type="object")
+     *     responses={
+     *         @OA\Response(
+     *             response=201,
+     *             description="Tạo sản phẩm thành công",
+     *             @OA\JsonContent(
+     *                 @OA\Property(property="data", type="object",
+     *                     @OA\Property(property="id", type="integer", example=10),
+     *                     @OA\Property(property="name", type="string", example="Sữa hạt óc chó"),
+     *                     @OA\Property(property="slug", type="string", example="sua-hat-oc-cho"),
+     *                     @OA\Property(property="description", type="string", example="Thức uống bổ dưỡng từ hạt óc chó"),
+     *                     @OA\Property(property="status", type="integer", example=1),
+     *                     @OA\Property(property="product_type", type="string", example="simple"),
+     *                     @OA\Property(property="price", type="number", example=50000),
+     *                     @OA\Property(property="discount", type="number", example=10000),
+     *                     @OA\Property(property="stock_quantity", type="integer", example=100),
+     *                     @OA\Property(property="category_id", type="integer", example=1),
+     *                     @OA\Property(property="image", type="string", example="/storage/products/abcxyz.jpg"),
+     *                     @OA\Property(property="images", type="array", @OA\Items(type="object")),
+     *                     @OA\Property(property="variants", type="array", @OA\Items(type="object")),
+     *                     @OA\Property(property="created_at", type="string", example="2024-07-01T10:00:00.000000Z"),
+     *                     @OA\Property(property="updated_at", type="string", example="2024-07-01T10:00:00.000000Z")
+     *                 )
+     *             )
+     *         ),
+     *         @OA\Response(
+     *             response=422,
+     *             description="Lỗi validate hoặc thiếu trường bắt buộc"
+     *         ),
+     *         @OA\Response(
+     *             response=401,
+     *             description="Không có hoặc sai token admin"
      *         )
-     *     )
+     *     }
      * )
      */
     public function adminCreateProduct() {}
