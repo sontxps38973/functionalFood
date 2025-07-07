@@ -583,4 +583,41 @@ public function getOrderStats(Request $request)
     return response()->json(['stats' => $stats]);
 }
 
+/**
+ * Lấy danh sách đơn hàng cho admin
+ */
+public function adminGetOrders(Request $request)
+{
+    $query = Order::with(['user', 'items.product', 'items.variant', 'coupon'])
+        ->orderBy('created_at', 'desc');
+
+    // Lọc theo trạng thái nếu có
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+    // Lọc theo user nếu có
+    if ($request->filled('user_id')) {
+        $query->where('user_id', $request->user_id);
+    }
+    // Lọc theo ngày tạo nếu có
+    if ($request->filled('from_date')) {
+        $query->whereDate('created_at', '>=', $request->from_date);
+    }
+    if ($request->filled('to_date')) {
+        $query->whereDate('created_at', '<=', $request->to_date);
+    }
+
+    $orders = $query->paginate($request->input('per_page', 20));
+
+    return response()->json([
+        'orders' => $orders->items(),
+        'pagination' => [
+            'current_page' => $orders->currentPage(),
+            'last_page' => $orders->lastPage(),
+            'per_page' => $orders->perPage(),
+            'total' => $orders->total(),
+        ]
+    ]);
+}
+
 }
