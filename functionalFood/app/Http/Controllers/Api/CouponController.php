@@ -359,53 +359,57 @@ class CouponController extends Controller
 
         $query = Coupon::valid();
 
-        // Loại bỏ coupon đã tặng riêng cho user (chỉ lấy coupon chưa có trong user_coupons)
-        $assignedCouponIds = CouponUser::where('user_id', $user->id)->pluck('coupon_id');
-        if ($assignedCouponIds->isNotEmpty()) {
-            $query->whereNotIn('id', $assignedCouponIds);
-        }
+        // Nếu có user đăng nhập mới filter theo user
+        if ($user) {
+            // Loại bỏ coupon đã tặng riêng cho user (chỉ lấy coupon chưa có trong user_coupons)
+            $assignedCouponIds = CouponUser::where('user_id', $user->id)->pluck('coupon_id');
+            if ($assignedCouponIds->isNotEmpty()) {
+                $query->whereNotIn('id', $assignedCouponIds);
+            }
 
-        // Filter theo điều kiện user
-        $query->where(function ($q) use ($user) {
-            $q->whereNull('allowed_rank_ids')
-              ->orWhereJsonContains('allowed_rank_ids', $user->customer_rank_id);
-        });
-
-        // Filter theo giá trị đơn hàng
-        $orderValue = $subtotal + $shippingFee;
-        $query->where(function ($q) use ($orderValue) {
-            $q->whereNull('min_order_value')
-              ->orWhere('min_order_value', '<=', $orderValue);
-        });
-
-        $query->where(function ($q) use ($orderValue) {
-            $q->whereNull('max_order_value')
-              ->orWhere('max_order_value', '>=', $orderValue);
-        });
-
-        // Filter theo phương thức thanh toán
-        if ($paymentMethod) {
-            $query->where(function ($q) use ($paymentMethod) {
-                $q->whereNull('allowed_payment_methods')
-                  ->orWhereJsonContains('allowed_payment_methods', $paymentMethod);
+            // Filter theo điều kiện user
+            $query->where(function ($q) use ($user) {
+                $q->whereNull('allowed_rank_ids')
+                  ->orWhereJsonContains('allowed_rank_ids', $user->customer_rank_id);
             });
-        }
 
-        // Loại bỏ coupon đã sử dụng (nếu only_once_per_user)
-        $usedCouponIds = $user->coupons()->where('only_once_per_user', true)->pluck('coupons.id');
-        if ($usedCouponIds->isNotEmpty()) {
-            $query->whereNotIn('id', $usedCouponIds);
-        }
+            // Filter theo giá trị đơn hàng
+            $orderValue = $subtotal + $shippingFee;
+            $query->where(function ($q) use ($orderValue) {
+                $q->whereNull('min_order_value')
+                  ->orWhere('min_order_value', '<=', $orderValue);
+            });
 
-        // Loại bỏ coupon cho đơn hàng đầu tiên (nếu user đã có đơn hàng)
-        if ($user->orders()->exists()) {
-            $query->where('first_time_only', false);
+            $query->where(function ($q) use ($orderValue) {
+                $q->whereNull('max_order_value')
+                  ->orWhere('max_order_value', '>=', $orderValue);
+            });
+
+            // Filter theo phương thức thanh toán
+            if ($paymentMethod) {
+                $query->where(function ($q) use ($paymentMethod) {
+                    $q->whereNull('allowed_payment_methods')
+                      ->orWhereJsonContains('allowed_payment_methods', $paymentMethod);
+                });
+            }
+
+            // Loại bỏ coupon đã sử dụng (nếu only_once_per_user)
+            $usedCouponIds = $user->coupons()->where('only_once_per_user', true)->pluck('coupons.id');
+            if ($usedCouponIds->isNotEmpty()) {
+                $query->whereNotIn('id', $usedCouponIds);
+            }
+
+            // Loại bỏ coupon cho đơn hàng đầu tiên (nếu user đã có đơn hàng)
+            if ($user->orders()->exists()) {
+                $query->where('first_time_only', false);
+            }
         }
 
         $coupons = $query->get();
 
         return response()->json([
             'coupons' => $coupons->map(function ($coupon) use ($subtotal, $shippingFee) {
+                if (!$coupon) return null;
                 $productDiscount = 0;
                 $shippingDiscount = 0;
 
@@ -435,7 +439,7 @@ class CouponController extends Controller
                     'total_discount' => $productDiscount + $shippingDiscount,
                     'free_shipping' => $coupon->free_shipping,
                 ];
-            })
+            })->filter()->values()
         ]);
     }
 }

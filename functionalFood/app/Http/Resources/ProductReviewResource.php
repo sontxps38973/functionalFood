@@ -15,6 +15,14 @@ class ProductReviewResource extends JsonResource
             'comment' => $this->comment,
             'status' => $this->status,
             'created_at' => $this->created_at,
+            'images' => $this->whenLoaded('images', function () {
+                return $this->images->map(function ($img) {
+                    return [
+                        'id' => $img->id,
+                        'image_path' => $img->image_path,
+                    ];
+                });
+            }, []),
         ];
     }
 }

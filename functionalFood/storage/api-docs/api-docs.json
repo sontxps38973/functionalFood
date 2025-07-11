@@ -3136,15 +3136,13 @@
                         "bearerAuth": []
                     }
                 ]
-            }
-        },
-        "/api/v1/products/{product_id}/reviews": {
+            },
             "post": {
                 "tags": [
                     "Product Reviews"
                 ],
                 "summary": "Submit a review for a product (user must be authenticated and have purchased the product)",
-                "operationId": "eeca068d8f0bcf82028bbc12b5ff8e75",
+                "operationId": "dc422d996d221f297dfdac708417ef53",
                 "parameters": [
                     {
                         "name": "product_id",
@@ -3158,7 +3156,7 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "rating"
@@ -3173,6 +3171,14 @@
                                     "comment": {
                                         "type": "string",
                                         "example": "Great product!"
+                                    },
+                                    "images": {
+                                        "description": "Upload multiple images",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -3191,6 +3197,40 @@
                                             "type": "string"
                                         },
                                         "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "user_id": {
+                                                    "type": "integer"
+                                                },
+                                                "rating": {
+                                                    "type": "integer"
+                                                },
+                                                "comment": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "images": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "image_path": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -3216,13 +3256,13 @@
                 ]
             }
         },
-        "/api/v1/products/{product_id}/reviews/{review_id}": {
+        "/api/v1/user/products/{product_id}/reviews/{review_id}": {
             "put": {
                 "tags": [
                     "Product Reviews"
                 ],
                 "summary": "Update your review for a product (user must be authenticated)",
-                "operationId": "18d74abfc23286e306f8406beac0687a",
+                "operationId": "985b64d93d6602e72a26a14bff2b9d0e",
                 "parameters": [
                     {
                         "name": "product_id",
@@ -3244,7 +3284,7 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "rating"
@@ -3259,6 +3299,14 @@
                                     "comment": {
                                         "type": "string",
                                         "example": "Updated review comment."
+                                    },
+                                    "images": {
+                                        "description": "Upload multiple images",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -3277,6 +3325,40 @@
                                             "type": "string"
                                         },
                                         "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "user_id": {
+                                                    "type": "integer"
+                                                },
+                                                "rating": {
+                                                    "type": "integer"
+                                                },
+                                                "comment": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "images": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "image_path": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -3297,7 +3379,7 @@
                     "Product Reviews"
                 ],
                 "summary": "Delete your review for a product (user must be authenticated)",
-                "operationId": "ccf70480f0bd7c67bfa5b7a703de6ffe",
+                "operationId": "6e6a9997397ef3915c48aaf5dae39962",
                 "parameters": [
                     {
                         "name": "product_id",

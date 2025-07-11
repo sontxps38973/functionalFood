@@ -1598,7 +1598,7 @@ class OpenApiSpec extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/v1/products/{product_id}/reviews",
+     *     path="/api/v1/user/products/{product_id}/reviews",
      *     tags={"Product Reviews"},
      *     summary="Submit a review for a product (user must be authenticated and have purchased the product)",
      *     security={{"bearerAuth":{}}},
@@ -1610,10 +1610,19 @@ class OpenApiSpec extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"rating"},
-     *             @OA\Property(property="rating", type="integer", minimum=1, maximum=5, example=5),
-     *             @OA\Property(property="comment", type="string", example="Great product!")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"rating"},
+     *                 @OA\Property(property="rating", type="integer", minimum=1, maximum=5, example=5),
+     *                 @OA\Property(property="comment", type="string", example="Great product!"),
+     *                 @OA\Property(
+     *                     property="images",
+     *                     type="array",
+     *                     @OA\Items(type="string", format="binary"),
+     *                     description="Upload multiple images"
+     *                 )
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -1621,7 +1630,18 @@ class OpenApiSpec extends Controller
      *         description="Review submitted successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="data", type="object")
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="user_id", type="integer"),
+     *                 @OA\Property(property="rating", type="integer"),
+     *                 @OA\Property(property="comment", type="string"),
+     *                 @OA\Property(property="status", type="string"),
+     *                 @OA\Property(property="created_at", type="string"),
+     *                 @OA\Property(property="images", type="array", @OA\Items(
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="image_path", type="string")
+     *                 ))
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -1642,7 +1662,7 @@ class OpenApiSpec extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/v1/products/{product_id}/reviews/{review_id}",
+     *     path="/api/v1/user/products/{product_id}/reviews/{review_id}",
      *     tags={"Product Reviews"},
      *     summary="Update your review for a product (user must be authenticated)",
      *     security={{"bearerAuth":{}}},
@@ -1660,10 +1680,19 @@ class OpenApiSpec extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"rating"},
-     *             @OA\Property(property="rating", type="integer", minimum=1, maximum=5, example=4),
-     *             @OA\Property(property="comment", type="string", example="Updated review comment.")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"rating"},
+     *                 @OA\Property(property="rating", type="integer", minimum=1, maximum=5, example=4),
+     *                 @OA\Property(property="comment", type="string", example="Updated review comment."),
+     *                 @OA\Property(
+     *                     property="images",
+     *                     type="array",
+     *                     @OA\Items(type="string", format="binary"),
+     *                     description="Upload multiple images"
+     *                 )
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -1671,7 +1700,18 @@ class OpenApiSpec extends Controller
      *         description="Review updated successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="data", type="object")
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="user_id", type="integer"),
+     *                 @OA\Property(property="rating", type="integer"),
+     *                 @OA\Property(property="comment", type="string"),
+     *                 @OA\Property(property="status", type="string"),
+     *                 @OA\Property(property="created_at", type="string"),
+     *                 @OA\Property(property="images", type="array", @OA\Items(
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="image_path", type="string")
+     *                 ))
+     *             )
      *         )
      *     )
      * )
@@ -1680,7 +1720,7 @@ class OpenApiSpec extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/v1/products/{product_id}/reviews/{review_id}",
+     *     path="/api/v1/user/products/{product_id}/reviews/{review_id}",
      *     tags={"Product Reviews"},
      *     summary="Delete your review for a product (user must be authenticated)",
      *     security={{"bearerAuth":{}}},

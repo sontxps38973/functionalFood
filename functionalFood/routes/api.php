@@ -158,6 +158,11 @@ Route::prefix('v1')->group(function () {
             // Product review (admin)
             Route::get('reviews', [ProductReviewAdminController::class, 'index']);
             Route::put('reviews/{review_id}/status', [ProductReviewAdminController::class, 'updateStatus']);
+            // Banned words management (admin)
+            Route::get('banned-words', [\App\Http\Controllers\Api\BannedWordController::class, 'index']);
+            Route::post('banned-words', [\App\Http\Controllers\Api\BannedWordController::class, 'store']);
+            Route::put('banned-words/{id}', [\App\Http\Controllers\Api\BannedWordController::class, 'update']);
+            Route::delete('banned-words/{id}', [\App\Http\Controllers\Api\BannedWordController::class, 'destroy']);
         });
     });
 });

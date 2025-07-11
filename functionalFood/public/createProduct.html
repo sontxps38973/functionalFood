@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm sản phẩm mới (Admin)</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; margin: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 4px 24px #0002; padding: 36px 32px 28px 32px; }
+        h2 { text-align: center; color: #2d3a4a; margin-bottom: 24px; }
+        label { display: block; margin-top: 18px; font-weight: 500; color: #34495e; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 6px; border-radius: 6px; border: 1px solid #d0d7de; font-size: 15px; background: #f9fafb; transition: border 0.2s; }
+        input:focus, select:focus, textarea:focus { border: 1.5px solid #3498db; outline: none; background: #fff; }
+        input[type="file"] { padding: 0; background: none; }
+        button { margin-top: 28px; width: 100%; padding: 13px; background: #3498db; color: #fff; border: none; border-radius: 6px; font-size: 17px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        button:disabled { background: #aaa; }
+        button:hover:not(:disabled) { background: #217dbb; }
+        .msg { margin-top: 18px; text-align: center; font-size: 15px; }
+        .msg.success { color: #27ae60; }
+        .msg.error { color: #c0392b; }
+        .variants-section { background: #f6f8fa; border-radius: 8px; padding: 18px 14px 10px 14px; margin-top: 18px; }
+        .variants-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        .variants-table th, .variants-table td { padding: 7px 6px; text-align: left; font-size: 14px; }
+        .variants-table th { color: #888; font-weight: 600; background: #f0f2f5; }
+        .variants-table td { background: #fff; border-bottom: 1px solid #f0f2f5; }
+        .variant-input { width: 100%; box-sizing: border-box; border-radius: 4px; border: 1px solid #d0d7de; padding: 7px; font-size: 14px; background: #f9fafb; }
+        .variant-input[type="file"] { padding: 0; background: none; }
+        .remove-variant { background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 15px; transition: background 0.2s; }
+        .remove-variant:hover { background: #c0392b; }
+        .add-variant-btn { background: #2ecc71; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; margin-top: 8px; cursor: pointer; font-size: 15px; display: block; margin-left: auto; transition: background 0.2s; }
+        .add-variant-btn:hover { background: #219150; }
+        @media (max-width: 700px) {
+            .container { padding: 18px 4vw; }
+            .variants-table th, .variants-table td { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Thêm sản phẩm mới</h2>
+    <form id="productForm">
+        <label>Tên sản phẩm *</label>
+        <input type="text" name="name" required>
+
+        <label>Mô tả</label>
+        <textarea name="description" rows="2"></textarea>
+
+        <label>Trạng thái *</label>
+        <select name="status" required>
+            <option value="1">Hiển thị</option>
+            <option value="0">Ẩn</option>
+        </select>
+
+        <label>Loại sản phẩm *</label>
+        <select name="product_type" id="product_type" required>
+            <option value="simple">Đơn</option>
+            <option value="variable">Có biến thể</option>
+        </select>
+
+        <label>Giá *</label>
+        <input type="number" name="price" min="0" required>
+
+        <label>Giảm giá</label>
+        <input type="number" name="discount" min="0">
+
+        <label>Số lượng tồn kho</label>
+        <input type="number" name="stock_quantity" min="0">
+
+        <label>ID danh mục *</label>
+        <input type="number" name="category_id" min="1" required>
+
+        <label>Ảnh sản phẩm (có thể chọn nhiều)</label>
+        <input type="file" name="images[]" multiple accept="image/*">
+
+        <div id="variantsSection" class="variants-section" style="display:none;">
+            <table class="variants-table">
+                <thead>
+                    <tr>
+                        <th>Tên biến thể *</th>
+                        <th>Giá *</th>
+                        <th>Tồn kho</th>
+                        <th>SKU</th>
+                        <th>Ảnh</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="variantsList"></tbody>
+            </table>
+            <button type="button" class="add-variant-btn" onclick="addVariant()">+ Thêm biến thể</button>
+        </div>
+
+        <button type="submit">Thêm sản phẩm</button>
+        <div class="msg" id="msg"></div>
+    </form>
+</div>
+<script>
+const form = document.getElementById('productForm');
+const msg = document.getElementById('msg');
+const productType = document.getElementById('product_type');
+const variantsSection = document.getElementById('variantsSection');
+const variantsList = document.getElementById('variantsList');
+
+productType.onchange = function() {
+    variantsSection.style.display = (this.value === 'variable') ? 'block' : 'none';
+};
+
+function addVariant(data = {}) {
+    const idx = document.querySelectorAll('.variant-row').length;
+    const tr = document.createElement('tr');
+    tr.className = 'variant-row';
+    tr.innerHTML = `
+        <td><input class="variant-input" type="text" name="variants[${idx}][name]" placeholder="Tên" required></td>
+        <td><input class="variant-input" type="number" name="variants[${idx}][price]" placeholder="Giá" min="0" required></td>
+        <td><input class="variant-input" type="number" name="variants[${idx}][stock]" placeholder="Tồn kho" min="0"></td>
+        <td><input class="variant-input" type="text" name="variants[${idx}][sku]" placeholder="SKU"></td>
+        <td><input class="variant-input" type="file" name="variants[${idx}][image]" accept="image/*"></td>
+        <td><button type="button" class="remove-variant" title="Xóa" onclick="this.closest('tr').remove()">✕</button></td>
+    `;
+    // Gán giá trị nếu có (dùng cho edit sau này)
+    if (data.name) tr.querySelector('[name^="variants"][name$="[name]"]').value = data.name;
+    if (data.price) tr.querySelector('[name^="variants"][name$="[price]"]').value = data.price;
+    if (data.stock) tr.querySelector('[name^="variants"][name$="[stock]"]').value = data.stock;
+    if (data.sku) tr.querySelector('[name^="variants"][name$="[sku]"]').value = data.sku;
+    variantsList.appendChild(tr);
+}
+
+form.onsubmit = async function(e) {
+    e.preventDefault();
+    msg.textContent = '';
+    msg.className = 'msg';
+    // Validate biến thể nếu có
+    if (productType.value === 'variable' && variantsList.children.length === 0) {
+        msg.textContent = 'Bạn phải thêm ít nhất 1 biến thể!';
+        msg.classList.add('error');
+        return;
+    }
+    const formData = new FormData(form);
+    // Nhập token admin ở đây (hoặc lấy từ localStorage)
+    const token = prompt('Nhập Bearer Token (admin):');
+    if (!token) {
+        msg.textContent = 'Bạn cần nhập token admin!';
+        msg.classList.add('error');
+        return;
+    }
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/v1/admin/products', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+            msg.textContent = 'Thêm sản phẩm thành công!';
+            msg.classList.add('success');
+            form.reset();
+            variantsList.innerHTML = '';
+            variantsSection.style.display = 'none';
+        } else {
+            msg.textContent = data.message || 'Có lỗi xảy ra!';
+            msg.classList.add('error');
+        }
+    } catch (err) {
+        msg.textContent = 'Lỗi kết nối máy chủ!';
+        msg.classList.add('error');
+    }
+};
+</script>
+</body>
+</html> 

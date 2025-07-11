@@ -8,6 +8,9 @@ use App\Models\ProductReview;
 use App\Models\Product;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Models\ProductReviewImage;
+use App\Models\BannedWord;
 
 class ProductReviewController extends Controller
 {
@@ -40,13 +43,14 @@ class ProductReviewController extends Controller
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string',
+            'images.*' => 'nullable|image|max:2048',
         ]);
         // Kiểm duyệt từ khóa cấm
-        $blacklist = ['badword1', 'badword2', 'http://', 'https://', 'spamword'];
+        $blacklist = BannedWord::where('is_active', true)->pluck('word')->toArray();
         $comment = strtolower($request->input('comment', ''));
         $isFlagged = false;
         foreach ($blacklist as $word) {
-            if (strpos($comment, $word) !== false) {
+            if (strpos($comment, strtolower($word)) !== false) {
                 $isFlagged = true;
                 break;
             }
@@ -60,7 +64,22 @@ class ProductReviewController extends Controller
             'status' => $status,
             'flagged' => $isFlagged,
         ]);
-        return response()->json(['message' => $isFlagged ? 'Your review contains inappropriate content and was rejected.' : 'Review submitted successfully.', 'data' => $review], $isFlagged ? 422 : 201);
+        // Lưu nhiều ảnh
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $path = $file->store('public/review_images');
+                $url = Storage::url($path);
+                ProductReviewImage::create([
+                    'product_review_id' => $review->id,
+                    'image_path' => $url,
+                ]);
+            }
+        }
+        $review->load('images');
+        return response()->json([
+            'message' => $isFlagged ? 'Your review contains inappropriate content and was rejected.' : 'Review submitted successfully.',
+            'data' => $review
+        ], $isFlagged ? 422 : 201);
     }
 
     // Sửa đánh giá của mình
@@ -71,13 +90,14 @@ class ProductReviewController extends Controller
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string',
+            'images.*' => 'nullable|image|max:2048',
         ]);
         // Kiểm duyệt lại từ khóa cấm
-        $blacklist = ['badword1', 'badword2', 'http://', 'https://', 'spamword'];
+        $blacklist = BannedWord::where('is_active', true)->pluck('word')->toArray();
         $comment = strtolower($request->input('comment', ''));
         $isFlagged = false;
         foreach ($blacklist as $word) {
-            if (strpos($comment, $word) !== false) {
+            if (strpos($comment, strtolower($word)) !== false) {
                 $isFlagged = true;
                 break;
             }
@@ -89,7 +109,23 @@ class ProductReviewController extends Controller
             'status' => $status,
             'flagged' => $isFlagged,
         ]);
-        return response()->json(['message' => $isFlagged ? 'Your review contains inappropriate content and was rejected.' : 'Review updated successfully.', 'data' => $review]);
+        // Nếu có ảnh mới, xóa ảnh cũ và lưu lại ảnh mới
+        if ($request->hasFile('images')) {
+            $review->images()->delete();
+            foreach ($request->file('images') as $file) {
+                $path = $file->store('public/review_images');
+                $url = Storage::url($path);
+                ProductReviewImage::create([
+                    'product_review_id' => $review->id,
+                    'image_path' => $url,
+                ]);
+            }
+        }
+        $review->load('images');
+        return response()->json([
+            'message' => $isFlagged ? 'Your review contains inappropriate content and was rejected.' : 'Review updated successfully.',
+            'data' => $review
+        ]);
     }
 
     // Xóa đánh giá của mình
