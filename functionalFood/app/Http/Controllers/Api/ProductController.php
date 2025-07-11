@@ -39,18 +39,15 @@ public function store(StoreProductRequest $request)
     if ($request->hasFile('images')) {
         $isFirst = true;
         foreach ($request->file('images') as $file) {
-            $path = $file->store('public/products');
-            $url = Storage::url($path);
-
+            $path = $file->store('products', 'public');
             $product->images()->create([
-                'image_path' => $url,
+                'image_path' => $path,
                 'alt_text'   => $product->name,
                 'is_main'    => $isFirst,
             ]);
-
             // Gán ảnh đầu tiên làm ảnh đại diện cho bảng products
             if ($isFirst) {
-                $product->image = $url;
+                $product->image = $path;
                 $product->save();
                 $isFirst = false;
             }
