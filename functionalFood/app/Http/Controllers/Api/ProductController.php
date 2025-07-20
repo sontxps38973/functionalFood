@@ -114,6 +114,11 @@ public function show(Product $product)
         $data = $request->validated();
         $data['slug'] = Str::slug($data['name']);
 
+        // Đảm bảo status là boolean
+        if (isset($data['status'])) {
+            $data['status'] = (int) $data['status'];
+        }
+
         // Cập nhật thông tin cơ bản sản phẩm
         $product->update($data);
 

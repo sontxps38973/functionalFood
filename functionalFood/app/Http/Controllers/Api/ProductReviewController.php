@@ -18,6 +18,8 @@ class ProductReviewController extends Controller
     public function index($product_id)
     {
         $reviews = ProductReview::with('user')
+            ->with('images')
+            ->where('product_id', $product_id)
             ->where('product_id', $product_id)
             ->where('status', 'approved')
             ->orderByDesc('id')

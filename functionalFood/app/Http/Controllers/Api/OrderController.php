@@ -499,8 +499,8 @@ public function cancelOrder(Request $request, $orderId)
         return response()->json(['message' => 'Đơn hàng không tồn tại.'], 404);
     }
 
-    // Chỉ cho phép hủy đơn hàng có trạng thái pending hoặc paid
-    if (!in_array($order->status, ['pending', 'paid'])) {
+    // Chỉ cho phép hủy đơn hàng có trạng thái pending, confirmed, processing
+    if (!in_array($order->status, ['pending', 'confirmed', 'processing'])) {
         return response()->json(['message' => 'Không thể hủy đơn hàng ở trạng thái này.'], 422);
     }
 
@@ -573,11 +573,11 @@ public function getOrderStats(Request $request)
     $stats = [
         'total_orders' => $user->orders()->count(),
         'pending_orders' => $user->orders()->where('status', 'pending')->count(),
-        'paid_orders' => $user->orders()->where('status', 'paid')->count(),
+        'paid_orders' => $user->orders()->where('payment_status', 'paid')->count(),
         'shipped_orders' => $user->orders()->where('status', 'shipped')->count(),
         'delivered_orders' => $user->orders()->where('status', 'delivered')->count(),
         'cancelled_orders' => $user->orders()->where('status', 'cancelled')->count(),
-        'total_spent' => $user->orders()->where('status', 'paid')->sum('total'),
+        'total_spent' => $user->orders()->where('payment_status', 'paid')->sum('total'),
     ];
 
     return response()->json(['stats' => $stats]);
@@ -638,7 +638,7 @@ public function adminGetOrderDetail($id)
 public function updateOrderStatus(Request $request, $id)
 {
     $request->validate([
-        'status' => 'required|string|in:pending,paid,shipped,delivered,cancelled',
+        'status' => 'required|string|in:pending,confirmed,processing,shipped,delivered,cancelled,refunded',
     ]);
     $order = Order::find($id);
     if (!$order) {
@@ -657,11 +657,11 @@ public function adminGetOrderStats(Request $request)
     $stats = [
         'total_orders' => Order::count(),
         'pending_orders' => Order::where('status', 'pending')->count(),
-        'paid_orders' => Order::where('status', 'paid')->count(),
+        'paid_orders' => Order::where('payment_status', 'paid')->count(),
         'shipped_orders' => Order::where('status', 'shipped')->count(),
         'delivered_orders' => Order::where('status', 'delivered')->count(),
         'cancelled_orders' => Order::where('status', 'cancelled')->count(),
-        'total_revenue' => Order::where('status', 'paid')->sum('total'),
+        'total_revenue' => Order::where('payment_status', 'paid')->sum('total'),
     ];
     return response()->json(['stats' => $stats]);
 }
