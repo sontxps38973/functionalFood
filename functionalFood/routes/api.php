@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\ReviewReportController;
 use App\Http\Controllers\Api\ProductReviewAdminController;
+use App\Http\Controllers\Api\StatsController;
 
 
 Route::prefix('v1')->group(function () {
@@ -150,6 +151,20 @@ Route::prefix('v1')->group(function () {
                 Route::post('/{eventId}/products', [EventController::class, 'addProduct']);
                 Route::put('/{eventId}/products/{eventProductId}', [EventController::class, 'updateProduct']);
                 Route::delete('/{eventId}/products/{eventProductId}', [EventController::class, 'removeProduct']);
+            });
+
+            Route::prefix('statistics')->group(function () {
+                Route::get('/overview', [StatsController::class, 'overview']);
+                Route::get('/revenue', [StatsController::class, 'revenue']);
+                Route::get('/orders-by-status', [StatsController::class, 'ordersByStatus']);
+                Route::get('/top-products', [StatsController::class, 'topProducts']);
+                Route::get('/new-users', [StatsController::class, 'newUsers']);
+                Route::get('/visits', [StatsController::class, 'visits']);
+                Route::get('/revenue-by-category', [StatsController::class, 'revenueByCategory']);
+                Route::get('/top-customers', [StatsController::class, 'topCustomers']);
+                Route::get('/revenue-summary', [StatsController::class, 'revenueSummary']);
+                Route::get('/slow-products', [StatsController::class, 'slowProducts']);
+
             });
 
             // Review report (admin)
