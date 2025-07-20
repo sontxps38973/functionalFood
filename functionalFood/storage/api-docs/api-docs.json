@@ -3475,6 +3475,604 @@
                     }
                 ]
             }
+        },
+        "/api/v1/admin/statistics/overview": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get dashboard overview statistics (Admin only)",
+                "operationId": "79c38e7bd4f7f63d8336da933f226af0",
+                "responses": {
+                    "200": {
+                        "description": "Overview statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_revenue": {
+                                            "type": "number",
+                                            "example": 1000000
+                                        },
+                                        "orders_today": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "orders_this_week": {
+                                            "type": "integer",
+                                            "example": 50
+                                        },
+                                        "orders_this_month": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "products_sold": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "total_users": {
+                                            "type": "integer",
+                                            "example": 1000
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/statistics/revenue": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get revenue statistics by date range (Admin only)",
+                "operationId": "b4ab636796c998ca18af83e553df18a4",
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "End date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Revenue statistics by date",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "date": {
+                                                "type": "string",
+                                                "example": "2024-07-01"
+                                            },
+                                            "revenue": {
+                                                "type": "number",
+                                                "example": 100000
+                                            },
+                                            "orders": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "total": {
+                                                            "type": "number"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/statistics/revenue-summary": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get revenue summary by type (today/week/month/year)",
+                "operationId": "e9798c5e8a2ff4f00e1720d843903c9c",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Summary type (today, week, month, year)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "today",
+                                "week",
+                                "month",
+                                "year"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Revenue summary",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "date": {
+                                                "type": "string"
+                                            },
+                                            "revenue": {
+                                                "type": "number"
+                                            },
+                                            "orders": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "order_number": {
+                                                            "type": "string"
+                                                        },
+                                                        "customer": {
+                                                            "type": "string"
+                                                        },
+                                                        "total": {
+                                                            "type": "number"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/statistics/orders-by-status": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get order count by status (Admin only)",
+                "operationId": "f2791a2aa76bf682021d968cd1410cd3",
+                "responses": {
+                    "200": {
+                        "description": "Order count by status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "pending": {
+                                            "type": "integer"
+                                        },
+                                        "confirmed": {
+                                            "type": "integer"
+                                        },
+                                        "processing": {
+                                            "type": "integer"
+                                        },
+                                        "shipped": {
+                                            "type": "integer"
+                                        },
+                                        "delivered": {
+                                            "type": "integer"
+                                        },
+                                        "cancelled": {
+                                            "type": "integer"
+                                        },
+                                        "refunded": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/statistics/top-products": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get top selling products (Admin only)",
+                "operationId": "8f32d9f917942e859a372583c9e17392",
+                "responses": {
+                    "200": {
+                        "description": "Top selling products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "product_id": {
+                                                "type": "integer"
+                                            },
+                                            "total_sold": {
+                                                "type": "integer"
+                                            },
+                                            "product": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "image": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/statistics/slow-products": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get slow selling products (Admin only)",
+                "operationId": "388a0d3371a7537c32dd2b51028cfc8c",
+                "responses": {
+                    "200": {
+                        "description": "Slow selling products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "product_id": {
+                                                "type": "integer"
+                                            },
+                                            "total_sold": {
+                                                "type": "integer"
+                                            },
+                                            "product": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "image": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/statistics/new-users": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get new registered users (Admin only)",
+                "operationId": "7601cab96daad01b8487307b72982aad",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Type of period (week, month)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "week",
+                                "month"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New users statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "users": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/statistics/revenue-by-category": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get revenue by product category (Admin only)",
+                "operationId": "0e02c377a65a636afb580f0fbb098841",
+                "responses": {
+                    "200": {
+                        "description": "Revenue by category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "revenue": {
+                                                "type": "number"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/statistics/top-customers": {
+            "get": {
+                "tags": [
+                    "Admin - Stats"
+                ],
+                "summary": "Get top customers by spending (Admin only)",
+                "operationId": "372d6810ffa78a747f66cfd4be070cdd",
+                "responses": {
+                    "200": {
+                        "description": "Top customers",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "user_id": {
+                                                "type": "integer"
+                                            },
+                                            "orders_count": {
+                                                "type": "integer"
+                                            },
+                                            "total_spent": {
+                                                "type": "number"
+                                            },
+                                            "user": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/change-password": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Change password for authenticated user",
+                "operationId": "656dd5eed8be674bdd86eb66e44ad573",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "new_password",
+                                    "new_password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "example": "oldpass123"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "example": "newpass456"
+                                    },
+                                    "new_password_confirmation": {
+                                        "type": "string",
+                                        "example": "newpass456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Đổi mật khẩu thành công."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or wrong current password",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mật khẩu hiện tại không đúng."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -3538,6 +4136,10 @@
         {
             "name": "Product Reviews",
             "description": "Endpoints for product reviews"
+        },
+        {
+            "name": "Admin - Stats",
+            "description": "Admin - Stats"
         }
     ]
 }

@@ -263,4 +263,29 @@ class UserController extends Controller
             'total' => $exportData->count()
         ]);
     }
+
+    /**
+     * Đổi mật khẩu cho user
+     */
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+    
+        // Validate dữ liệu đầu vào
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+    
+        // Kiểm tra mật khẩu hiện tại có đúng không
+        if (!Hash::check($request->current_password, (string)$user->password)) {
+            return response()->json(['message' => 'Mật khẩu hiện tại không đúng.'], 401);
+        }
+    
+        // Cập nhật mật khẩu mới
+        $user->password = $request->new_password;
+        $user->save();
+    
+        return response()->json(['message' => 'Đổi mật khẩu thành công.'], 200);
+    }
 } 

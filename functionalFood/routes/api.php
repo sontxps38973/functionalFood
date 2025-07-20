@@ -76,6 +76,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('products/{product_id}/reviews/{review_id}', [ProductReviewController::class, 'destroy']);
         // Review report (user)
         Route::post('reviews/{review_id}/report', [ReviewReportController::class, 'report']);
+        // Đổi mật khẩu user
+        Route::post('change-password', [UserController::class, 'changePassword']);
     });
 
     // Admin routes

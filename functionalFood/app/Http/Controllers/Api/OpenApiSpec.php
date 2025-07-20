@@ -1778,4 +1778,271 @@ class OpenApiSpec extends Controller
      * )
      */
     public function reportProductReview() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/overview",
+     *     tags={"Admin - Stats"},
+     *     summary="Get dashboard overview statistics (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Overview statistics",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="total_revenue", type="number", example=1000000),
+     *             @OA\Property(property="orders_today", type="integer", example=10),
+     *             @OA\Property(property="orders_this_week", type="integer", example=50),
+     *             @OA\Property(property="orders_this_month", type="integer", example=200),
+     *             @OA\Property(property="products_sold", type="integer", example=500),
+     *             @OA\Property(property="total_users", type="integer", example=1000)
+     *         )
+     *     )
+     * )
+     */
+    public function statsOverview() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/revenue",
+     *     tags={"Admin - Stats"},
+     *     summary="Get revenue statistics by date range (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="from",
+     *         in="query",
+     *         description="Start date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="to",
+     *         in="query",
+     *         description="End date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Revenue statistics by date",
+     *         @OA\JsonContent(type="array", @OA\Items(
+     *             @OA\Property(property="date", type="string", example="2024-07-01"),
+     *             @OA\Property(property="revenue", type="number", example=100000),
+     *             @OA\Property(property="orders", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="total", type="number"),
+     *                 @OA\Property(property="created_at", type="string")
+     *             ))
+     *         ))
+     *     )
+     * )
+     */
+    public function statsRevenue() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/revenue-summary",
+     *     tags={"Admin - Stats"},
+     *     summary="Get revenue summary by type (today/week/month/year)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         description="Summary type (today, week, month, year)",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"today","week","month","year"})
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Revenue summary",
+     *         @OA\JsonContent(type="array", @OA\Items(
+     *             @OA\Property(property="date", type="string"),
+     *             @OA\Property(property="revenue", type="number"),
+     *             @OA\Property(property="orders", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="order_number", type="string"),
+     *                 @OA\Property(property="customer", type="string"),
+     *                 @OA\Property(property="total", type="number"),
+     *                 @OA\Property(property="created_at", type="string")
+     *             ))
+     *         ))
+     *     )
+     * )
+     */
+    public function statsRevenueSummary() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/orders-by-status",
+     *     tags={"Admin - Stats"},
+     *     summary="Get order count by status (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order count by status",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="pending", type="integer"),
+     *             @OA\Property(property="confirmed", type="integer"),
+     *             @OA\Property(property="processing", type="integer"),
+     *             @OA\Property(property="shipped", type="integer"),
+     *             @OA\Property(property="delivered", type="integer"),
+     *             @OA\Property(property="cancelled", type="integer"),
+     *             @OA\Property(property="refunded", type="integer")
+     *         )
+     *     )
+     * )
+     */
+    public function statsOrdersByStatus() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/top-products",
+     *     tags={"Admin - Stats"},
+     *     summary="Get top selling products (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Top selling products",
+     *         @OA\JsonContent(type="array", @OA\Items(
+     *             @OA\Property(property="product_id", type="integer"),
+     *             @OA\Property(property="total_sold", type="integer"),
+     *             @OA\Property(property="product", type="object",
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="image", type="string")
+     *             )
+     *         ))
+     *     )
+     * )
+     */
+    public function statsTopProducts() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/slow-products",
+     *     tags={"Admin - Stats"},
+     *     summary="Get slow selling products (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Slow selling products",
+     *         @OA\JsonContent(type="array", @OA\Items(
+     *             @OA\Property(property="product_id", type="integer"),
+     *             @OA\Property(property="total_sold", type="integer"),
+     *             @OA\Property(property="product", type="object",
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="image", type="string")
+     *             )
+     *         ))
+     *     )
+     * )
+     */
+    public function statsSlowProducts() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/new-users",
+     *     tags={"Admin - Stats"},
+     *     summary="Get new registered users (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         description="Type of period (week, month)",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"week","month"})
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="New users statistics",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="count", type="integer"),
+     *             @OA\Property(property="users", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="email", type="string"),
+     *                 @OA\Property(property="created_at", type="string")
+     *             ))
+     *         )
+     *     )
+     * )
+     */
+    public function statsNewUsers() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/revenue-by-category",
+     *     tags={"Admin - Stats"},
+     *     summary="Get revenue by product category (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Revenue by category",
+     *         @OA\JsonContent(type="array", @OA\Items(
+     *             @OA\Property(property="id", type="integer"),
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="revenue", type="number")
+     *         ))
+     *     )
+     * )
+     */
+    public function statsRevenueByCategory() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/statistics/top-customers",
+     *     tags={"Admin - Stats"},
+     *     summary="Get top customers by spending (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Top customers",
+     *         @OA\JsonContent(type="array", @OA\Items(
+     *             @OA\Property(property="user_id", type="integer"),
+     *             @OA\Property(property="orders_count", type="integer"),
+     *             @OA\Property(property="total_spent", type="number"),
+     *             @OA\Property(property="user", type="object",
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="email", type="string")
+     *             )
+     *         ))
+     *     )
+     * )
+     */
+    public function statsTopCustomers() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/user/change-password",
+     *     tags={"User"},
+     *     summary="Change password for authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"current_password","new_password","new_password_confirmation"},
+     *             @OA\Property(property="current_password", type="string", example="oldpass123"),
+     *             @OA\Property(property="new_password", type="string", example="newpass456"),
+     *             @OA\Property(property="new_password_confirmation", type="string", example="newpass456")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password changed successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Đổi mật khẩu thành công.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error or wrong current password",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Mật khẩu hiện tại không đúng.")
+     *         )
+     *     )
+     * )
+     */
+    public function changeUserPassword() {}
 }
