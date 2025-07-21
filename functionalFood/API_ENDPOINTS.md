@@ -77,6 +77,13 @@ http://localhost:8000/api/v1
 - `PUT /admin/orders/{id}/status` - Cập nhật trạng thái đơn hàng
 - `GET /admin/orders/stats` - Thống kê đơn hàng
 
+### User Management
+- `GET /admin/users` - Danh sách user
+- `GET /admin/users/{id}` - Chi tiết user
+- `PUT /admin/users/{id}` - Cập nhật user
+- `DELETE /admin/users/{id}` - Xóa user
+- `POST /admin/users/{id}/toggle-status` - Khóa/mở khóa tài khoản user
+
 ## Thêm sản phẩm mới (Admin)
 
 **Endpoint:**  
@@ -365,3 +372,40 @@ Accept: application/json
 - `cod`: Thanh toán khi nhận hàng
 - `bank_transfer`: Chuyển khoản ngân hàng
 - `online_payment`: Thanh toán trực tuyến 
+
+---
+
+## Khóa/Mở khóa tài khoản user (Admin)
+
+**Endpoint:**  
+`POST /api/v1/admin/users/{id}/toggle-status`
+
+**Yêu cầu:**  
+- Header: `Authorization: Bearer <admin_token>`
+- Content-Type: `application/json`
+
+**Mô tả:**  
+Chỉ admin/super admin mới có quyền thực hiện. Endpoint này sẽ chuyển trạng thái user giữa `active` và `inactive`.
+
+### Request
+Không cần body, chỉ cần `{id}` user trên URL.
+
+### Response mẫu
+```json
+{
+  "message": "Khóa user thành công.",
+  "status": "inactive"
+}
+```
+Hoặc:
+```json
+{
+  "message": "Kích hoạt user thành công.",
+  "status": "active"
+}
+```
+
+### Lỗi thường gặp
+- 403: Không có quyền
+- 404: Không tìm thấy user
+- 422: Không thể tự khóa tài khoản của chính mình 

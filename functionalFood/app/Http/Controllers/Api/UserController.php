@@ -288,4 +288,31 @@ class UserController extends Controller
     
         return response()->json(['message' => 'Đổi mật khẩu thành công.'], 200);
     }
+
+    /**
+     * Admin: Khóa/mở khóa tài khoản user
+     */
+    public function toggleStatus(Request $request, $id)
+    {
+        $admin = $request->user();
+        if (!$admin || !in_array($admin->role, ['admin', 'super_admin'])) {
+            return response()->json([
+                'message' => 'Bạn không có quyền thay đổi trạng thái user.'
+            ], 403);
+        }
+
+        $user = \App\Models\User::findOrFail($id);
+        // Không cho phép tự khóa chính mình nếu là user
+        if ($admin->id == $user->id && $admin instanceof \App\Models\User) {
+            return response()->json([
+                'message' => 'Không thể tự khóa tài khoản của chính mình.'
+            ], 422);
+        }
+        $user->status = $user->status === 'active' ? 'inactive' : 'active';
+        $user->save();
+        return response()->json([
+            'message' => $user->status === 'active' ? 'Kích hoạt user thành công.' : 'Khóa user thành công.',
+            'status' => $user->status
+        ]);
+    }
 } 

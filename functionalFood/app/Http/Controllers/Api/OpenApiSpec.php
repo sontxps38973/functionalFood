@@ -2045,4 +2045,40 @@ class OpenApiSpec extends Controller
      * )
      */
     public function changeUserPassword() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/admin/users/{id}/toggle-status",
+     *     tags={"Admin - Users"},
+     *     summary="Khóa hoặc mở khóa tài khoản user (Admin)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Khóa/mở khóa user thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Khóa user thành công."),
+     *             @OA\Property(property="status", type="string", example="inactive")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Không có quyền"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Không tìm thấy user"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Không thể tự khóa tài khoản của chính mình"
+     *     )
+     * )
+     */
+    public function toggleUserStatus() {}
 }
