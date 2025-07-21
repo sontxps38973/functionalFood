@@ -90,6 +90,6 @@ class OrderItem extends Model
 
     public function getProductImageUrlAttribute()
     {
-        return $this->product_image ? Storage::url($this->product_image) : null;
+        return $this->product_image ? asset('storage/' . $this->product_image) : null;
     }
 }

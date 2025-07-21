@@ -14,7 +14,7 @@ class ProductVariantResource extends JsonResource
             'attribute_json' => json_decode($this->attribute_json, true),
             'price' => $this->price,
             'stock_quantity' => $this->stock_quantity,
-            'image' => $this->image,
+            'image' => $this->image_url,
         ];
     }
 }

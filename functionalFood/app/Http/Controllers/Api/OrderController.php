@@ -10,6 +10,7 @@ use App\Models\OrderItem;
 use App\Models\CouponUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -475,10 +476,15 @@ public function getOrderDetail(Request $request, $orderId)
                     'price' => $item->price,
                     'quantity' => $item->quantity,
                     'total' => $item->total,
+                    'product_image' => $item->product_image_url,
                     'product' => $item->product ? [
                         'id' => $item->product->id,
                         'name' => $item->product->name,
-                        'image' => $item->product->images->first()?->url,
+                        'image' => $item->product->image ? asset('storage/' . $item->product->image) : null,
+                    ] : null,
+                    'variant' => $item->variant ? [
+                        'id' => $item->variant->id,
+                        'image' => $item->variant->image_url,
                     ] : null,
                 ];
             }),
@@ -609,8 +615,82 @@ public function adminGetOrders(Request $request)
 
     $orders = $query->paginate($request->input('per_page', 20));
 
+    $ordersData = collect($orders->items())->map(function ($order) {
+        return [
+            'id' => $order->id,
+            'user_id' => $order->user_id,
+            'name' => $order->name,
+            'phone' => $order->phone,
+            'address' => $order->address,
+            'email' => $order->email,
+            'order_number' => $order->order_number,
+            'subtotal' => $order->subtotal,
+            'shipping_fee' => $order->shipping_fee,
+            'tax' => $order->tax,
+            'discount' => $order->discount,
+            'total' => $order->total,
+            'coupon_id' => $order->coupon_id,
+            'status' => $order->status,
+            'payment_status' => $order->payment_status,
+            'payment_method' => $order->payment_method,
+            'payment_transaction_id' => $order->payment_transaction_id,
+            'tracking_number' => $order->tracking_number,
+            'shipping_method' => $order->shipping_method,
+            'shipped_at' => $order->shipped_at,
+            'delivered_at' => $order->delivered_at,
+            'notes' => $order->notes,
+            'admin_notes' => $order->admin_notes,
+            'created_at' => $order->created_at,
+            'updated_at' => $order->updated_at,
+            'user' => $order->user,
+            'items' => $order->items->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'order_id' => $item->order_id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'product_name' => $item->product_name,
+                    'variant_name' => $item->variant_name,
+                    'sku' => $item->sku,
+                    'product_image' => $item->product_image_url, // trả về full URL
+                    'product_image_url' => $item->product_image_url,
+                    'price' => $item->price,
+                    'discount_price' => $item->discount_price,
+                    'final_price' => $item->final_price,
+                    'quantity' => $item->quantity,
+                    'total' => $item->total,
+                    'weight' => $item->weight,
+                    'dimensions' => $item->dimensions,
+                    'status' => $item->status,
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at,
+                    'product' => $item->product ? [
+                        'id' => $item->product->id,
+                        'name' => $item->product->name,
+                        'image' => $item->product->image ? asset('storage/' . $item->product->image) : null,
+                        'image_url' => $item->product->image ? Storage::url($item->product->image) : null,
+                    ] : null,
+                    'variant' => $item->variant ? [
+                        'id' => $item->variant->id,
+                        'product_id' => $item->variant->product_id,
+                        'sku' => $item->variant->sku,
+                        'attribute_json' => $item->variant->attribute_json,
+                        'price' => $item->variant->price,
+                        'discount' => $item->variant->discount,
+                        'stock_quantity' => $item->variant->stock_quantity,
+                        'image' => $item->variant->image,
+                        'image_url' => $item->variant->image_url,
+                        'created_at' => $item->variant->created_at,
+                        'updated_at' => $item->variant->updated_at,
+                    ] : null,
+                ];
+            }),
+            'coupon' => $order->coupon,
+        ];
+    });
+
     return response()->json([
-        'orders' => $orders->items(),
+        'orders' => $ordersData,
         'pagination' => [
             'current_page' => $orders->currentPage(),
             'last_page' => $orders->lastPage(),

@@ -409,3 +409,16 @@ Hoặc:
 - 403: Không có quyền
 - 404: Không tìm thấy user
 - 422: Không thể tự khóa tài khoản của chính mình 
+
+---
+
+## Lưu ý về trường ảnh (image)
+
+- Tất cả các endpoint trả về thông tin sản phẩm, biến thể, ảnh sản phẩm, order item đều trả về trường `image` là **public URL đầy đủ domain**.
+- Ví dụ:
+  - `image`: "https://your-domain.com/storage/products/abc.jpg"
+  - `product_image`: "https://your-domain.com/storage/variants/variant1.jpg"
+- Không còn trả về các trường `_url` hoặc path nội bộ.
+- Client chỉ cần dùng trường `image` hoặc `product_image` để hiển thị ảnh trực tiếp.
+
+--- 

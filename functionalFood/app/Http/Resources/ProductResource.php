@@ -4,6 +4,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class ProductResource extends JsonResource
 {
@@ -15,8 +16,7 @@ class ProductResource extends JsonResource
         $variant = $this->variants->first();
     }
 
-    $imagePath = $variant ? $variant->image : $this->image;
-    $imageUrl = $imagePath ? asset('storage/' . $imagePath) : null;
+    $imageUrl = $variant ? $variant->image_url : ($this->image ? asset('storage/' . $this->image) : null);
 
     return [
         'id'              => $this->id,
