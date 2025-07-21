@@ -78,6 +78,7 @@ Route::prefix('v1')->group(function () {
         Route::post('reviews/{review_id}/report', [ReviewReportController::class, 'report']);
         // Đổi mật khẩu user
         Route::post('change-password', [UserController::class, 'changePassword']);
+        Route::patch('address', [UserController::class, 'updateAddress']);
     });
 
     // Admin routes

@@ -301,18 +301,29 @@ class UserController extends Controller
             ], 403);
         }
 
-        $user = \App\Models\User::findOrFail($id);
-        // Không cho phép tự khóa chính mình nếu là user
-        if ($admin->id == $user->id && $admin instanceof \App\Models\User) {
-            return response()->json([
-                'message' => 'Không thể tự khóa tài khoản của chính mình.'
-            ], 422);
-        }
+        $user = User::findOrFail($id);
         $user->status = $user->status === 'active' ? 'inactive' : 'active';
         $user->save();
         return response()->json([
             'message' => $user->status === 'active' ? 'Kích hoạt user thành công.' : 'Khóa user thành công.',
             'status' => $user->status
+        ]);
+    }
+
+    /**
+     * Cập nhật địa chỉ người dùng (user tự cập nhật)
+     */
+    public function updateAddress(Request $request)
+    {
+        $user = $request->user();
+        $data = $request->validate([
+            'address' => 'required|string|max:500',
+        ]);
+        $user->address = $data['address'];
+        $user->save();
+        return response()->json([
+            'message' => 'Cập nhật địa chỉ thành công.',
+            'address' => $user->address
         ]);
     }
 } 

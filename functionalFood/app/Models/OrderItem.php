@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class OrderItem extends Model
 {
@@ -85,5 +86,10 @@ class OrderItem extends Model
         return in_array($this->status, ['delivered']) && 
                $this->order->delivered_at && 
                $this->order->delivered_at->diffInDays(now()) <= 7; // 7 ngày từ khi giao hàng
+    }
+
+    public function getProductImageUrlAttribute()
+    {
+        return $this->product_image ? Storage::url($this->product_image) : null;
     }
 }

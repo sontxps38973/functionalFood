@@ -48,6 +48,11 @@ class UserAuthController extends Controller
             'message' => 'Email hoặc mật khẩu không đúng!'
         ], 401);
     }
+
+    if ($user->status !== 'active') {
+        return response()->json(['message' => 'Tài khoản của bạn đã bị khóa hoặc chưa được kích hoạt.'], 403);
+    }
+
     // xử lí avatar
     $user->avatar = $user->avatar ? asset('storage/' . $user->avatar) : asset('images/default-avatar.jpg');
 

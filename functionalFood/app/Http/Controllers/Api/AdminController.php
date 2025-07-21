@@ -274,7 +274,7 @@ class AdminController extends Controller
         $admin = Admin::findOrFail($id);
         $currentAdmin = $request->user();
 
-        // Kiểm tra quyền super admin
+        // Chỉ super_admin mới có quyền
         if ($currentAdmin->role !== 'super_admin') {
             return response()->json([
                 'message' => 'Bạn không có quyền thay đổi trạng thái admin.'
@@ -285,6 +285,13 @@ class AdminController extends Controller
         if ($currentAdmin->id === $admin->id) {
             return response()->json([
                 'message' => 'Không thể vô hiệu hóa tài khoản của chính mình.'
+            ], 422);
+        }
+
+        // Không cho phép vô hiệu hóa super_admin
+        if ($admin->role === 'super_admin') {
+            return response()->json([
+                'message' => 'Không thể vô hiệu hóa tài khoản super admin.'
             ], 422);
         }
 

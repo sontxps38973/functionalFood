@@ -2081,4 +2081,85 @@ class OpenApiSpec extends Controller
      * )
      */
     public function toggleUserStatus() {}
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/admin/users/{id}",
+     *     tags={"Admin - Users"},
+     *     summary="Cập nhật thông tin user (Admin)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Nguyễn Văn A"),
+     *             @OA\Property(property="email", type="string", example="user@email.com"),
+     *             @OA\Property(property="phone", type="string", example="0123456789"),
+     *             @OA\Property(property="customer_rank_id", type="integer", example=1),
+     *             @OA\Property(property="status", type="string", enum={"active","inactive","suspended"}, example="active"),
+     *             @OA\Property(property="password", type="string", example="newpassword"),
+     *             @OA\Property(property="password_confirmation", type="string", example="newpassword")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cập nhật thông tin user thành công."),
+     *             @OA\Property(property="user", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Không có quyền"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Không tìm thấy user"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Lỗi validate"
+     *     )
+     * )
+     */
+    public function updateUser() {}
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/user/address",
+     *     tags={"User"},
+     *     summary="Cập nhật địa chỉ người dùng (user tự cập nhật)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"address"},
+     *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật địa chỉ thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cập nhật địa chỉ thành công."),
+     *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Chưa đăng nhập"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Lỗi validate"
+     *     )
+     * )
+     */
+    public function updateUserAddress() {}
 }

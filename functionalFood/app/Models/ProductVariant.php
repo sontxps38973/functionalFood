@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class ProductVariant extends Model
 {
@@ -27,5 +28,10 @@ class ProductVariant extends Model
     {
         $attributes = json_decode($this->attribute_json, true);
         return collect($attributes)->map(fn($v, $k) => "$k: $v")->implode(', ');
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? Storage::url($this->image) : null;
     }
 }
