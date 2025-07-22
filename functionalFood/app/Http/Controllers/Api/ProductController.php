@@ -28,7 +28,6 @@ public function index(Request $request)
 
 public function store(StoreProductRequest $request)
 {
-    
     $data = $request->validated();
     $data['slug'] = Str::slug($data['name']);
 
@@ -56,15 +55,24 @@ public function store(StoreProductRequest $request)
 
     // Lưu biến thể nếu có
     if ($request->has('variants')) {
-        foreach ($request->input('variants') as $index => $variantData) {
+        // Lấy tất cả index của variants từ FormData
+        $variantIndexes = array_keys($request->input('variants'));
+        foreach ($variantIndexes as $index) {
+            $sku = $request->input("variants.$index.sku");
+            $name = $request->input("variants.$index.name");
+            $price = $request->input("variants.$index.price");
+            $stock_quantity = $request->input("variants.$index.stock_quantity");
+            $discount = $request->input("variants.$index.discount") ?? 0;
+            $attributes = $request->input("variants.$index.attributes") ?? [];
+            // Tạo biến thể
             $variant = $product->variants()->create([
-                'sku'             => $variantData['sku'],
-                'attribute_json'  => json_encode($variantData['attributes']),
-                'price'           => $variantData['price'],
-                'discount'        => $variantData['discount'] ?? 0,
-                'stock_quantity'  => $variantData['stock_quantity'] ?? 0,
+                'sku'             => $sku,
+                'name'            => $name,
+                'attribute_json'  => is_array($attributes) ? json_encode($attributes) : $attributes,
+                'price'           => $price,
+                'discount'        => $discount,
+                'stock_quantity'  => $stock_quantity ?? 0,
             ]);
-
             // Ảnh biến thể nếu có
             if ($request->hasFile("variants.$index.image")) {
                 $variantImage = $request->file("variants.$index.image")->store('public/variants');
@@ -76,7 +84,6 @@ public function store(StoreProductRequest $request)
 
     return new ProductResource($product->load(['images', 'variants']));
 }
-
 
 public function show(Product $product)
 {
@@ -147,17 +154,21 @@ public function show(Product $product)
             // Xóa biến thể cũ
             $product->variants()->delete();
 
-            foreach ($request->variants as $variantData) {
+            foreach ($request->input('variants', []) as $index => $variantData) {
                 $variant = $product->variants()->create([
-                    'name' => $variantData['name'],
-                    'price' => $variantData['price'],
-                    'stock' => $variantData['stock'] ?? 0,
+                    'sku' => $variantData['sku'] ?? null,
+                    'name' => $variantData['name'] ?? null,
+                    'price' => $variantData['price'] ?? 0,
+                    'stock_quantity' => $variantData['stock_quantity'] ?? 0,
+                    'discount' => $variantData['discount'] ?? 0,
+                    'attribute_json' => isset($variantData['attributes']) ? json_encode($variantData['attributes']) : null,
                 ]);
 
                 // Lưu ảnh biến thể nếu có
-                if (isset($variantData['image']) && $variantData['image'] instanceof \Illuminate\Http\UploadedFile) {
-                    $variantPath = $variantData['image']->store('variants', 'public');
-                    $variant->update(['image' => $variantPath]);
+                if ($request->hasFile("variants.$index.image")) {
+                    $variantImage = $request->file("variants.$index.image")->store('variants', 'public');
+                    $variant->image = $variantImage;
+                    $variant->save();
                 }
             }
         }
