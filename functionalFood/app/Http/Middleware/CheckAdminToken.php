@@ -25,6 +25,11 @@ class CheckAdminToken
             ], 401);
         }
 
+        // Gán user cho request để controller nhận đúng admin
+        $request->setUserResolver(function () use ($admin) {
+            return $admin;
+        });
+
         return $next($request);
     }
 }
