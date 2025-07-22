@@ -161,7 +161,7 @@ public function show(Product $product)
                     'price' => $variantData['price'] ?? 0,
                     'stock_quantity' => $variantData['stock_quantity'] ?? 0,
                     'discount' => $variantData['discount'] ?? 0,
-                    'attribute_json' => isset($variantData['attributes']) ? json_encode($variantData['attributes']) : null,
+                    'attribute_json' => isset($variantData['attributes']) ? json_encode($variantData['attributes']) : '{}',
                 ]);
 
                 // Lưu ảnh biến thể nếu có
