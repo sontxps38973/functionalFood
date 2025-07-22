@@ -4228,22 +4228,32 @@
                 ]
             }
         },
-        "/api/v1/user/address": {
+        "/api/v1/user/profile": {
             "patch": {
                 "tags": [
                     "User"
                 ],
-                "summary": "Cập nhật địa chỉ người dùng (user tự cập nhật)",
-                "operationId": "c926107f8e4786b5c706d05e1dd80863",
+                "summary": "Cập nhật thông tin người dùng (user tự cập nhật)",
+                "operationId": "b6bfa0d3f5dba868f1c61b548ea9df36",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "name",
+                                    "phone",
                                     "address"
                                 ],
                                 "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nguyễn Văn A"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
                                     "address": {
                                         "type": "string",
                                         "example": "123 Đường ABC, Quận 1, TP.HCM"
@@ -4256,18 +4266,55 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Cập nhật địa chỉ thành công",
+                        "description": "Cập nhật thông tin thành công",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Cập nhật địa chỉ thành công."
+                                            "example": "Cập nhật thông tin thành công."
                                         },
-                                        "address": {
-                                            "type": "string",
-                                            "example": "123 Đường ABC, Quận 1, TP.HCM"
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Nguyễn Văn A"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "address": {
+                                                    "type": "string",
+                                                    "example": "123 Đường ABC, Quận 1, TP.HCM"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@email.com"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "active"
+                                                },
+                                                "customer_rank_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2024-07-01T10:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2024-07-01T10:00:00.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -4280,6 +4327,67 @@
                     },
                     "422": {
                         "description": "Lỗi validate"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/avatar": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Cập nhật avatar người dùng (user tự cập nhật)",
+                "operationId": "7cbb2472396d7648a01e7331d96ced2a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "avatar"
+                                ],
+                                "properties": {
+                                    "avatar": {
+                                        "description": "Ảnh đại diện (jpeg, png, jpg, gif, tối đa 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật avatar thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cập nhật avatar thành công."
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Lỗi validate"
+                    },
+                    "401": {
+                        "description": "Chưa đăng nhập"
                     }
                 },
                 "security": [

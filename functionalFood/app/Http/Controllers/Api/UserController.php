@@ -311,19 +311,33 @@ class UserController extends Controller
     }
 
     /**
-     * Cập nhật địa chỉ người dùng (user tự cập nhật)
+     * Cập nhật thông tin người dùng (user tự cập nhật)
      */
-    public function updateAddress(Request $request)
+    public function updateProfile(Request $request)
     {
         $user = $request->user();
         $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => ['required', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
             'address' => 'required|string|max:500',
         ]);
+        $user->name = $data['name'];
+        $user->phone = $data['phone'];
         $user->address = $data['address'];
         $user->save();
         return response()->json([
-            'message' => 'Cập nhật địa chỉ thành công.',
-            'address' => $user->address
+            'message' => 'Cập nhật thông tin thành công.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'email' => $user->email,
+                'status' => $user->status,
+                'customer_rank_id' => $user->customer_rank_id,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ]
         ]);
     }
 } 

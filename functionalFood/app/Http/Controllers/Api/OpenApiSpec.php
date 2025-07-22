@@ -2132,23 +2132,35 @@ class OpenApiSpec extends Controller
 
     /**
      * @OA\Patch(
-     *     path="/api/v1/user/address",
+     *     path="/api/v1/user/profile",
      *     tags={"User"},
-     *     summary="Cập nhật địa chỉ người dùng (user tự cập nhật)",
+     *     summary="Cập nhật thông tin người dùng (user tự cập nhật)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"address"},
+     *             required={"name","phone","address"},
+     *             @OA\Property(property="name", type="string", example="Nguyễn Văn A"),
+     *             @OA\Property(property="phone", type="string", example="0123456789"),
      *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM")
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Cập nhật địa chỉ thành công",
+     *         description="Cập nhật thông tin thành công",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Cập nhật địa chỉ thành công."),
-     *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM")
+     *             @OA\Property(property="message", type="string", example="Cập nhật thông tin thành công."),
+     *             @OA\Property(property="user", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Nguyễn Văn A"),
+     *                 @OA\Property(property="phone", type="string", example="0123456789"),
+     *                 @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM"),
+     *                 @OA\Property(property="email", type="string", example="user@email.com"),
+     *                 @OA\Property(property="status", type="string", example="active"),
+     *                 @OA\Property(property="customer_rank_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", example="2024-07-01T10:00:00.000000Z"),
+     *                 @OA\Property(property="updated_at", type="string", example="2024-07-01T10:00:00.000000Z")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -2161,5 +2173,46 @@ class OpenApiSpec extends Controller
      *     )
      * )
      */
-    public function updateUserAddress() {}
+    public function updateUserProfile() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/user/avatar",
+     *     tags={"User"},
+     *     summary="Cập nhật avatar người dùng (user tự cập nhật)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"avatar"},
+     *                 @OA\Property(
+     *                     property="avatar",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Ảnh đại diện (jpeg, png, jpg, gif, tối đa 2MB)"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật avatar thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cập nhật avatar thành công."),
+     *             @OA\Property(property="user", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Lỗi validate"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Chưa đăng nhập"
+     *     )
+     * )
+     */
+    public function updateUserAvatar() {}
 }
