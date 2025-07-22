@@ -637,11 +637,10 @@
                             "schema": {
                                 "required": [
                                     "items",
-                                    "name",
-                                    "phone",
-                                    "address",
                                     "email",
-                                    "payment_method"
+                                    "payment_method",
+                                    "subtotal",
+                                    "total"
                                 ],
                                 "properties": {
                                     "items": {
@@ -650,33 +649,62 @@
                                             "type": "object"
                                         }
                                     },
+                                    "address_id": {
+                                        "description": "ID địa chỉ giao hàng (user_addresses). Nếu truyền address_id thì không cần truyền name, phone, address.",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "name": {
+                                        "description": "Tên người nhận. Bắt buộc nếu không truyền address_id.",
                                         "type": "string",
-                                        "example": "John Doe"
+                                        "example": "Nguyễn Văn A"
                                     },
                                     "phone": {
+                                        "description": "Số điện thoại người nhận. Bắt buộc nếu không truyền address_id.",
                                         "type": "string",
                                         "example": "0123456789"
                                     },
                                     "address": {
+                                        "description": "Địa chỉ giao hàng. Bắt buộc nếu không truyền address_id.",
                                         "type": "string",
-                                        "example": "123 Main St"
+                                        "example": "123 Đường ABC, Quận 1, TP.HCM"
                                     },
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "john@example.com"
+                                        "example": "user@email.com"
                                     },
                                     "payment_method": {
                                         "type": "string",
                                         "example": "cod"
                                     },
-                                    "coupon_code": {
-                                        "type": "string",
-                                        "example": "SAVE20"
+                                    "coupon_id": {
+                                        "type": "integer",
+                                        "example": 1
                                     },
-                                    "note": {
-                                        "type": "string"
+                                    "subtotal": {
+                                        "type": "number",
+                                        "example": 100000
+                                    },
+                                    "shipping_fee": {
+                                        "type": "number",
+                                        "example": 30000
+                                    },
+                                    "tax": {
+                                        "type": "number",
+                                        "example": 5000
+                                    },
+                                    "discount": {
+                                        "type": "number",
+                                        "example": 20000
+                                    },
+                                    "total": {
+                                        "type": "number",
+                                        "example": 115000
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Giao giờ hành chính"
                                     }
                                 },
                                 "type": "object"
@@ -4388,6 +4416,250 @@
                     },
                     "401": {
                         "description": "Chưa đăng nhập"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/addresses": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Lấy danh sách địa chỉ giao hàng của user",
+                "operationId": "173cb8791925665a27318c81f3dbd381",
+                "responses": {
+                    "200": {
+                        "description": "Danh sách địa chỉ giao hàng",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Thêm địa chỉ giao hàng mới cho user",
+                "operationId": "d49b4ed840e73ea31de2e640d57f4755",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "phone",
+                                    "address"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nguyễn Văn A"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Đường ABC, Quận 1, TP.HCM"
+                                    },
+                                    "is_default": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tạo địa chỉ thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/addresses/{id}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Xem chi tiết địa chỉ giao hàng của user",
+                "operationId": "7847a4942a7968dd79b59a6d8e39be24",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chi tiết địa chỉ giao hàng",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Cập nhật địa chỉ giao hàng của user",
+                "operationId": "de4541a8c2d38e469c70feb369f4f4fc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nguyễn Văn B"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0987654321"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "456 Đường XYZ, Quận 2, TP.HCM"
+                                    },
+                                    "is_default": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật địa chỉ thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Xóa địa chỉ giao hàng của user",
+                "operationId": "69abfdc9d60912577cdc19e62f899fbf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Xóa địa chỉ thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Xóa địa chỉ thành công."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [

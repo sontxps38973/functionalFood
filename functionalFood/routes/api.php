@@ -79,6 +79,8 @@ Route::prefix('v1')->group(function () {
         // Đổi mật khẩu user
         Route::post('change-password', [UserController::class, 'changePassword']);
         Route::patch('profile', [UserController::class, 'updateProfile']);
+        // Địa chỉ giao hàng (user CRUD)
+        Route::apiResource('addresses', \App\Http\Controllers\Api\UserAddressController::class);
     });
 
     // Admin routes
@@ -182,6 +184,9 @@ Route::prefix('v1')->group(function () {
             Route::post('banned-words', [\App\Http\Controllers\Api\BannedWordController::class, 'store']);
             Route::put('banned-words/{id}', [\App\Http\Controllers\Api\BannedWordController::class, 'update']);
             Route::delete('banned-words/{id}', [\App\Http\Controllers\Api\BannedWordController::class, 'destroy']);
+            // Xem địa chỉ giao hàng của user (admin chỉ được xem)
+            Route::get('user-addresses', [\App\Http\Controllers\Api\UserAddressController::class, 'index']);
+            Route::get('user-addresses/{id}', [\App\Http\Controllers\Api\UserAddressController::class, 'show']);
         });
     });
 });

@@ -412,15 +412,21 @@ class OpenApiSpec extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"items","name","phone","address","email","payment_method"},
+     *             required={"items","email","payment_method","subtotal","total"},
      *             @OA\Property(property="items", type="array", @OA\Items(type="object")),
-     *             @OA\Property(property="name", type="string", example="John Doe"),
-     *             @OA\Property(property="phone", type="string", example="0123456789"),
-     *             @OA\Property(property="address", type="string", example="123 Main St"),
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="address_id", type="integer", example=1, description="ID địa chỉ giao hàng (user_addresses). Nếu truyền address_id thì không cần truyền name, phone, address."),
+     *             @OA\Property(property="name", type="string", example="Nguyễn Văn A", description="Tên người nhận. Bắt buộc nếu không truyền address_id."),
+     *             @OA\Property(property="phone", type="string", example="0123456789", description="Số điện thoại người nhận. Bắt buộc nếu không truyền address_id."),
+     *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM", description="Địa chỉ giao hàng. Bắt buộc nếu không truyền address_id."),
+     *             @OA\Property(property="email", type="string", format="email", example="user@email.com"),
      *             @OA\Property(property="payment_method", type="string", example="cod"),
-     *             @OA\Property(property="coupon_code", type="string", example="SAVE20"),
-     *             @OA\Property(property="note", type="string")
+     *             @OA\Property(property="coupon_id", type="integer", example=1),
+     *             @OA\Property(property="subtotal", type="number", example=100000),
+     *             @OA\Property(property="shipping_fee", type="number", example=30000),
+     *             @OA\Property(property="tax", type="number", example=5000),
+     *             @OA\Property(property="discount", type="number", example=20000),
+     *             @OA\Property(property="total", type="number", example=115000),
+     *             @OA\Property(property="notes", type="string", example="Giao giờ hành chính")
      *         )
      *     ),
      *     @OA\Response(
@@ -2215,4 +2221,111 @@ class OpenApiSpec extends Controller
      * )
      */
     public function updateUserAvatar() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/user/addresses",
+     *     tags={"User"},
+     *     summary="Lấy danh sách địa chỉ giao hàng của user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Danh sách địa chỉ giao hàng",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     */
+    public function getUserAddresses() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/user/addresses",
+     *     tags={"User"},
+     *     summary="Thêm địa chỉ giao hàng mới cho user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","phone","address"},
+     *             @OA\Property(property="name", type="string", example="Nguyễn Văn A"),
+     *             @OA\Property(property="phone", type="string", example="0123456789"),
+     *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM"),
+     *             @OA\Property(property="is_default", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Tạo địa chỉ thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function createUserAddress() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/user/addresses/{id}",
+     *     tags={"User"},
+     *     summary="Xem chi tiết địa chỉ giao hàng của user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Chi tiết địa chỉ giao hàng",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function showUserAddress() {}
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/user/addresses/{id}",
+     *     tags={"User"},
+     *     summary="Cập nhật địa chỉ giao hàng của user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Nguyễn Văn B"),
+     *             @OA\Property(property="phone", type="string", example="0987654321"),
+     *             @OA\Property(property="address", type="string", example="456 Đường XYZ, Quận 2, TP.HCM"),
+     *             @OA\Property(property="is_default", type="boolean", example=false)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật địa chỉ thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function updateUserAddress() {}
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/user/addresses/{id}",
+     *     tags={"User"},
+     *     summary="Xóa địa chỉ giao hàng của user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa địa chỉ thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Xóa địa chỉ thành công.")
+     *         )
+     *     )
+     * )
+     */
+    public function deleteUserAddress() {}
 }
