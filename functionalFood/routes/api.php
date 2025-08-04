@@ -83,6 +83,10 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('addresses', \App\Http\Controllers\Api\UserAddressController::class);
     });
 
+    // Public Post API
+    Route::get('posts', [\App\Http\Controllers\Api\PostController::class, 'index']);
+    Route::get('posts/{id}', [\App\Http\Controllers\Api\PostController::class, 'show']);
+
     // Admin routes
     Route::prefix('admin')->group(function () {
         // Admin authentication
@@ -188,5 +192,13 @@ Route::prefix('v1')->group(function () {
             Route::get('user-addresses', [\App\Http\Controllers\Api\UserAddressController::class, 'index']);
             Route::get('user-addresses/{id}', [\App\Http\Controllers\Api\UserAddressController::class, 'show']);
         });
+
+        // Admin Post API
+        Route::get('posts', [\App\Http\Controllers\Api\AdminPostController::class, 'index']);
+        Route::post('posts', [\App\Http\Controllers\Api\AdminPostController::class, 'store']);
+        Route::get('posts/{id}', [\App\Http\Controllers\Api\AdminPostController::class, 'show']);
+        Route::put('posts/{id}', [\App\Http\Controllers\Api\AdminPostController::class, 'update']);
+        Route::delete('posts/{id}', [\App\Http\Controllers\Api\AdminPostController::class, 'destroy']);
+        Route::patch('posts/{id}/toggle-status', [\App\Http\Controllers\Api\AdminPostController::class, 'toggleStatus']);
     });
 });
