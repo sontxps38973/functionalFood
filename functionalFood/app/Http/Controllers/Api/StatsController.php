@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Support\Currency;
 
 class StatsController extends Controller
 {
@@ -22,7 +23,7 @@ class StatsController extends Controller
             $monthStart = Carbon::now()->startOfMonth();
 
             return response()->json([
-                'total_revenue' => Order::where('status', 'completed')->sum('total'), 
+                'total_revenue' => Currency::toVndInt(Order::where('status', 'completed')->sum('total')), 
                 'orders_today' => Order::whereDate('created_at', $today)->count(),
                 'orders_this_week' => Order::whereBetween('created_at', [$weekStart, now()])->count(),
                 'orders_this_month' => Order::whereBetween('created_at', [$monthStart, now()])->count(),
@@ -66,12 +67,12 @@ class StatsController extends Controller
         $result = $grouped->map(function ($orders, $date) {
             return [
                 'date' => $date,
-                'revenue' => $orders->sum('total'),
+                'revenue' => Currency::toVndInt($orders->sum('total')),
                 'orders' => $orders->map(function ($order) {
                     return [
                         'id' => $order->id,
                         'name' => $order->name, 
-                        'total' => $order->total,
+                        'total' => Currency::toVndInt($order->total),
                         'created_at' => $order->created_at->toDateTimeString()
                     ];
                 })->values()
@@ -113,13 +114,13 @@ class StatsController extends Controller
         $result = $grouped->map(function ($orders, $date) {
             return [
                 'date' => $date,
-                'revenue' => $orders->sum('total'),
+                'revenue' => Currency::toVndInt($orders->sum('total')),
                 'orders' => $orders->map(function ($order) {
                     return [
                         'id' => $order->id,
                         'order_number' => $order->order_number,
                         'customer' => $order->name,
-                        'total' => $order->total,
+                        'total' => Currency::toVndInt($order->total),
                         'created_at' => $order->created_at->toDateTimeString(),
                     ];
                 })->values()

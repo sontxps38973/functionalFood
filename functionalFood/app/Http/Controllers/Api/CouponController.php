@@ -8,6 +8,7 @@ use App\Models\Coupon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Models\CouponUser;
+use App\Support\Currency;
 
 class CouponController extends Controller
 {
@@ -434,9 +435,9 @@ class CouponController extends Controller
                     'description' => $coupon->description,
                     'type' => $coupon->type,
                     'scope' => $coupon->scope,
-                    'product_discount' => $productDiscount,
-                    'shipping_discount' => $shippingDiscount,
-                    'total_discount' => $productDiscount + $shippingDiscount,
+                    'product_discount' => Currency::toVndInt($productDiscount),
+                    'shipping_discount' => Currency::toVndInt($shippingDiscount),
+                    'total_discount' => Currency::toVndInt($productDiscount + $shippingDiscount),
                     'free_shipping' => $coupon->free_shipping,
                 ];
             })->filter()->values()

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Support\Currency;
 
 class UserController extends Controller
 {
@@ -93,7 +94,7 @@ class UserController extends Controller
         // Tính toán thống kê
         $stats = [
             'total_orders' => $user->orders()->count(),
-            'total_spent' => $user->orders()->where('status', 'paid')->sum('total'),
+            'total_spent' => Currency::toVndInt($user->orders()->where('status', 'paid')->sum('total')),
             'pending_orders' => $user->orders()->where('status', 'pending')->count(),
             'completed_orders' => $user->orders()->where('status', 'delivered')->count(),
             'cancelled_orders' => $user->orders()->where('status', 'cancelled')->count(),
@@ -111,7 +112,7 @@ class UserController extends Controller
                 'customer_rank' => $user->customerRank ? [
                     'id' => $user->customerRank->id,
                     'name' => $user->customerRank->name,
-                    'min_total_spent' => $user->customerRank->min_total_spent,
+                    'min_total_spent' => Currency::toVndInt($user->customerRank->min_total_spent),
                 ] : null,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
@@ -120,7 +121,7 @@ class UserController extends Controller
                     return [
                         'id' => $order->id,
                         'order_number' => $order->order_number,
-                        'total' => $order->total,
+                        'total' => Currency::toVndInt($order->total),
                         'status' => $order->status,
                         'payment_status' => $order->payment_status,
                         'created_at' => $order->created_at,
@@ -201,7 +202,13 @@ class UserController extends Controller
             }], 'total')
             ->orderByDesc('orders_sum_total')
             ->limit(10)
-            ->get(['id', 'name', 'email', 'orders_sum_total']),
+            ->get(['id', 'name', 'email', 'orders_sum_total'])
+            ->map(function ($u) { return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'orders_sum_total' => Currency::toVndInt($u->orders_sum_total),
+            ]; }),
         ];
 
         return response()->json(['stats' => $stats]);
@@ -253,7 +260,7 @@ class UserController extends Controller
                 'Trạng thái' => $user->status,
                 'Ngày đăng ký' => $user->created_at->format('d/m/Y H:i:s'),
                 'Tổng đơn hàng' => $user->orders()->count(),
-                'Tổng chi tiêu' => $user->orders()->where('status', 'paid')->sum('total'),
+                'Tổng chi tiêu' => Currency::toVndInt($user->orders()->where('status', 'paid')->sum('total')),
             ];
         });
 

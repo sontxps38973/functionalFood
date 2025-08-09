@@ -11,6 +11,7 @@ use App\Models\CouponUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Support\Currency;
 
 class OrderController extends Controller
 {
@@ -75,7 +76,7 @@ class OrderController extends Controller
 
     // Kiểm tra thời gian áp dụng
     if ($coupon->time_rules) {
-        $rules = json_decode($coupon->time_rules, true);
+        $rules = is_array($coupon->time_rules) ? $coupon->time_rules : json_decode((string)$coupon->time_rules, true);
         $now = now();
 
         if (isset($rules['days']) && !in_array($now->dayOfWeek, $rules['days'])) {
@@ -104,7 +105,7 @@ class OrderController extends Controller
 
     // Kiểm tra phương thức thanh toán
     if ($coupon->allowed_payment_methods) {
-        $allowedMethods = json_decode($coupon->allowed_payment_methods, true);
+        $allowedMethods = is_array($coupon->allowed_payment_methods) ? $coupon->allowed_payment_methods : json_decode((string)$coupon->allowed_payment_methods, true);
         if (!in_array($request->payment_method, $allowedMethods)) {
             return response()->json(['message' => 'Phương thức thanh toán không được áp dụng mã này.'], 422);
         }
@@ -164,11 +165,11 @@ class OrderController extends Controller
 
     return response()->json([
         'message' => 'Áp mã thành công.',
-        'product_discount' => $productDiscount,
-        'shipping_discount' => $shippingDiscount,
-        'total_discount' => $totalDiscount,
-        'final_shipping_fee' => $finalShippingFee,
-        'total' => $total,
+        'product_discount' => Currency::toVndInt($productDiscount),
+        'shipping_discount' => Currency::toVndInt($shippingDiscount),
+        'total_discount' => Currency::toVndInt($totalDiscount),
+        'final_shipping_fee' => Currency::toVndInt($finalShippingFee),
+        'total' => Currency::toVndInt($total),
         'coupon_id' => $coupon->id,
         'coupon_type' => $coupon->type,
         'coupon_value' => $coupon->value,
@@ -339,11 +340,11 @@ public function placeOrder(Request $request)
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $product->id,
-                'product_variant_id' => $variant?->id,
+                'product_variant_id' => $variant ? $variant->id : null,
                 'product_name' => $product->name,
                 'variant_name' => $variant ? $variant->attribute_name_text : null,
                 'sku' => $variant ? $variant->sku : $product->sku,
-                'product_image' => $variant ? ($variant->image ?? $product->image) : $product->image,
+                'product_image' => $variant ? ($variant->image ?: $product->image) : $product->image,
                 'price' => $item['price'],
                 'discount_price' => $item['discount_price'],
                 'final_price' => $item['final_price'],
@@ -375,7 +376,6 @@ public function placeOrder(Request $request)
         }
 
         $this->updateUserRank($user);
-        \App\Models\CartItem::where('user_id', $user->id)->delete();
 
         DB::commit();
 
@@ -386,7 +386,7 @@ public function placeOrder(Request $request)
             'order' => [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
-                'total' => $order->total,
+                'total' => Currency::toVndInt($order->total),
                 'status' => $order->status,
                 'payment_status' => $order->payment_status,
                 'payment_method' => $order->payment_method,
@@ -437,7 +437,18 @@ public function getOrders(Request $request)
         ->paginate(10);
 
     return response()->json([
-        'orders' => $orders->items(),
+        'orders' => collect($orders->items())->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'subtotal' => Currency::toVndInt($order->subtotal),
+                'discount' => Currency::toVndInt($order->discount),
+                'total' => Currency::toVndInt($order->total),
+                'status' => $order->status,
+                'payment_status' => $order->payment_status,
+                'created_at' => $order->created_at,
+            ];
+        }),
         'pagination' => [
             'current_page' => $orders->currentPage(),
             'last_page' => $orders->lastPage(),
@@ -469,9 +480,9 @@ public function getOrderDetail(Request $request, $orderId)
             'phone' => $order->phone,
             'address' => $order->address,
             'email' => $order->email,
-            'subtotal' => $order->subtotal,
-            'discount' => $order->discount,
-            'total' => $order->total,
+            'subtotal' => Currency::toVndInt($order->subtotal),
+            'discount' => Currency::toVndInt($order->discount),
+            'total' => Currency::toVndInt($order->total),
             'status' => $order->status,
             'payment_method' => $order->payment_method,
             'created_at' => $order->created_at,
@@ -486,9 +497,9 @@ public function getOrderDetail(Request $request, $orderId)
                     'id' => $item->id,
                     'product_name' => $item->product_name,
                     'variant_name' => $item->variant_name,
-                    'price' => $item->price,
+                    'price' => Currency::toVndInt($item->price),
                     'quantity' => $item->quantity,
-                    'total' => $item->total,
+                    'total' => Currency::toVndInt($item->total),
                     'product_image' => $item->product_image_url,
                     'product' => $item->product ? [
                         'id' => $item->product->id,
@@ -637,11 +648,11 @@ public function adminGetOrders(Request $request)
             'address' => $order->address,
             'email' => $order->email,
             'order_number' => $order->order_number,
-            'subtotal' => $order->subtotal,
-            'shipping_fee' => $order->shipping_fee,
-            'tax' => $order->tax,
-            'discount' => $order->discount,
-            'total' => $order->total,
+            'subtotal' => Currency::toVndInt($order->subtotal),
+            'shipping_fee' => Currency::toVndInt($order->shipping_fee),
+            'tax' => Currency::toVndInt($order->tax),
+            'discount' => Currency::toVndInt($order->discount),
+            'total' => Currency::toVndInt($order->total),
             'coupon_id' => $order->coupon_id,
             'status' => $order->status,
             'payment_status' => $order->payment_status,
@@ -667,11 +678,11 @@ public function adminGetOrders(Request $request)
                     'sku' => $item->sku,
                     'product_image' => $item->product_image_url, // trả về full URL
                     'product_image_url' => $item->product_image_url,
-                    'price' => $item->price,
-                    'discount_price' => $item->discount_price,
-                    'final_price' => $item->final_price,
+                    'price' => Currency::toVndInt($item->price),
+                    'discount_price' => Currency::toVndInt($item->discount_price),
+                    'final_price' => Currency::toVndInt($item->final_price),
                     'quantity' => $item->quantity,
-                    'total' => $item->total,
+                    'total' => Currency::toVndInt($item->total),
                     'weight' => $item->weight,
                     'dimensions' => $item->dimensions,
                     'status' => $item->status,
@@ -688,8 +699,8 @@ public function adminGetOrders(Request $request)
                         'product_id' => $item->variant->product_id,
                         'sku' => $item->variant->sku,
                         'attribute_json' => $item->variant->attribute_json,
-                        'price' => $item->variant->price,
-                        'discount' => $item->variant->discount,
+                        'price' => Currency::toVndInt($item->variant->price),
+                        'discount' => Currency::toVndInt($item->variant->discount),
                         'stock_quantity' => $item->variant->stock_quantity,
                         'image' => $item->variant->image,
                         'image_url' => $item->variant->image_url,

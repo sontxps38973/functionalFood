@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Support\Currency;
 
 class EventProductResource extends JsonResource
 {
@@ -18,9 +19,9 @@ class EventProductResource extends JsonResource
             'id' => $this->id,
             'event_id' => $this->event_id,
             'product_id' => $this->product_id,
-            'event_price' => $this->event_price,
-            'original_price' => $this->original_price,
-            'discount_price' => $this->discount_price,
+            'event_price' => Currency::toVndInt($this->event_price),
+            'original_price' => Currency::toVndInt($this->original_price),
+            'discount_price' => Currency::toVndInt($this->discount_price),
             'quantity_limit' => $this->quantity_limit,
             'sold_quantity' => $this->sold_quantity,
             'status' => $this->status,
