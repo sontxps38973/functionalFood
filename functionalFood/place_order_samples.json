@@ -323,7 +323,8 @@
           "phone": "0123456789",
           "address": "123 ABC",
           "email": "test@email.com",
-          "payment_method": "cod"
+          "payment_method": "cod",
+          "coupon_code": "SAVE20"
         }
       }
     }
@@ -331,7 +332,7 @@
 
   "notes": {
     "variant_ids": "Các variant_id này cần tồn tại trong database. Kiểm tra bảng product_variants để lấy ID thực tế.",
-    "coupon_ids": "Các coupon_id này cần tồn tại trong database. Kiểm tra bảng coupons để lấy ID thực tế.",
+    "coupon_codes": "Các coupon_code này cần tồn tại trong database. Kiểm tra bảng coupons để lấy code thực tế.",
     "authentication": "Tất cả request cần có Bearer token trong header Authorization",
     "validation": "Hệ thống sẽ tự động validate: tồn kho, giá trị, coupon hợp lệ, v.v.",
     "total_calculation": "total = subtotal + shipping_fee + tax - discount",

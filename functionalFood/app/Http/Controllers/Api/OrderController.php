@@ -179,27 +179,27 @@ class OrderController extends Controller
     ]);
 }
 
-public function placeOrder(Request $request)
-{
-    $request->validate([
-        'items' => 'required|array|min:1',
-        'items.*.product_id' => 'required|integer|exists:products,id',
-        'items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
-        'items.*.quantity' => 'required|integer|min:1',
-        'address_id' => 'nullable|integer|exists:user_addresses,id',
-        'name' => 'required_without:address_id|string|max:255',
-        'phone' => 'required_without:address_id|string|max:20',
-        'address' => 'required_without:address_id|string|max:500',
-        'email' => 'required|email|max:255',
-        'payment_method' => 'required|string|in:cod,bank_transfer,online_payment',
-        'coupon_id' => 'nullable|integer|exists:coupons,id',
-        'subtotal' => 'required|numeric|min:0',
-        'shipping_fee' => 'nullable|numeric|min:0',
-        'tax' => 'nullable|numeric|min:0',
-        'discount' => 'nullable|numeric|min:0',
-        'total' => 'required|numeric|min:0',
-        'notes' => 'nullable|string|max:1000',
-    ]);
+    public function placeOrder(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'address_id' => 'nullable|integer|exists:user_addresses,id',
+            'name' => 'required_without:address_id|string|max:255',
+            'phone' => 'required_without:address_id|string|max:20',
+            'address' => 'required_without:address_id|string|max:500',
+            'email' => 'required|email|max:255',
+            'payment_method' => 'required|string|in:cod,bank_transfer,online_payment',
+            'coupon_code' => 'nullable|string|max:50',
+            'subtotal' => 'required|numeric|min:0',
+            'shipping_fee' => 'nullable|numeric|min:0',
+            'tax' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:1000',
+        ]);
 
     $user = $request->user();
 
@@ -273,14 +273,18 @@ public function placeOrder(Request $request)
 
     // Kiểm tra coupon nếu có (chỉ kiểm tra trạng thái, không tính lại discount)
     $coupon = null;
-    if ($request->filled('coupon_id')) {
-        $coupon = Coupon::find($request->coupon_id);
-        if (!$coupon || !$coupon->is_active) {
-            return response()->json(['message' => 'Mã giảm giá không hợp lệ.'], 422);
-        }
-        $now = now();
-        if (($coupon->start_at && $now < $coupon->start_at) || ($coupon->end_at && $now > $coupon->end_at)) {
-            return response()->json(['message' => 'Mã giảm giá đã hết hạn hoặc chưa có hiệu lực.'], 422);
+    if ($request->filled('coupon_code')) {
+        $coupon = Coupon::where('code', $request->coupon_code)
+            ->where('is_active', true)
+            ->where(function ($q) {
+                $now = now();
+                $q->whereNull('start_at')->orWhere('start_at', '<=', $now);
+                $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
+            })
+            ->first();
+            
+        if (!$coupon) {
+            return response()->json(['message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'], 422);
         }
         if ($coupon->usage_limit !== null && $coupon->used_count >= $coupon->usage_limit) {
             return response()->json(['message' => 'Mã đã hết lượt sử dụng.'], 422);
@@ -326,7 +330,7 @@ public function placeOrder(Request $request)
             'tax' => $tax,
             'discount' => $finalDiscount,
             'total' => $finalTotal,
-            'coupon_id' => $coupon?->id,
+            'coupon_id' => $coupon ? $coupon->id : null,
             'status' => 'pending',
             'payment_status' => $paymentStatus,
             'payment_method' => $request->payment_method,

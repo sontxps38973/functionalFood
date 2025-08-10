@@ -240,7 +240,7 @@ POST /user/orders/place-order
   "address": "123 Đường ABC, Quận 1, TP.HCM",
   "email": "nguyenvana@email.com",
   "payment_method": "cod",
-  "coupon_id": 1,
+  "coupon_code": "SAVE20",
   "subtotal": 500000,
   "shipping_fee": 30000,
   "tax": 25000,

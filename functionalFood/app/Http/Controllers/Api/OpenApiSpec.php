@@ -420,7 +420,7 @@ class OpenApiSpec extends Controller
      *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM", description="Địa chỉ giao hàng. Bắt buộc nếu không truyền address_id."),
      *             @OA\Property(property="email", type="string", format="email", example="user@email.com"),
      *             @OA\Property(property="payment_method", type="string", example="cod"),
-     *             @OA\Property(property="coupon_id", type="integer", example=1),
+     *             @OA\Property(property="coupon_code", type="string", example="SAVE20", description="Mã giảm giá (nếu có)"),
      *             @OA\Property(property="subtotal", type="number", example=100000),
      *             @OA\Property(property="shipping_fee", type="number", example=30000),
      *             @OA\Property(property="tax", type="number", example=5000),
