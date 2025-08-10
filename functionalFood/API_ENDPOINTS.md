@@ -17,6 +17,10 @@ http://localhost:8000/api/v1
 - `GET /public/products-search` - Tìm kiếm sản phẩm
 - `GET /public/products-filter` - Lọc sản phẩm
 
+### Posts
+- `GET /posts` - Lấy danh sách bài viết công khai
+- `GET /posts/{id}` - Xem chi tiết bài viết công khai
+
 ### Coupons
 - `GET /public/coupons/valid` - Lấy danh sách coupon có hiệu lực cho user
 
@@ -83,6 +87,14 @@ http://localhost:8000/api/v1
 - `PUT /admin/users/{id}` - Cập nhật user
 - `DELETE /admin/users/{id}` - Xóa user
 - `POST /admin/users/{id}/toggle-status` - Khóa/mở khóa tài khoản user
+
+### Post Management
+- `GET /admin/posts` - Danh sách tất cả bài viết
+- `POST /admin/posts` - Tạo bài viết mới
+- `GET /admin/posts/{id}` - Chi tiết bài viết
+- `PUT /admin/posts/{id}` - Cập nhật bài viết
+- `DELETE /admin/posts/{id}` - Xóa bài viết
+- `PATCH /admin/posts/{id}/toggle-status` - Chuyển đổi trạng thái bài viết
 
 ## Thêm sản phẩm mới (Admin)
 
@@ -262,6 +274,94 @@ Response:
     "payment_status": "pending",
     "payment_method": "cod",
     "created_at": "2025-01-01T10:00:00.000000Z"
+  }
+}
+```
+
+### Create Post (Admin)
+```json
+POST /admin/posts
+{
+  "title": "Lợi ích của thực phẩm chức năng",
+  "content": "Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe...",
+  "status": "draft",
+  "image": "[file upload]"
+}
+```
+
+Response:
+```json
+{
+  "id": 1,
+  "title": "Lợi ích của thực phẩm chức năng",
+  "content": "Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe...",
+  "image_url": "/storage/posts/abc123.jpg",
+  "status": "draft",
+  "created_at": "2025-01-01T10:00:00.000000Z",
+  "updated_at": "2025-01-01T10:00:00.000000Z"
+}
+```
+
+### Update Post (Admin)
+```json
+PUT /admin/posts/1
+{
+  "title": "Lợi ích của thực phẩm chức năng - Cập nhật",
+  "content": "Nội dung đã được cập nhật...",
+  "status": "public"
+}
+```
+
+### Toggle Post Status (Admin)
+```json
+PATCH /admin/posts/1/toggle-status
+```
+
+Response:
+```json
+{
+  "id": 1,
+  "title": "Lợi ích của thực phẩm chức năng - Cập nhật",
+  "content": "Nội dung đã được cập nhật...",
+  "image_url": "/storage/posts/abc123.jpg",
+  "status": "draft",
+  "created_at": "2025-01-01T10:00:00.000000Z",
+  "updated_at": "2025-01-01T10:00:00.000000Z"
+}
+```
+
+### Get Public Posts
+```json
+GET /posts
+```
+
+Response:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Lợi ích của thực phẩm chức năng",
+      "content": "Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe...",
+      "image_url": "/storage/posts/abc123.jpg",
+      "status": "public",
+      "created_at": "2025-01-01T10:00:00.000000Z",
+      "updated_at": "2025-01-01T10:00:00.000000Z"
+    }
+  ],
+  "links": {
+    "first": "http://localhost:8000/api/v1/posts?page=1",
+    "last": "http://localhost:8000/api/v1/posts?page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "per_page": 10,
+    "to": 1,
+    "total": 1
   }
 }
 ```

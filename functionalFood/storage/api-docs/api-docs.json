@@ -678,9 +678,10 @@
                                         "type": "string",
                                         "example": "cod"
                                     },
-                                    "coupon_id": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "coupon_code": {
+                                        "description": "Mã giảm giá (nếu có)",
+                                        "type": "string",
+                                        "example": "SAVE20"
                                     },
                                     "subtotal": {
                                         "type": "number",
@@ -4668,6 +4669,650 @@
                     }
                 ]
             }
+        },
+        "/api/v1/posts": {
+            "get": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Lấy danh sách bài viết công khai",
+                "operationId": "0358fee9a40e120edbb9aa43f1b03189",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Số trang",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Danh sách bài viết",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Lợi ích của thực phẩm chức năng"
+                                                    },
+                                                    "content": {
+                                                        "type": "string",
+                                                        "example": "Thực phẩm chức năng mang lại nhiều lợi ích..."
+                                                    },
+                                                    "image_url": {
+                                                        "type": "string",
+                                                        "example": "/storage/posts/abc123.jpg"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "public"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/posts/{id}": {
+            "get": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Xem chi tiết bài viết công khai",
+                "operationId": "ce63e02f98d73ed66a8aa7a2ba1575c2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chi tiết bài viết",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Lợi ích của thực phẩm chức năng"
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "Thực phẩm chức năng mang lại nhiều lợi ích..."
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "/storage/posts/abc123.jpg"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "public"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/posts": {
+            "get": {
+                "tags": [
+                    "Admin - Posts"
+                ],
+                "summary": "Admin: Lấy danh sách tất cả bài viết",
+                "operationId": "9203621b93a7a02be21f314a760cec7a",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Số trang",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Tìm kiếm theo title",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Lọc theo status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "public",
+                                "draft"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Sắp xếp theo trường",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort_order",
+                        "in": "query",
+                        "description": "Thứ tự sắp xếp",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Danh sách bài viết",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Lợi ích của thực phẩm chức năng"
+                                                    },
+                                                    "content": {
+                                                        "type": "string",
+                                                        "example": "Thực phẩm chức năng mang lại nhiều lợi ích..."
+                                                    },
+                                                    "image_url": {
+                                                        "type": "string",
+                                                        "example": "/storage/posts/abc123.jpg"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "draft"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Posts"
+                ],
+                "summary": "Admin: Tạo bài viết mới",
+                "operationId": "29efab56b6c813475ec849f00323184c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "content",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Lợi ích của thực phẩm chức năng"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe..."
+                                    },
+                                    "image": {
+                                        "description": "Ảnh bài viết (jpeg, png, jpg, gif, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "public",
+                                            "draft"
+                                        ],
+                                        "example": "draft"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tạo bài viết thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Lợi ích của thực phẩm chức năng"
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe..."
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "/storage/posts/abc123.jpg"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "draft"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/posts/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Posts"
+                ],
+                "summary": "Admin: Xem chi tiết bài viết",
+                "operationId": "1a0658a4f4fecf3511f45c5a442046cd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chi tiết bài viết",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Lợi ích của thực phẩm chức năng"
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe..."
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "/storage/posts/abc123.jpg"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "draft"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Posts"
+                ],
+                "summary": "Admin: Cập nhật bài viết",
+                "operationId": "942b33b5291c2df97ebc1c7f3c56e7ad",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Lợi ích của thực phẩm chức năng - Cập nhật"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Nội dung đã được cập nhật..."
+                                    },
+                                    "image": {
+                                        "description": "Ảnh bài viết mới (jpeg, png, jpg, gif, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "public",
+                                            "draft"
+                                        ],
+                                        "example": "public"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật bài viết thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Lợi ích của thực phẩm chức năng - Cập nhật"
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "Nội dung đã được cập nhật..."
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "/storage/posts/abc123.jpg"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "public"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Posts"
+                ],
+                "summary": "Admin: Xóa bài viết",
+                "operationId": "ab007584d7bfe78e3d56ffc7f8426334",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Xóa bài viết thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Deleted"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/posts/{id}/toggle-status": {
+            "patch": {
+                "tags": [
+                    "Admin - Posts"
+                ],
+                "summary": "Admin: Chuyển đổi trạng thái bài viết",
+                "operationId": "60489d7649e3e8d33f8def7f68b429c9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chuyển đổi trạng thái thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Lợi ích của thực phẩm chức năng"
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe..."
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "/storage/posts/abc123.jpg"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "public"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -4731,6 +5376,14 @@
         {
             "name": "Product Reviews",
             "description": "Endpoints for product reviews"
+        },
+        {
+            "name": "Posts",
+            "description": "Public endpoints for blog posts"
+        },
+        {
+            "name": "Admin - Posts",
+            "description": "Admin endpoints for post management"
         },
         {
             "name": "Admin - Stats",

@@ -90,6 +90,16 @@ use App\Http\Controllers\Controller;
  *     name="Product Reviews",
  *     description="Endpoints for product reviews"
  * )
+ * 
+ * @OA\Tag(
+ *     name="Posts",
+ *     description="Public endpoints for blog posts"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Admin - Posts",
+ *     description="Admin endpoints for post management"
+ * )
  */
 class OpenApiSpec extends Controller
 {
@@ -2328,4 +2338,238 @@ class OpenApiSpec extends Controller
      * )
      */
     public function deleteUserAddress() {}
+
+    // ==================== POST ENDPOINTS ====================
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/posts",
+     *     tags={"Posts"},
+     *     summary="Lấy danh sách bài viết công khai",
+     *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer"), description="Số trang"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Danh sách bài viết",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Lợi ích của thực phẩm chức năng"),
+     *                 @OA\Property(property="content", type="string", example="Thực phẩm chức năng mang lại nhiều lợi ích..."),
+     *                 @OA\Property(property="image_url", type="string", example="/storage/posts/abc123.jpg"),
+     *                 @OA\Property(property="status", type="string", example="public"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )),
+     *             @OA\Property(property="links", type="object"),
+     *             @OA\Property(property="meta", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function getPosts() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/posts/{id}",
+     *     tags={"Posts"},
+     *     summary="Xem chi tiết bài viết công khai",
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Chi tiết bài viết",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Lợi ích của thực phẩm chức năng"),
+     *                 @OA\Property(property="content", type="string", example="Thực phẩm chức năng mang lại nhiều lợi ích..."),
+     *                 @OA\Property(property="image_url", type="string", example="/storage/posts/abc123.jpg"),
+     *                 @OA\Property(property="status", type="string", example="public"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function getPostById() {}
+
+    // ==================== ADMIN POST ENDPOINTS ====================
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/posts",
+     *     tags={"Admin - Posts"},
+     *     summary="Admin: Lấy danh sách tất cả bài viết",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer"), description="Số trang"),
+     *     @OA\Parameter(name="search", in="query", @OA\Schema(type="string"), description="Tìm kiếm theo title"),
+     *     @OA\Parameter(name="status", in="query", @OA\Schema(type="string", enum={"public","draft"}), description="Lọc theo status"),
+     *     @OA\Parameter(name="sort_by", in="query", @OA\Schema(type="string"), description="Sắp xếp theo trường"),
+     *     @OA\Parameter(name="sort_order", in="query", @OA\Schema(type="string", enum={"asc","desc"}), description="Thứ tự sắp xếp"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Danh sách bài viết",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Lợi ích của thực phẩm chức năng"),
+     *                 @OA\Property(property="content", type="string", example="Thực phẩm chức năng mang lại nhiều lợi ích..."),
+     *                 @OA\Property(property="image_url", type="string", example="/storage/posts/abc123.jpg"),
+     *                 @OA\Property(property="status", type="string", example="draft"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )),
+     *             @OA\Property(property="links", type="object"),
+     *             @OA\Property(property="meta", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function adminGetPosts() {}
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/admin/posts",
+     *     tags={"Admin - Posts"},
+     *     summary="Admin: Tạo bài viết mới",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"title","content","status"},
+     *                 @OA\Property(property="title", type="string", maxLength=255, example="Lợi ích của thực phẩm chức năng"),
+     *                 @OA\Property(property="content", type="string", example="Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe..."),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Ảnh bài viết (jpeg, png, jpg, gif, max 2MB)"),
+     *                 @OA\Property(property="status", type="string", enum={"public","draft"}, example="draft")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Tạo bài viết thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Lợi ích của thực phẩm chức năng"),
+     *                 @OA\Property(property="content", type="string", example="Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe..."),
+     *                 @OA\Property(property="image_url", type="string", example="/storage/posts/abc123.jpg"),
+     *                 @OA\Property(property="status", type="string", example="draft"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function adminCreatePost() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/posts/{id}",
+     *     tags={"Admin - Posts"},
+     *     summary="Admin: Xem chi tiết bài viết",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Chi tiết bài viết",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Lợi ích của thực phẩm chức năng"),
+     *                 @OA\Property(property="content", type="string", example="Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe..."),
+     *                 @OA\Property(property="image_url", type="string", example="/storage/posts/abc123.jpg"),
+     *                 @OA\Property(property="status", type="string", example="draft"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function adminShowPost() {}
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/admin/posts/{id}",
+     *     tags={"Admin - Posts"},
+     *     summary="Admin: Cập nhật bài viết",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="title", type="string", maxLength=255, example="Lợi ích của thực phẩm chức năng - Cập nhật"),
+     *                 @OA\Property(property="content", type="string", example="Nội dung đã được cập nhật..."),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Ảnh bài viết mới (jpeg, png, jpg, gif, max 2MB)"),
+     *                 @OA\Property(property="status", type="string", enum={"public","draft"}, example="public")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật bài viết thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Lợi ích của thực phẩm chức năng - Cập nhật"),
+     *                 @OA\Property(property="content", type="string", example="Nội dung đã được cập nhật..."),
+     *                 @OA\Property(property="image_url", type="string", example="/storage/posts/abc123.jpg"),
+     *                 @OA\Property(property="status", type="string", example="public"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function adminUpdatePost() {}
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/admin/posts/{id}",
+     *     tags={"Admin - Posts"},
+     *     summary="Admin: Xóa bài viết",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa bài viết thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Deleted")
+     *         )
+     *     )
+     * )
+     */
+    public function adminDeletePost() {}
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/admin/posts/{id}/toggle-status",
+     *     tags={"Admin - Posts"},
+     *     summary="Admin: Chuyển đổi trạng thái bài viết",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Chuyển đổi trạng thái thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Lợi ích của thực phẩm chức năng"),
+     *                 @OA\Property(property="content", type="string", example="Thực phẩm chức năng mang lại nhiều lợi ích cho sức khỏe..."),
+     *                 @OA\Property(property="image_url", type="string", example="/storage/posts/abc123.jpg"),
+     *                 @OA\Property(property="status", type="string", example="public"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function adminTogglePostStatus() {}
 }
