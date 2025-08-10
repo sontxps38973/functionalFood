@@ -186,10 +186,9 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|integer|exists:products,id',
             'items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
-            'address_id' => 'nullable|integer|exists:user_addresses,id',
-            'name' => 'required_without:address_id|string|max:255',
-            'phone' => 'required_without:address_id|string|max:20',
-            'address' => 'required_without:address_id|string|max:500',
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
             'email' => 'required|email|max:255',
             'payment_method' => 'required|string|in:cod,bank_transfer,online_payment',
             'coupon_code' => 'nullable|string|max:50',
@@ -305,17 +304,10 @@ class OrderController extends Controller
     // Xác định payment_status dựa trên payment_method
     $paymentStatus = $request->payment_method === 'cod' ? 'pending' : 'paid';
 
-    // Lấy thông tin địa chỉ giao hàng
-    if ($request->filled('address_id')) {
-        $addressObj = \App\Models\UserAddress::where('id', $request->address_id)->where('user_id', $user->id)->firstOrFail();
-        $orderName = $addressObj->name;
-        $orderPhone = $addressObj->phone;
-        $orderAddress = $addressObj->address;
-    } else {
-        $orderName = $request->name;
-        $orderPhone = $request->phone;
-        $orderAddress = $request->address;
-    }
+    // Lấy thông tin địa chỉ giao hàng trực tiếp từ request
+    $orderName = $request->name;
+    $orderPhone = $request->phone;
+    $orderAddress = $request->address;
 
     DB::beginTransaction();
     try {

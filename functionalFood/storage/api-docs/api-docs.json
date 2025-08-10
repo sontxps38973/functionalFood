@@ -637,6 +637,9 @@
                             "schema": {
                                 "required": [
                                     "items",
+                                    "name",
+                                    "phone",
+                                    "address",
                                     "email",
                                     "payment_method",
                                     "subtotal",
@@ -649,23 +652,18 @@
                                             "type": "object"
                                         }
                                     },
-                                    "address_id": {
-                                        "description": "ID địa chỉ giao hàng (user_addresses). Nếu truyền address_id thì không cần truyền name, phone, address.",
-                                        "type": "integer",
-                                        "example": 1
-                                    },
                                     "name": {
-                                        "description": "Tên người nhận. Bắt buộc nếu không truyền address_id.",
+                                        "description": "Tên người nhận",
                                         "type": "string",
                                         "example": "Nguyễn Văn A"
                                     },
                                     "phone": {
-                                        "description": "Số điện thoại người nhận. Bắt buộc nếu không truyền address_id.",
+                                        "description": "Số điện thoại người nhận",
                                         "type": "string",
                                         "example": "0123456789"
                                     },
                                     "address": {
-                                        "description": "Địa chỉ giao hàng. Bắt buộc nếu không truyền address_id.",
+                                        "description": "Địa chỉ giao hàng",
                                         "type": "string",
                                         "example": "123 Đường ABC, Quận 1, TP.HCM"
                                     },

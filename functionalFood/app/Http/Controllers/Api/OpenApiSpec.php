@@ -422,12 +422,11 @@ class OpenApiSpec extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"items","email","payment_method","subtotal","total"},
+     *             required={"items","name","phone","address","email","payment_method","subtotal","total"},
      *             @OA\Property(property="items", type="array", @OA\Items(type="object")),
-     *             @OA\Property(property="address_id", type="integer", example=1, description="ID địa chỉ giao hàng (user_addresses). Nếu truyền address_id thì không cần truyền name, phone, address."),
-     *             @OA\Property(property="name", type="string", example="Nguyễn Văn A", description="Tên người nhận. Bắt buộc nếu không truyền address_id."),
-     *             @OA\Property(property="phone", type="string", example="0123456789", description="Số điện thoại người nhận. Bắt buộc nếu không truyền address_id."),
-     *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM", description="Địa chỉ giao hàng. Bắt buộc nếu không truyền address_id."),
+     *             @OA\Property(property="name", type="string", example="Nguyễn Văn A", description="Tên người nhận"),
+     *             @OA\Property(property="phone", type="string", example="0123456789", description="Số điện thoại người nhận"),
+     *             @OA\Property(property="address", type="string", example="123 Đường ABC, Quận 1, TP.HCM", description="Địa chỉ giao hàng"),
      *             @OA\Property(property="email", type="string", format="email", example="user@email.com"),
      *             @OA\Property(property="payment_method", type="string", example="cod"),
      *             @OA\Property(property="coupon_code", type="string", example="SAVE20", description="Mã giảm giá (nếu có)"),
