@@ -1,24 +1,41 @@
-# Dùng PHP 8.2 + Composer
+# Sử dụng image PHP chính thức có Composer
 FROM php:8.2-fpm
 
-# Cài extensions cần cho Laravel
+# Cài đặt các extension cần thiết cho Laravel
 RUN apt-get update && apt-get install -y \
-    zip unzip git curl libpng-dev libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+    git \
+    unzip \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    curl \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Cài Composer
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy source code
+# Tạo thư mục dự án
 WORKDIR /var/www/html
+
+# Sao chép file dự án vào container
 COPY . .
 
-# Cài dependency
+# Cài đặt PHP dependencies qua Composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Set quyền
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Cài Node.js để build frontend nếu có
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install \
+    && npm run build || echo "Không có frontend để build"
 
-# Expose cổng 8000 và chạy Laravel
-EXPOSE 8000
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
+# Clear cache Laravel
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
+
+# Expose cổng chạy PHP-FPM
+EXPOSE 9000
+
+CMD ["php-fpm"]
