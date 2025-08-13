@@ -86,6 +86,10 @@ Route::prefix('v1')->group(function () {
     // Public Post API
     Route::get('posts', [\App\Http\Controllers\Api\PostController::class, 'index']);
     Route::get('posts/{id}', [\App\Http\Controllers\Api\PostController::class, 'show']);
+    
+    // Public Event API
+    Route::get('events', [EventController::class, 'publicIndex']);
+    Route::get('events/{id}', [EventController::class, 'publicShow']);
 
     // Admin routes
     Route::prefix('admin')->group(function () {

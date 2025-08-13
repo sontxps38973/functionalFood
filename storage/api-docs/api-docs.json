@@ -4668,6 +4668,215 @@
                 ]
             }
         },
+        "/api/v1/events": {
+            "get": {
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Lấy danh sách sự kiện công khai",
+                "operationId": "6bd7daffb417868e93b6a4b278856315",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Số trang",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Số item mỗi trang",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Tìm kiếm theo tên sự kiện",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Lọc sự kiện nổi bật",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Lọc theo loại sự kiện",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "running",
+                                "upcoming",
+                                "ended"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Danh sách sự kiện",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Siêu sale mùa hè"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Giảm giá lên đến 50% cho các sản phẩm mùa hè"
+                                                    },
+                                                    "start_time": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "end_time": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "banner_image": {
+                                                        "type": "string",
+                                                        "example": "/storage/events/banner.jpg"
+                                                    },
+                                                    "discount_type": {
+                                                        "type": "string",
+                                                        "example": "percentage"
+                                                    },
+                                                    "discount_value": {
+                                                        "type": "number",
+                                                        "example": 50
+                                                    },
+                                                    "is_featured": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "products": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events/{id}": {
+            "get": {
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Xem chi tiết sự kiện công khai",
+                "operationId": "cdb872879e5c3a43828a54ca895432a7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chi tiết sự kiện",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Siêu sale mùa hè"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Giảm giá lên đến 50% cho các sản phẩm mùa hè"
+                                                },
+                                                "start_time": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "end_time": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "banner_image": {
+                                                    "type": "string",
+                                                    "example": "/storage/events/banner.jpg"
+                                                },
+                                                "discount_type": {
+                                                    "type": "string",
+                                                    "example": "percentage"
+                                                },
+                                                "discount_value": {
+                                                    "type": "number",
+                                                    "example": 50
+                                                },
+                                                "is_featured": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "products": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sự kiện không tồn tại"
+                    }
+                }
+            }
+        },
         "/api/v1/posts": {
             "get": {
                 "tags": [
@@ -5378,6 +5587,10 @@
         {
             "name": "Posts",
             "description": "Public endpoints for blog posts"
+        },
+        {
+            "name": "Events",
+            "description": "Public event endpoints"
         },
         {
             "name": "Admin - Posts",

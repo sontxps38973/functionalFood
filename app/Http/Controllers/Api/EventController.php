@@ -13,7 +13,54 @@ use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
-    // Danh sách sự kiện (lọc, tìm kiếm, phân trang)
+    // Danh sách sự kiện public (chỉ events đang hoạt động)
+    public function publicIndex(Request $request)
+    {
+        $query = Event::query()->where('status', 'active');
+        
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+        
+        if ($request->has('is_featured')) {
+            $query->where('is_featured', $request->boolean('is_featured'));
+        }
+        
+        if ($request->has('type')) {
+            switch ($request->type) {
+                case 'running':
+                    $query->running();
+                    break;
+                case 'upcoming':
+                    $query->upcoming();
+                    break;
+                case 'ended':
+                    $query->ended();
+                    break;
+                default:
+                    // Mặc định là active
+                    break;
+            }
+        }
+        
+        $query->orderBy('sort_order')->orderByDesc('start_time');
+        $events = $query->with(['eventProducts.product'])->paginate($request->get('per_page', 15));
+        
+        return EventResource::collection($events);
+    }
+    
+    // Xem chi tiết sự kiện public
+    public function publicShow($id)
+    {
+        $event = Event::where('status', 'active')
+            ->with(['eventProducts.product'])
+            ->findOrFail($id);
+            
+        return new EventResource($event);
+    }
+
+    // Danh sách sự kiện (lọc, tìm kiếm, phân trang) - Admin only
     public function index(Request $request)
     {
         $query = Event::query();

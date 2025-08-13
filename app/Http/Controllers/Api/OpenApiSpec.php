@@ -91,10 +91,14 @@ use App\Http\Controllers\Controller;
  *     description="Endpoints for product reviews"
  * )
  * 
- * @OA\Tag(
- *     name="Posts",
- *     description="Public endpoints for blog posts"
- * )
+      * @OA\Tag(
+     *     name="Posts",
+     *     description="Public endpoints for blog posts"
+     * ),
+     * @OA\Tag(
+     *     name="Events",
+     *     description="Public event endpoints"
+     * )
  * 
  * @OA\Tag(
  *     name="Admin - Posts",
@@ -2337,6 +2341,74 @@ class OpenApiSpec extends Controller
      * )
      */
     public function deleteUserAddress() {}
+
+    // ==================== EVENT ENDPOINTS ====================
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/events",
+     *     tags={"Events"},
+     *     summary="Lấy danh sách sự kiện công khai",
+     *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer"), description="Số trang"),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer"), description="Số item mỗi trang"),
+     *     @OA\Parameter(name="search", in="query", @OA\Schema(type="string"), description="Tìm kiếm theo tên sự kiện"),
+     *     @OA\Parameter(name="is_featured", in="query", @OA\Schema(type="boolean"), description="Lọc sự kiện nổi bật"),
+     *     @OA\Parameter(name="type", in="query", @OA\Schema(type="string", enum={"running","upcoming","ended"}), description="Lọc theo loại sự kiện"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Danh sách sự kiện",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Siêu sale mùa hè"),
+     *                 @OA\Property(property="description", type="string", example="Giảm giá lên đến 50% cho các sản phẩm mùa hè"),
+     *                 @OA\Property(property="start_time", type="string", format="date-time"),
+     *                 @OA\Property(property="end_time", type="string", format="date-time"),
+     *                 @OA\Property(property="banner_image", type="string", example="/storage/events/banner.jpg"),
+     *                 @OA\Property(property="discount_type", type="string", example="percentage"),
+     *                 @OA\Property(property="discount_value", type="number", example=50),
+     *                 @OA\Property(property="is_featured", type="boolean", example=true),
+     *                 @OA\Property(property="products", type="array", @OA\Items(type="object"))
+     *             )),
+     *             @OA\Property(property="links", type="object"),
+     *             @OA\Property(property="meta", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function getPublicEvents() {}
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/events/{id}",
+     *     tags={"Events"},
+     *     summary="Xem chi tiết sự kiện công khai",
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Chi tiết sự kiện",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Siêu sale mùa hè"),
+     *                 @OA\Property(property="description", type="string", example="Giảm giá lên đến 50% cho các sản phẩm mùa hè"),
+     *                 @OA\Property(property="start_time", type="string", format="date-time"),
+     *                 @OA\Property(property="end_time", type="string", format="date-time"),
+     *                 @OA\Property(property="banner_image", type="string", example="/storage/events/banner.jpg"),
+     *                 @OA\Property(property="discount_type", type="string", example="percentage"),
+     *                 @OA\Property(property="discount_value", type="number", example=50),
+     *                 @OA\Property(property="is_featured", type="boolean", example=true),
+     *                 @OA\Property(property="products", type="array", @OA\Items(type="object"))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Sự kiện không tồn tại"
+     *     )
+     * )
+     */
+    public function getPublicEventById() {}
 
     // ==================== POST ENDPOINTS ====================
 
