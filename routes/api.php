@@ -23,7 +23,9 @@ Route::prefix('v1')->group(function () {
     // Public routes
     Route::prefix('public')->group(function () {
         // Category CRUD
-        Route::apiResource('public-categories', CategoryController::class)->only(['index', 'show']);
+        Route::apiResource('public-categories', CategoryController::class)
+            ->only(['index', 'show'])
+            ->names('public-categories');
         
         // Product CRUD
         Route::apiResource('products', ProductController::class)->only(['index', 'show']);
@@ -103,7 +105,8 @@ Route::prefix('v1')->group(function () {
         // Admin authenticated routes
         Route::middleware(CheckAdminToken::class)->group(function () {
             // Category management
-            Route::apiResource('admin-categories', CategoryController::class);
+            Route::apiResource('admin-categories', CategoryController::class)
+                ->names('admin-categories');
             
             // Product management
             Route::apiResource('products', ProductController::class);
