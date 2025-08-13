@@ -1,16 +1,9 @@
-# Base image: PHP + Apache
+# Base image PHP + Apache
 FROM php:8.2-apache
 
-# Cài đặt các extension cần cho Laravel
+# Cài extension cần thiết cho Laravel
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    git \
-    curl \
-    supervisor \
+    libpng-dev libonig-dev libxml2-dev zip unzip git curl supervisor \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Cài Composer
@@ -25,19 +18,18 @@ COPY . .
 # Cài dependencies Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Phân quyền cho storage và bootstrap/cache
+# Phân quyền
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Cache config và route
-RUN php artisan config:cache && php artisan route:cache
+# Copy file entrypoint
+COPY docker/entrypoint.sh /var/www/html/docker/entrypoint.sh
+RUN chmod +x /var/www/html/docker/entrypoint.sh
 
 # Copy file cấu hình Supervisor
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Expose cổng 80 cho Apache
+# Expose cổng 80
 EXPOSE 80
 
-# Chạy Supervisor để quản lý Apache + Queue
-ENTRYPOINT ["sh", "/var/www/html/docker/entrypoint.sh"]
-CMD ["/usr/bin/supervisord"]
-
+# Chạy entrypoint khi container start
+ENTRYPOINT ["/var/www/html/docker/entrypoint.sh"]
