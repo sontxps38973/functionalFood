@@ -1,41 +1,43 @@
-# Sử dụng image PHP chính thức có Composer
-FROM php:8.2-fpm
+# Base image: PHP + Apache
+FROM php:8.2-apache
 
-# Cài đặt các extension cần thiết cho Laravel
+# Cài đặt các extension cần cho Laravel
 RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
     zip \
+    unzip \
+    git \
     curl \
+    supervisor \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Cài Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Tạo thư mục dự án
+# Thiết lập thư mục làm việc
 WORKDIR /var/www/html
 
-# Sao chép file dự án vào container
+# Copy source code
 COPY . .
 
-# Cài đặt PHP dependencies qua Composer
+# Cài dependencies Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Cài Node.js để build frontend nếu có
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install \
-    && npm run build || echo "Không có frontend để build"
+# Phân quyền cho storage và bootstrap/cache
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Clear cache Laravel
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Cache config và route
+RUN php artisan config:cache && php artisan route:cache
 
-# Expose cổng chạy PHP-FPM
-EXPOSE 9000
+# Copy file cấu hình Supervisor
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-CMD ["php-fpm"]
+# Expose cổng 80 cho Apache
+EXPOSE 80
+
+# Chạy Supervisor để quản lý Apache + Queue
+ENTRYPOINT ["sh", "/var/www/html/docker/entrypoint.sh"]
+CMD ["/usr/bin/supervisord"]
+
