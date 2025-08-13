@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
@@ -22,7 +23,7 @@ Route::prefix('v1')->group(function () {
     // Public routes
     Route::prefix('public')->group(function () {
         // Category CRUD
-        Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+        Route::apiResource('public-categories', CategoryController::class)->only(['index', 'show']);
         
         // Product CRUD
         Route::apiResource('products', ProductController::class)->only(['index', 'show']);
@@ -102,7 +103,7 @@ Route::prefix('v1')->group(function () {
         // Admin authenticated routes
         Route::middleware(CheckAdminToken::class)->group(function () {
             // Category management
-            Route::apiResource('categories', CategoryController::class);
+            Route::apiResource('admin-categories', CategoryController::class);
             
             // Product management
             Route::apiResource('products', ProductController::class);
