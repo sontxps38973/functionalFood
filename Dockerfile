@@ -9,6 +9,12 @@ RUN apt-get update && apt-get install -y \
 # Cài Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Bật mod_rewrite cho Apache
+RUN a2enmod rewrite
+
+# Cấu hình Apache để trỏ vào thư mục public
+COPY docker/laravel.conf /etc/apache2/sites-available/000-default.conf
+
 # Thiết lập thư mục làm việc
 WORKDIR /var/www/html
 
@@ -18,8 +24,9 @@ COPY . .
 # Cài dependencies Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Phân quyền
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Phân quyền cho storage và cache
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 # Copy file entrypoint
 COPY docker/entrypoint.sh /var/www/html/docker/entrypoint.sh
