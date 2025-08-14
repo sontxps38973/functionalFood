@@ -21,9 +21,58 @@ class ProductController extends Controller
 public function index(Request $request)
 {
     $perPage = $request->query('per_page', 10);
-    return ProductResource::collection(
-        Product::with(['category'])->paginate($perPage)
-    );
+    $products = Product::with(['category', 'eventProducts.event'])->paginate($perPage);
+    
+    // Transform products để bao gồm thông tin giá cả sự kiện
+    $transformedProducts = $products->getCollection()->map(function ($product) {
+        $eventPriceInfo = $product->getBestEventPrice();
+        
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'description' => $product->description,
+            'status' => $product->status,
+            'product_type' => $product->product_type,
+            'category' => new \App\Http\Resources\CategoryResource($product->category),
+            
+            // Giá cả cơ bản
+            'base_price' => $product->price,
+            'base_discount' => $product->discount,
+            
+            // Thông tin sự kiện
+            'event_price' => $eventPriceInfo ? $eventPriceInfo['event_price'] : null,
+            'original_price' => $eventPriceInfo ? $eventPriceInfo['original_price'] : null,
+            'event_info' => $eventPriceInfo ? $eventPriceInfo['event_info'] : null,
+            
+            // Giá hiển thị (ưu tiên sự kiện)
+            'display_price' => $eventPriceInfo ? $eventPriceInfo['event_price'] : $product->price,
+            'display_discount_price' => $eventPriceInfo ? $eventPriceInfo['discount_price'] : $product->discount,
+            
+            'stock_quantity' => $product->stock_quantity,
+            'image' => $product->image ? asset('storage/' . $product->image) : null,
+            
+            // Thông tin bổ sung về sự kiện
+            'has_active_event' => $eventPriceInfo !== null,
+            'event_discount_percentage' => $eventPriceInfo ? 
+                round((($eventPriceInfo['original_price'] - $eventPriceInfo['event_price']) / $eventPriceInfo['original_price']) * 100, 1) : null,
+        ];
+    });
+    
+    // Tạo pagination response mới
+    $products->setCollection($transformedProducts);
+    
+    return response()->json([
+        'success' => true,
+        'data' => $products->items(),
+        'links' => $products->links(),
+        'meta' => [
+            'current_page' => $products->currentPage(),
+            'last_page' => $products->lastPage(),
+            'per_page' => $products->perPage(),
+            'total' => $products->total(),
+        ]
+    ]);
 }
 
 public function store(StoreProductRequest $request)
@@ -106,11 +155,58 @@ public function show(Product $product)
         Cache::put($cacheKey, true, now()->addHours(24));
     }
     
-    // Trả về chi tiết sản phẩm (kèm category, variants, reviews...)
-    return new ProductResource(
-        $product->load(['category', 'images', 'variants', 'reviews', 'relatedProducts'])
-    );
+    // Trả về chi tiết sản phẩm với thông tin giá cả sự kiện
+    $product->load(['category', 'images', 'variants', 'reviews', 'relatedProducts', 'eventProducts.event']);
+    
+    // Lấy thông tin giá cả sự kiện
+    $eventPriceInfo = $product->getBestEventPrice();
+
+    // Tạo response tùy chỉnh
+    $response = [
+        'id' => $product->id,
+        'name' => $product->name,
+        'slug' => $product->slug,
+        'description' => $product->description,
+        'status' => $product->status,
+        'product_type' => $product->product_type,
+        'category' => new \App\Http\Resources\CategoryResource($product->category),
+        
+        // Giá cả cơ bản
+        'base_price' => $product->price,
+        'base_discount' => $product->discount,
+        
+        // Thông tin sự kiện
+        'event_price' => $eventPriceInfo ? $eventPriceInfo['event_price'] : null,
+        'original_price' => $eventPriceInfo ? $eventPriceInfo['original_price'] : null,
+        'event_info' => $eventPriceInfo ? $eventPriceInfo['event_info'] : null,
+        
+        // Giá hiển thị (ưu tiên sự kiện)
+        'display_price' => $eventPriceInfo ? $eventPriceInfo['event_price'] : $product->price,
+        'display_discount_price' => $eventPriceInfo ? $eventPriceInfo['discount_price'] : $product->discount,
+        
+        'stock_quantity' => $product->stock_quantity,
+        'image' => $product->image ? asset('storage/' . $product->image) : null,
+        
+        'images' => \App\Http\Resources\ProductImageResource::collection($product->images),
+        'variants' => \App\Http\Resources\ProductVariantResource::collection($product->variants),
+        'reviews' => \App\Http\Resources\ProductReviewResource::collection($product->reviews),
+        'related_products' => \App\Http\Resources\ProductResource::collection($product->relatedProducts),
+        
+        'average_rating' => round($product->reviews->avg('rating'), 1),
+        'views_count' => $product->views()->count(),
+        
+        // Thông tin bổ sung về sự kiện
+        'has_active_event' => $eventPriceInfo !== null,
+        'event_discount_percentage' => $eventPriceInfo ? 
+            round((($eventPriceInfo['original_price'] - $eventPriceInfo['event_price']) / $eventPriceInfo['original_price']) * 100, 1) : null,
+    ];
+
+    return response()->json([
+        'success' => true,
+        'data' => $response
+    ]);
 }
+
 
 
 
@@ -194,74 +290,176 @@ public function show(Product $product)
         return response()->noContent();
     }
 
- public function search(Request $request)
-    {
-        $keyword = $request->query('q');
-        $products = Product::where('name', 'like', "%{$keyword}%")
-            ->orWhere('description', 'like', "%{$keyword}%")
-            ->paginate(10);
-        return ProductResource::collection($products);
-    }
+  public function search(Request $request)
+     {
+         $keyword = $request->query('q');
+         $products = Product::with(['category', 'eventProducts.event'])
+             ->where('name', 'like', "%{$keyword}%")
+             ->orWhere('description', 'like', "%{$keyword}%")
+             ->paginate(10);
+         
+         // Transform products để bao gồm thông tin giá cả sự kiện
+         $transformedProducts = $products->getCollection()->map(function ($product) {
+             $eventPriceInfo = $product->getBestEventPrice();
+             
+             return [
+                 'id' => $product->id,
+                 'name' => $product->name,
+                 'slug' => $product->slug,
+                 'description' => $product->description,
+                 'status' => $product->status,
+                 'product_type' => $product->product_type,
+                 'category' => new \App\Http\Resources\CategoryResource($product->category),
+                 
+                 // Giá cả cơ bản
+                 'base_price' => $product->price,
+                 'base_discount' => $product->discount,
+                 
+                 // Thông tin sự kiện
+                 'event_price' => $eventPriceInfo ? $eventPriceInfo['event_price'] : null,
+                 'original_price' => $eventPriceInfo ? $eventPriceInfo['original_price'] : null,
+                 'event_info' => $eventPriceInfo ? $eventPriceInfo['event_info'] : null,
+                 
+                 // Giá hiển thị (ưu tiên sự kiện)
+                 'display_price' => $eventPriceInfo ? $eventPriceInfo['event_price'] : $product->price,
+                 'display_discount_price' => $eventPriceInfo ? $eventPriceInfo['discount_price'] : $product->discount,
+                 
+                 'stock_quantity' => $product->stock_quantity,
+                 'image' => $product->image ? asset('storage/' . $product->image) : null,
+                 
+                 // Thông tin bổ sung về sự kiện
+                 'has_active_event' => $eventPriceInfo !== null,
+                 'event_discount_percentage' => $eventPriceInfo ? 
+                     round((($eventPriceInfo['original_price'] - $eventPriceInfo['event_price']) / $eventPriceInfo['original_price']) * 100, 1) : null,
+             ];
+         });
+         
+         // Tạo pagination response mới
+         $products->setCollection($transformedProducts);
+         
+         return response()->json([
+             'success' => true,
+             'data' => $products->items(),
+             'links' => $products->links(),
+             'meta' => [
+                 'current_page' => $products->currentPage(),
+                 'last_page' => $products->lastPage(),
+                 'per_page' => $products->perPage(),
+                 'total' => $products->total(),
+             ]
+         ]);
+     }
 
-    public function filter(Request $request)
-    {
-        $query = Product::query()->with('category');
+         public function filter(Request $request)
+     {
+         $query = Product::query()->with(['category', 'eventProducts.event']);
 
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
+         if ($request->filled('category_id')) {
+             $query->where('category_id', $request->category_id);
+         }
 
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
+         if ($request->filled('min_price')) {
+             $query->where('price', '>=', $request->min_price);
+         }
 
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
+         if ($request->filled('max_price')) {
+             $query->where('price', '<=', $request->max_price);
+         }
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+         if ($request->filled('status')) {
+             $query->where('status', $request->status);
+         }
 
-        if ($request->filled('product_type')) {
-            $query->where('product_type', $request->product_type);
-        }
+         if ($request->filled('product_type')) {
+             $query->where('product_type', $request->product_type);
+         }
 
-        if ($request->filled('min_views')) {
-            $query->where('view_count', '>=', $request->min_views);
-        }
+         if ($request->filled('min_views')) {
+             $query->where('view_count', '>=', $request->min_views);
+         }
 
-        if ($request->filled('min_rating')) {
-            $query->whereHas('reviews', function ($q) use ($request) {
-                $q->selectRaw('AVG(rating) as avg_rating')
-                    ->havingRaw('avg_rating >= ?', [$request->min_rating]);
-            });
-        }
+         if ($request->filled('min_rating')) {
+             $query->whereHas('reviews', function ($q) use ($request) {
+                 $q->selectRaw('AVG(rating) as avg_rating')
+                     ->havingRaw('avg_rating >= ?', [$request->min_rating]);
+             });
+         }
 
-        if ($request->filled('sort_by')) {
-            switch ($request->sort_by) {
-                case 'price_asc':
-                    $query->orderBy('price', 'asc');
-                    break;
-                case 'price_desc':
-                    $query->orderBy('price', 'desc');
-                    break;
-                case 'name_asc':
-                    $query->orderBy('name', 'asc');
-                    break;
-                case 'name_desc':
-                    $query->orderBy('name', 'desc');
-                    break;
-                case 'most_viewed':
-                    $query->orderBy('view_count', 'desc');
-                    break;
-                case 'rating_desc':
-                    $query->withAvg('reviews', 'rating')->orderBy('reviews_avg_rating', 'desc');
-                    break;
-            }
-        }
+         if ($request->filled('sort_by')) {
+             switch ($request->sort_by) {
+                 case 'price_asc':
+                     $query->orderBy('price', 'asc');
+                     break;
+                 case 'price_desc':
+                     $query->orderBy('price', 'desc');
+                     break;
+                 case 'name_asc':
+                     $query->orderBy('name', 'asc');
+                     break;
+                 case 'name_desc':
+                     $query->orderBy('name', 'desc');
+                     break;
+                 case 'most_viewed':
+                     $query->orderBy('view_count', 'desc');
+                     break;
+                 case 'rating_desc':
+                     $query->withAvg('reviews', 'rating')->orderBy('reviews_avg_rating', 'desc');
+                     break;
+             }
+         }
 
-        return ProductResource::collection($query->paginate(10));
-    }
+         $products = $query->paginate(10);
+         
+         // Transform products để bao gồm thông tin giá cả sự kiện
+         $transformedProducts = $products->getCollection()->map(function ($product) {
+             $eventPriceInfo = $product->getBestEventPrice();
+             
+             return [
+                 'id' => $product->id,
+                 'name' => $product->name,
+                 'slug' => $product->slug,
+                 'description' => $product->description,
+                 'status' => $product->status,
+                 'product_type' => $product->product_type,
+                 'category' => new \App\Http\Resources\CategoryResource($product->category),
+                 
+                 // Giá cả cơ bản
+                 'base_price' => $product->price,
+                 'base_discount' => $product->discount,
+                 
+                 // Thông tin sự kiện
+                 'event_price' => $eventPriceInfo ? $eventPriceInfo['event_price'] : null,
+                 'original_price' => $eventPriceInfo ? $eventPriceInfo['original_price'] : null,
+                 'event_info' => $eventPriceInfo ? $eventPriceInfo['event_info'] : null,
+                 
+                 // Giá hiển thị (ưu tiên sự kiện)
+                 'display_price' => $eventPriceInfo ? $eventPriceInfo['event_price'] : $product->price,
+                 'display_discount_price' => $eventPriceInfo ? $eventPriceInfo['discount_price'] : $product->discount,
+                 
+                 'stock_quantity' => $product->stock_quantity,
+                 'image' => $product->image ? asset('storage/' . $product->image) : null,
+                 
+                 // Thông tin bổ sung về sự kiện
+                 'has_active_event' => $eventPriceInfo !== null,
+                 'event_discount_percentage' => $eventPriceInfo ? 
+                     round((($eventPriceInfo['original_price'] - $eventPriceInfo['event_price']) / $eventPriceInfo['original_price']) * 100, 1) : null,
+             ];
+         });
+         
+         // Tạo pagination response mới
+         $products->setCollection($transformedProducts);
+         
+         return response()->json([
+             'success' => true,
+             'data' => $products->items(),
+             'links' => $products->links(),
+             'meta' => [
+                 'current_page' => $products->currentPage(),
+                 'last_page' => $products->lastPage(),
+                 'per_page' => $products->perPage(),
+                 'total' => $products->total(),
+             ]
+         ]);
+     }
 
 }

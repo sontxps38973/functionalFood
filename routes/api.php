@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\ReviewReportController;
 use App\Http\Controllers\Api\ProductReviewAdminController;
 use App\Http\Controllers\Api\StatsController;
+use App\Http\Controllers\Api\PaymentController;
 
 
 Route::prefix('v1')->group(function () {
@@ -32,12 +33,18 @@ Route::prefix('v1')->group(function () {
             ->only(['index', 'show'])
             ->names('public-products');
         
+
+        
         // Product search & filter
         Route::get('products-search', [ProductController::class, 'search'])->name('public-products.search');
         Route::get('products-filter', [ProductController::class, 'filter'])->name('public-products.filter');
         
         // Public coupon routes
         Route::get('coupons/valid', [CouponController::class, 'getValidCoupons'])->name('public-coupons.valid');
+        
+        // Public Event API
+        Route::get('events', [EventController::class, 'publicIndex'])->name('public-events.index');
+        Route::get('events/{id}', [EventController::class, 'publicShow'])->name('public-events.show');
     });
 
     // Authentication routes
@@ -92,10 +99,11 @@ Route::prefix('v1')->group(function () {
     // Public Post API
     Route::get('posts', [\App\Http\Controllers\Api\PostController::class, 'index'])->name('public-posts.index');
     Route::get('posts/{id}', [\App\Http\Controllers\Api\PostController::class, 'show'])->name('public-posts.show');
-    
-    // Public Event API
-    Route::get('events', [EventController::class, 'publicIndex'])->name('public-events.index');
-    Route::get('events/{id}', [EventController::class, 'publicShow'])->name('public-events.show');
+
+    // Payment routes
+    Route::post('/create-payment', [PaymentController::class, 'createPayment']);
+    Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
+    Route::get('/vnpay-ipn', [PaymentController::class, 'vnpayIpn']);
 
     // Admin routes
     Route::prefix('admin')->group(function () {

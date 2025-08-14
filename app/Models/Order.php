@@ -25,6 +25,9 @@ class Order extends Model
         'payment_status',
         'payment_method',
         'payment_transaction_id',
+        'payment_reference',
+        'paid_at',
+        'payment_error',
         'tracking_number',
         'shipping_method',
         'shipped_at',
@@ -36,6 +39,7 @@ class Order extends Model
     protected $casts = [
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'paid_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
         'tax' => 'decimal:2',
