@@ -3,341 +3,278 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\VnpayService;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
-use App\Models\Order;
-use App\Models\OrderItem;
 
 class PaymentController extends Controller
 {
+    private $vnpayService;
+
+    public function __construct(VnpayService $vnpayService)
+    {
+        $this->vnpayService = $vnpayService;
+    }
+
     /**
-     * Create a new payment transaction
+     * Tạo payment URL cho order
      */
     public function createPayment(Request $request)
     {
         try {
             $request->validate([
-                'order_id' => 'required|exists:orders,id',
-                'amount' => 'required|numeric|min:1000', // Minimum 1000 VND
-                'return_url' => 'nullable|url',
-                'ipn_url' => 'nullable|url',
+                'order_id' => 'required|integer|exists:orders,id',
+                'amount' => 'required|numeric|min:1000',
+                'order_info' => 'nullable|string',
+                'bank_code' => 'nullable|string',
+                'expire_date' => 'nullable|string',
+                'billing' => 'nullable|array',
+                'invoice' => 'nullable|array',
             ]);
 
+            // Get order
             $order = Order::findOrFail($request->order_id);
 
-            // Check if order is pending
-            if ($order->status !== 'pending') {
+            // Prepare payment data
+            $paymentData = [
+                'amount' => $request->amount,
+                'order_info' => $request->order_info ?: "Thanh toan don hang #{$order->order_number}",
+                'txn_ref' => $order->order_number,
+                'locale' => 'vn',
+                'order_type' => 'billpayment',
+                'bank_code' => $request->bank_code,
+                'expire_date' => $request->expire_date,
+                'billing' => $request->billing,
+                'invoice' => $request->invoice,
+            ];
+
+            // Create payment URL
+            $result = $this->vnpayService->createPaymentUrl($paymentData);
+
+            if ($result['code'] === '00') {
+                // Update order with payment reference
+                $order->update([
+                    'payment_reference' => $result['data']['txn_ref'],
+                    'payment_method' => 'vnpay'
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment URL created successfully',
+                    'data' => $result['data']
+                ]);
+            } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Order is not in pending status'
+                    'message' => $result['message']
                 ], 400);
             }
 
-            // Set default URLs if not provided
-            $returnUrl = $request->return_url ?: config('app.url') . '/payment/return';
-            $ipnUrl = $request->ipn_url ?: config('app.url') . '/api/v1/vnpay-ipn';
-
-            // VNPay configuration
-            $vnp_TmnCode = config('services.vnpay.tmn_code');
-            $vnp_HashSecret = config('services.vnpay.hash_secret');
-            $vnp_Url = config('services.vnpay.payment_url');
-            $vnp_Returnurl = $returnUrl;
-            $vnp_IpnUrl = $ipnUrl;
-
-            $vnp_TxnRef = $order->id . '_' . time(); // Unique transaction reference
-            $vnp_OrderInfo = 'Thanh toan don hang #' . $order->id;
-            $vnp_OrderType = 'billpayment';
-            $vnp_Amount = $request->amount * 100; // VNPay expects amount in VND (no decimal)
-            $vnp_Locale = 'vn';
-            $vnp_CurrCode = 'VND';
-            $vnp_TxnType = 'pay';
-
-            // Fix IP Address for VNPay Error 99 - Enhanced IP handling
-            $vnp_IpAddr = $request->ip();
-            
-            // Log original IP for debugging
-            Log::info('VNPay Payment - Original IP from request: ' . $vnp_IpAddr);
-            
-            // Handle various localhost/empty IP scenarios
-            if (empty($vnp_IpAddr) || 
-                $vnp_IpAddr === '127.0.0.1' || 
-                $vnp_IpAddr === '::1' || 
-                $vnp_IpAddr === 'localhost' ||
-                $vnp_IpAddr === '0.0.0.0') {
-                
-                // Try to get real IP from various sources
-                $realIp = $request->header('X-Forwarded-For') ?: 
-                          $request->header('X-Real-IP') ?: 
-                          $request->header('CF-Connecting-IP') ?: 
-                          '203.205.254.157'; // Fallback to public IP
-                
-                $vnp_IpAddr = $realIp;
-                Log::info('VNPay Payment - Using fallback IP: ' . $vnp_IpAddr);
-            }
-            
-            // Ensure IP is not empty
-            if (empty($vnp_IpAddr)) {
-                $vnp_IpAddr = '203.205.254.157'; // Final fallback
-                Log::warning('VNPay Payment - Using final fallback IP: ' . $vnp_IpAddr);
-            }
-
-            $inputData = array(
-                "vnp_Version" => "2.1.0",
-                "vnp_TmnCode" => $vnp_TmnCode,
-                "vnp_Amount" => $vnp_Amount,
-                "vnp_Command" => "pay",
-                "vnp_CreateDate" => date('YmdHis'),
-                "vnp_CurrCode" => $vnp_CurrCode,
-                "vnp_IpAddr" => $vnp_IpAddr, // Fixed IP address
-                "vnp_Locale" => $vnp_Locale,
-                "vnp_OrderInfo" => $vnp_OrderInfo,
-                "vnp_OrderType" => $vnp_OrderType,
-                "vnp_ReturnUrl" => $vnp_Returnurl,
-                "vnp_IpnUrl" => $vnp_IpnUrl,
-                "vnp_TxnRef" => $vnp_TxnRef,
-                "vnp_TxnType" => $vnp_TxnType,
-            );
-            
-            // Log final IP address being sent to VNPay
-            Log::info('VNPay Payment - Final IP address: ' . $vnp_IpAddr);
-            Log::info('VNPay Payment - Input data for hash: ' . json_encode($inputData));
-
-            ksort($inputData);
-            $query = "";
-            $i = 0;
-            $hashdata = "";
-            foreach ($inputData as $key => $value) {
-                if ($i == 1) {
-                    $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-                } else {
-                    $hashdata .= urlencode($key) . "=" . urlencode($value);
-                    $i = 1;
-                }
-                $query .= urlencode($key) . "=" . urlencode($value) . '&';
-            }
-
-            $vnp_Url = $vnp_Url . "?" . $query;
-            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
-
-            // Update order with payment info
-            $order->update([
-                'payment_method' => 'vnpay',
-                'payment_reference' => $vnp_TxnRef,
-                'status' => 'processing'
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Payment URL created successfully',
-                'data' => [
-                    'payment_url' => $vnp_Url,
-                    'transaction_ref' => $vnp_TxnRef,
-                    'order_id' => $order->id
-                ]
-            ]);
         } catch (\Exception $e) {
             Log::error('Payment creation error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create payment'
+                'message' => 'Error creating payment: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Handle VNPay return (user redirects back from VNPay)
+     * Xử lý return URL từ VNPay
      */
     public function vnpayReturn(Request $request)
     {
         try {
-            $vnp_HashSecret = config('services.vnpay.hash_secret');
+            Log::info('VNPay Return URL called', $request->all());
 
-            $inputData = array();
-            $returnData = array();
-            $data = $request->all();
+            // Verify payment response
+            $verification = $this->vnpayService->verifyPaymentResponse($request->all());
 
-            foreach ($data as $key => $value) {
-                if (substr($key, 0, 4) == "vnp_") {
-                    $inputData[$key] = $value;
-                }
+            if (!$verification['valid']) {
+                Log::error('VNPay Return - Invalid response', $verification);
+                return view('payment.error', [
+                    'message' => 'Invalid payment response',
+                    'error' => $verification['message']
+                ]);
             }
 
-            $vnp_SecureHash = $inputData['vnp_SecureHash'];
-            unset($inputData['vnp_SecureHash']);
-            unset($inputData['vnp_SecureHashType']);
-            ksort($inputData);
-            $i = 0;
-            $hashData = "";
-            foreach ($inputData as $key => $value) {
-                if ($i == 1) {
-                    $hashData = $hashData . '&' . urlencode($key) . "=" . urlencode($value);
-                } else {
-                    $hashData = urlencode($key) . "=" . urlencode($value);
-                    $i = 1;
-                }
-            }
+            $responseData = $verification['data'];
+            $orderNumber = $responseData['vnp_TxnRef'] ?? null;
+            $responseCode = $responseData['vnp_ResponseCode'] ?? null;
+            $transactionId = $responseData['vnp_TransactionNo'] ?? null;
+            $amount = $responseData['vnp_Amount'] ?? null;
 
-            $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
-
-            // Extract order ID from transaction reference
-            $vnp_TxnRef = $inputData['vnp_TxnRef'];
-            $orderId = explode('_', $vnp_TxnRef)[0];
-
-            $order = Order::find($orderId);
+            // Find order
+            $order = Order::where('order_number', $orderNumber)->first();
 
             if (!$order) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Order not found'
-                ], 404);
+                Log::error('VNPay Return - Order not found', ['order_number' => $orderNumber]);
+                return view('payment.error', [
+                    'message' => 'Order not found',
+                    'error' => 'Order number: ' . $orderNumber
+                ]);
             }
 
-            if ($secureHash == $vnp_SecureHash) {
-                if ($inputData['vnp_ResponseCode'] == '00') {
-                    // Payment successful
-                    $order->update([
-                        'status' => 'paid',
-                        'paid_at' => now(),
-                        'payment_transaction_id' => $inputData['vnp_TransactionNo'] ?? null
-                    ]);
+            // Process payment result
+            if ($responseCode === '00') {
+                // Payment successful
+                $order->update([
+                    'status' => 'paid',
+                    'payment_transaction_id' => $transactionId,
+                    'paid_at' => now(),
+                    'payment_error' => null
+                ]);
 
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Payment successful',
-                        'data' => [
-                            'order_id' => $order->id,
-                            'transaction_id' => $inputData['vnp_TransactionNo'] ?? null,
-                            'amount' => $inputData['vnp_Amount'] / 100, // Convert back from VND
-                            'bank_code' => $inputData['vnp_BankCode'] ?? null,
-                            'payment_time' => $inputData['vnp_PayDate'] ?? null
-                        ]
-                    ]);
-                } else {
-                    // Payment failed
-                    $order->update([
-                        'status' => 'payment_failed',
-                        'payment_error' => $inputData['vnp_ResponseCode'] ?? 'Unknown error'
-                    ]);
+                Log::info('VNPay Return - Payment successful', [
+                    'order_id' => $order->id,
+                    'transaction_id' => $transactionId,
+                    'amount' => $amount
+                ]);
 
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Payment failed',
-                        'data' => [
-                            'order_id' => $order->id,
-                            'error_code' => $inputData['vnp_ResponseCode'] ?? null,
-                            'error_message' => $this->getVnpayErrorMessage($inputData['vnp_ResponseCode'] ?? '')
-                        ]
-                    ]);
-                }
+                return view('payment.success', [
+                    'order' => $order,
+                    'transaction_id' => $transactionId,
+                    'amount' => $amount ? $amount / 100 : null
+                ]);
+
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid signature'
-                ], 400);
+                // Payment failed
+                $order->update([
+                    'status' => 'payment_failed',
+                    'payment_error' => "VNPay Error: {$responseCode}"
+                ]);
+
+                Log::error('VNPay Return - Payment failed', [
+                    'order_id' => $order->id,
+                    'response_code' => $responseCode,
+                    'response_data' => $responseData
+                ]);
+
+                return view('payment.error', [
+                    'message' => 'Payment failed',
+                    'error' => "VNPay Error Code: {$responseCode}",
+                    'order' => $order
+                ]);
             }
+
         } catch (\Exception $e) {
-            Log::error('VNPay return error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error processing payment return'
-            ], 500);
+            Log::error('VNPay Return - Exception: ' . $e->getMessage());
+            return view('payment.error', [
+                'message' => 'Payment processing error',
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
     /**
-     * Handle VNPay IPN (Instant Payment Notification)
+     * Xử lý IPN (Instant Payment Notification) từ VNPay
      */
     public function vnpayIpn(Request $request)
     {
         try {
-            $vnp_HashSecret = config('services.vnpay.hash_secret');
+            Log::info('VNPay IPN received', $request->all());
 
-            $inputData = array();
-            $data = $request->all();
+            // Verify payment response
+            $verification = $this->vnpayService->verifyPaymentResponse($request->all());
 
-            foreach ($data as $key => $value) {
-                if (substr($key, 0, 4) == "vnp_") {
-                    $inputData[$key] = $value;
-                }
+            if (!$verification['valid']) {
+                Log::error('VNPay IPN - Invalid response', $verification);
+                return response('Invalid response', 400);
             }
 
-            $vnp_SecureHash = $inputData['vnp_SecureHash'];
-            unset($inputData['vnp_SecureHash']);
-            unset($inputData['vnp_SecureHashType']);
-            ksort($inputData);
-            $i = 0;
-            $hashData = "";
-            foreach ($inputData as $key => $value) {
-                if ($i == 1) {
-                    $hashData = $hashData . '&' . urlencode($key) . "=" . urlencode($value);
-                } else {
-                    $hashData = urlencode($key) . "=" . urlencode($value);
-                    $i = 1;
-                }
-            }
+            $responseData = $verification['data'];
+            $orderNumber = $responseData['vnp_TxnRef'] ?? null;
+            $responseCode = $responseData['vnp_ResponseCode'] ?? null;
+            $transactionId = $responseData['vnp_TransactionNo'] ?? null;
+            $amount = $responseData['vnp_Amount'] ?? null;
 
-            $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
-
-            // Extract order ID from transaction reference
-            $vnp_TxnRef = $inputData['vnp_TxnRef'];
-            $orderId = explode('_', $vnp_TxnRef)[0];
-
-            $order = Order::find($orderId);
+            // Find order
+            $order = Order::where('order_number', $orderNumber)->first();
 
             if (!$order) {
-                Log::error('IPN: Order not found - ' . $orderId);
+                Log::error('VNPay IPN - Order not found', ['order_number' => $orderNumber]);
                 return response('Order not found', 404);
             }
 
-            if ($secureHash == $vnp_SecureHash) {
-                if ($inputData['vnp_ResponseCode'] == '00') {
-                    // Payment successful
-                    $order->update([
-                        'status' => 'paid',
-                        'paid_at' => now(),
-                        'payment_transaction_id' => $inputData['vnp_TransactionNo'] ?? null
-                    ]);
+            // Process payment result
+            if ($responseCode === '00') {
+                // Payment successful
+                $order->update([
+                    'status' => 'paid',
+                    'payment_transaction_id' => $transactionId,
+                    'paid_at' => now(),
+                    'payment_error' => null
+                ]);
 
-                    Log::info('IPN: Payment successful for order ' . $orderId);
-                    return response('OK', 200);
-                } else {
-                    // Payment failed
-                    $order->update([
-                        'status' => 'payment_failed',
-                        'payment_error' => $inputData['vnp_ResponseCode'] ?? 'Unknown error'
-                    ]);
+                Log::info('VNPay IPN - Payment successful', [
+                    'order_id' => $order->id,
+                    'transaction_id' => $transactionId,
+                    'amount' => $amount
+                ]);
 
-                    Log::info('IPN: Payment failed for order ' . $orderId . ' - Code: ' . $inputData['vnp_ResponseCode']);
-                    return response('OK', 200);
-                }
+                return response('OK', 200);
+
             } else {
-                Log::error('IPN: Invalid signature for order ' . $orderId);
-                return response('Invalid signature', 400);
+                // Payment failed
+                $order->update([
+                    'status' => 'payment_failed',
+                    'payment_error' => "VNPay Error: {$responseCode}"
+                ]);
+
+                Log::error('VNPay IPN - Payment failed', [
+                    'order_id' => $order->id,
+                    'response_code' => $responseCode,
+                    'response_data' => $responseData
+                ]);
+
+                return response('Payment failed', 400);
             }
+
         } catch (\Exception $e) {
-            Log::error('IPN error: ' . $e->getMessage());
-            return response('Error processing IPN', 500);
+            Log::error('VNPay IPN - Exception: ' . $e->getMessage());
+            return response('Internal error', 500);
         }
     }
 
     /**
-     * Get VNPay error message by response code
+     * Test payment URL creation (no authentication required)
      */
-    private function getVnpayErrorMessage($responseCode)
+    public function testPayment(Request $request)
     {
-        $errorMessages = [
-            '00' => 'Giao dịch thành công',
-            '01' => 'Giao dịch chưa hoàn tất',
-            '02' => 'Giao dịch bị lỗi',
-            '04' => 'Giao dịch đảo (Khách hàng đã bị trừ tiền tại Ngân hàng nhưng GD chưa thành công ở VNPAY)',
-            '05' => 'VNPAY đang xử lý',
-            '06' => 'VNPAY đã gửi yêu cầu hoàn tiền sang Ngân hàng',
-            '07' => 'Giao dịch bị nghi ngờ gian lận',
-            '09' => 'Giao dịch không thành công do: Thẻ/Tài khoản bị khóa',
-        ];
+        try {
+            $request->validate([
+                'amount' => 'required|numeric|min:1000',
+                'order_info' => 'nullable|string',
+                'bank_code' => 'nullable|string',
+                'billing' => 'nullable|array',
+                'invoice' => 'nullable|array',
+            ]);
 
-        return $errorMessages[$responseCode] ?? 'Mã lỗi không xác định';
+            // Prepare test payment data
+            $paymentData = [
+                'amount' => $request->amount,
+                'order_info' => $request->order_info ?: 'Test payment',
+                'txn_ref' => 'TEST_' . time(),
+                'locale' => 'vn',
+                'order_type' => 'billpayment',
+                'bank_code' => $request->bank_code,
+                'billing' => $request->billing,
+                'invoice' => $request->invoice,
+            ];
+
+            // Create payment URL
+            $result = $this->vnpayService->createPaymentUrl($paymentData);
+
+            return response()->json($result);
+
+        } catch (\Exception $e) {
+            Log::error('VNPay Test Payment Error: ' . $e->getMessage());
+            return response()->json([
+                'code' => '99',
+                'message' => 'Error creating test payment: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 }

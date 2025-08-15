@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Support\Currency;
+use App\Models\ProductVariant;
+use App\Models\Product;
+use App\Services\VnpayService;
 
 class OrderController extends Controller
 {
@@ -179,251 +182,217 @@ class OrderController extends Controller
     ]);
 }
 
+    /**
+     * Place a new order
+     */
     public function placeOrder(Request $request)
     {
-        $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer|exists:products,id',
-            'items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'address' => 'required|string|max:500',
-            'email' => 'required|email|max:255',
-            'payment_method' => 'required|string|in:cod,bank_transfer,online_payment',
-            'coupon_code' => 'nullable|string|max:50',
-            'subtotal' => 'required|numeric|min:0',
-            'shipping_fee' => 'nullable|numeric|min:0',
-            'tax' => 'nullable|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
-            'total' => 'required|numeric|min:0',
-            'notes' => 'nullable|string|max:1000',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email',
+                'phone' => 'required|string|max:20',
+                'address' => 'required|string',
+                'payment_method' => 'required|in:cod,online_payment',
+                'subtotal' => 'required|numeric|min:0',
+                'shipping_fee' => 'required|numeric|min:0',
+                'tax' => 'required|numeric|min:0',
+                'discount' => 'required|numeric|min:0',
+                'total' => 'required|numeric|min:0',
+                'notes' => 'nullable|string',
+                'coupon_code' => 'nullable|string',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|integer|exists:products,id',
+                'items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.price' => 'required|numeric|min:0',
+                'items.*.product_name' => 'nullable|string|max:255',
+            ]);
 
-    $user = $request->user();
+            $user = $request->user();
 
-    // Kiểm tra tồn kho trước khi đặt hàng
-    $stockErrors = [];
-    $orderItems = [];
-    $calculatedSubtotal = 0;
-
-    foreach ($request->items as $item) {
-        $product = \App\Models\Product::find($item['product_id']);
-        if (!$product) {
-            return response()->json(['message' => 'Sản phẩm không tồn tại.'], 422);
-        }
-
-        // Xử lý sản phẩm có variant
-        if (!empty($item['variant_id'])) {
-            $variant = \App\Models\ProductVariant::where('id', $item['variant_id'])
-                ->where('product_id', $item['product_id'])
-                ->first();
-            
-            if (!$variant) {
-                return response()->json(['message' => 'Biến thể sản phẩm không tồn tại.'], 422);
+            // Check stock availability
+            foreach ($request->items as $item) {
+                if (isset($item['variant_id'])) {
+                    $variant = ProductVariant::find($item['variant_id']);
+                    if (!$variant || $variant->stock_quantity < $item['quantity']) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Sản phẩm {$variant->product->name} chỉ còn {$variant->stock_quantity} trong kho."
+                        ], 400);
+                    }
+                } else {
+                    $product = Product::find($item['product_id']);
+                    if (!$product || $product->stock_quantity < $item['quantity']) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Sản phẩm {$product->name} chỉ còn {$product->stock_quantity} trong kho."
+                        ], 400);
+                    }
+                }
             }
 
-            if ($variant->stock_quantity < $item['quantity']) {
-                $stockErrors[] = "Sản phẩm {$product->name} ({$variant->attribute_name_text}) chỉ còn {$variant->stock_quantity} trong kho.";
-            }
+            // Generate order number
+            $orderNumber = 'ORD' . date('Ymd') . str_pad(Order::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT);
 
-            $price = $variant->discount > 0 ? $variant->price - $variant->discount : $variant->price;
-            $calculatedSubtotal += $price * $item['quantity'];
-
-            $orderItems[] = [
-                'type' => 'variant',
-                'product' => $product,
-                'variant' => $variant,
-                'quantity' => $item['quantity'],
-                'price' => $variant->price,
-                'discount_price' => $variant->discount,
-                'final_price' => $price,
-                'stock_quantity' => $variant->stock_quantity
-            ];
-
-        } else {
-            // Xử lý sản phẩm không có variant
-            if ($product->stock_quantity < $item['quantity']) {
-                $stockErrors[] = "Sản phẩm {$product->name} chỉ còn {$product->stock_quantity} trong kho.";
-            }
-
-            $price = $product->discount > 0 ? $product->price - $product->discount : $product->price;
-            $calculatedSubtotal += $price * $item['quantity'];
-
-            $orderItems[] = [
-                'type' => 'product',
-                'product' => $product,
-                'variant' => null,
-                'quantity' => $item['quantity'],
-                'price' => $product->price,
-                'discount_price' => $product->discount,
-                'final_price' => $price,
-                'stock_quantity' => $product->stock_quantity
-            ];
-        }
-    }
-
-    if (!empty($stockErrors)) {
-        return response()->json([
-            'message' => 'Một số sản phẩm không đủ số lượng trong kho.',
-            'errors' => $stockErrors
-        ], 422);
-    }
-
-    // Kiểm tra coupon nếu có (chỉ kiểm tra trạng thái, không tính lại discount)
-    $coupon = null;
-    if ($request->filled('coupon_code')) {
-        $coupon = Coupon::where('code', $request->coupon_code)
-            ->where('is_active', true)
-            ->where(function ($q) {
-                $now = now();
-                $q->whereNull('start_at')->orWhere('start_at', '<=', $now);
-                $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
-            })
-            ->first();
-            
-        if (!$coupon) {
-            return response()->json(['message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'], 422);
-        }
-        if ($coupon->usage_limit !== null && $coupon->used_count >= $coupon->usage_limit) {
-            return response()->json(['message' => 'Mã đã hết lượt sử dụng.'], 422);
-        }
-    }
-
-    // Tính toán các giá trị
-    $shippingFee = $request->shipping_fee ?? 0;
-    $tax = $request->tax ?? 0;
-    $finalDiscount = $request->discount ?? 0;
-    $finalTotal = $request->total;
-
-    // Kiểm tra discount và total gửi lên
-    if ($finalDiscount < 0 || $finalDiscount > $calculatedSubtotal) {
-        return response()->json(['message' => 'Giá trị giảm giá không hợp lệ.'], 422);
-    }
-
-    // Xác định payment_status dựa trên payment_method
-    $paymentStatus = $request->payment_method === 'cod' ? 'pending' : 'paid';
-
-    // Lấy thông tin địa chỉ giao hàng trực tiếp từ request
-    $orderName = $request->name;
-    $orderPhone = $request->phone;
-    $orderAddress = $request->address;
-
-    DB::beginTransaction();
-    try {
-        $order = Order::create([
-            'user_id' => $user->id,
-            'name' => $orderName,
-            'phone' => $orderPhone,
-            'address' => $orderAddress,
-            'email' => $request->email,
-            'subtotal' => $calculatedSubtotal,
-            'shipping_fee' => $shippingFee,
-            'tax' => $tax,
-            'discount' => $finalDiscount,
-            'total' => $finalTotal,
-            'coupon_id' => $coupon ? $coupon->id : null,
-            'status' => 'pending',
-            'payment_status' => $paymentStatus,
-            'payment_method' => $request->payment_method,
-            'notes' => $request->notes,
-        ]);
-
-        foreach ($orderItems as $item) {
-            $product = $item['product'];
-            $variant = $item['variant'];
-            
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-                'product_variant_id' => $variant ? $variant->id : null,
-                'product_name' => $product->name,
-                'variant_name' => $variant ? $variant->attribute_name_text : null,
-                'sku' => $variant ? $variant->sku : $product->sku,
-                'product_image' => $variant ? ($variant->image ?: $product->image) : $product->image,
-                'price' => $item['price'],
-                'discount_price' => $item['discount_price'],
-                'final_price' => $item['final_price'],
-                'quantity' => $item['quantity'],
-                'total' => $item['final_price'] * $item['quantity'],
-                'weight' => $product->weight ?? null,
-                'dimensions' => $product->dimensions ?? null,
+            // Create order
+            $order = Order::create([
+                'user_id' => $user->id,
+                'order_number' => $orderNumber,
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'notes' => $request->notes,
+                'subtotal' => $request->subtotal,
+                'shipping_fee' => $request->shipping_fee,
+                'tax' => $request->tax,
+                'discount' => $request->discount,
+                'total' => $request->total,
+                'payment_method' => $request->payment_method,
                 'status' => 'pending',
             ]);
 
-            // Cập nhật tồn kho
-            if ($variant) {
-                $variant->decrement('stock_quantity', $item['quantity']);
-            } else {
-                $product->decrement('stock_quantity', $item['quantity']);
-            }
-        }
-
-        // Nếu có mã giảm giá → ghi lại và tăng lượt
-        if ($coupon) {
-            CouponUser::create([
-                'coupon_id' => $coupon->id,
-                'user_id' => $user->id,
-                'usage_count' => 1,
-                'used_at' => now(),
-                'order_id' => $order->id
-            ]);
-            $coupon->increment('used_count');
-        }
-
-        $this->updateUserRank($user);
-
-        DB::commit();
-
-        // Nếu thanh toán online, tạo payment URL
-        $paymentData = null;
-        if ($request->payment_method === 'online_payment') {
-            try {
-                $paymentController = new \App\Http\Controllers\Api\PaymentController();
-                $paymentRequest = new Request([
-                    'order_id' => $order->id,
-                    'amount' => $order->total,
-                ]);
+            // Create order items
+            foreach ($request->items as $item) {
+                // Get product info for static storage
+                $product = Product::find($item['product_id']);
+                $variant = isset($item['variant_id']) ? ProductVariant::find($item['variant_id']) : null;
                 
-                $paymentResponse = $paymentController->createPayment($paymentRequest);
-                if ($paymentResponse->getStatusCode() === 200) {
-                    $paymentData = json_decode($paymentResponse->getContent(), true);
+                $orderItem = OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'product_variant_id' => $item['variant_id'] ?? null,
+                    'product_name' => $item['product_name'] ?? $product->name,
+                    'variant_name' => $variant ? $variant->name : null,
+                    'sku' => $variant ? $variant->sku : $product->sku,
+                    'product_image' => $product->images->first() ? $product->images->first()->image_path : null,
+                    'price' => $item['price'],
+                    'discount_price' => 0, // Default discount price
+                    'final_price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'total' => $item['price'] * $item['quantity'],
+                    'weight' => $product->weight ?? null,
+                    'dimensions' => $product->dimensions ?? null,
+                    'status' => 'pending'
+                ]);
+
+                // Update stock
+                if (isset($item['variant_id'])) {
+                    $variant = ProductVariant::find($item['variant_id']);
+                    $variant->decrement('stock_quantity', $item['quantity']);
+                } else {
+                    $product = Product::find($item['product_id']);
+                    $product->decrement('stock_quantity', $item['quantity']);
                 }
-            } catch (\Exception $e) {
-                Log::error('Payment creation error in placeOrder: ' . $e->getMessage());
             }
+
+            // Apply coupon if provided
+            if ($request->coupon_code) {
+                $coupon = Coupon::where('code', $request->coupon_code)
+                    ->where('status', 'active')
+                    ->where('start_date', '<=', now())
+                    ->where('end_date', '>=', now())
+                    ->first();
+
+                if ($coupon) {
+                    // Check if user already used this coupon
+                    $usedCoupon = CouponUser::where('user_id', $user->id)
+                        ->where('coupon_id', $coupon->id)
+                        ->where('used', true)
+                        ->first();
+
+                    if (!$usedCoupon) {
+                        CouponUser::create([
+                            'user_id' => $user->id,
+                            'coupon_id' => $coupon->id,
+                            'used' => true,
+                            'used_at' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            // If payment method is online_payment, create VNPay payment URL
+            $paymentData = null;
+            if ($request->payment_method === 'online_payment') {
+                try {
+                    $vnpayService = app(VnpayService::class);
+                    
+                    // Prepare payment data
+                    $paymentRequest = [
+                        'amount' => $order->total,
+                        'order_info' => "Thanh toan don hang #{$order->order_number}",
+                        'txn_ref' => $order->order_number,
+                        'locale' => 'vn',
+                        'order_type' => 'billpayment',
+                        'billing' => [
+                            'mobile' => $order->phone,
+                            'email' => $order->email,
+                            'fullname' => $order->name,
+                            'address' => $order->address,
+                            'city' => 'Đà Nẵng', // You can make this dynamic
+                            'country' => 'VN'
+                        ],
+                        'invoice' => [
+                            'phone' => $order->phone,
+                            'email' => $order->email,
+                            'customer' => $order->name,
+                            'address' => $order->address,
+                            'company' => 'Functional Food',
+                            'taxcode' => '123456789', // You can make this dynamic
+                            'type' => 'I'
+                        ]
+                    ];
+
+                    $paymentResult = $vnpayService->createPaymentUrl($paymentRequest);
+                    
+                    if ($paymentResult['code'] === '00') {
+                        // Update order with payment reference
+                        $order->update([
+                            'payment_reference' => $paymentResult['data']['txn_ref'],
+                            'payment_method' => 'vnpay'
+                        ]);
+
+                        $paymentData = $paymentResult['data'];
+                    } else {
+                        // Payment URL creation failed
+                        $order->update([
+                            'status' => 'payment_failed',
+                            'payment_error' => $paymentResult['message']
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Payment creation error in placeOrder: ' . $e->getMessage());
+                    $order->update([
+                        'status' => 'payment_failed',
+                        'payment_error' => 'Payment service error: ' . $e->getMessage()
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đặt hàng thành công',
+                'data' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'total' => $order->total,
+                    'status' => $order->status,
+                    'payment_method' => $order->payment_method,
+                    'payment_url' => $paymentData['payment_url'] ?? null,
+                    'payment_reference' => $paymentData['txn_ref'] ?? null,
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Order placement error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi đặt hàng: ' . $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'message' => 'Đặt hàng thành công',
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-            'order' => [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'total' => Currency::toVndInt($order->total),
-                'status' => $order->status,
-                'payment_status' => $order->payment_status,
-                'payment_method' => $order->payment_method,
-                'created_at' => $order->created_at
-            ],
-            'payment' => $paymentData
-        ], 201);
-
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        Log::error('Order placement error: ' . $e->getMessage(), [
-            'user_id' => $user->id,
-            'request' => $request->all(),
-            'trace' => $e->getTraceAsString()
-        ]);
-        
-        return response()->json([
-            'message' => 'Lỗi khi đặt hàng. Vui lòng thử lại sau.',
-            'error' => config('app.debug') ? $e->getMessage() : null
-        ], 500);
     }
-}
 
 protected function updateUserRank($user)
 {
