@@ -20,12 +20,12 @@ class PaymentController extends Controller
             $request->validate([
                 'order_id' => 'required|exists:orders,id',
                 'amount' => 'required|numeric|min:1000', // Minimum 1000 VND
-                'return_url' => 'required|url',
-                'ipn_url' => 'required|url',
+                'return_url' => 'nullable|url',
+                'ipn_url' => 'nullable|url',
             ]);
 
             $order = Order::findOrFail($request->order_id);
-            
+
             // Check if order is pending
             if ($order->status !== 'pending') {
                 return response()->json([
@@ -34,13 +34,17 @@ class PaymentController extends Controller
                 ], 400);
             }
 
+            // Set default URLs if not provided
+            $returnUrl = $request->return_url ?: config('app.url') . '/payment/return';
+            $ipnUrl = $request->ipn_url ?: config('app.url') . '/api/v1/vnpay-ipn';
+
             // VNPay configuration
             $vnp_TmnCode = config('services.vnpay.tmn_code');
             $vnp_HashSecret = config('services.vnpay.hash_secret');
             $vnp_Url = config('services.vnpay.payment_url');
-            $vnp_Returnurl = $request->return_url;
-            $vnp_IpnUrl = $request->ipn_url;
-            
+            $vnp_Returnurl = $returnUrl;
+            $vnp_IpnUrl = $ipnUrl;
+
             $vnp_TxnRef = $order->id . '_' . time(); // Unique transaction reference
             $vnp_OrderInfo = 'Thanh toan don hang #' . $order->id;
             $vnp_OrderType = 'billpayment';
@@ -49,6 +53,35 @@ class PaymentController extends Controller
             $vnp_CurrCode = 'VND';
             $vnp_TxnType = 'pay';
 
+            // Fix IP Address for VNPay Error 99 - Enhanced IP handling
+            $vnp_IpAddr = $request->ip();
+            
+            // Log original IP for debugging
+            Log::info('VNPay Payment - Original IP from request: ' . $vnp_IpAddr);
+            
+            // Handle various localhost/empty IP scenarios
+            if (empty($vnp_IpAddr) || 
+                $vnp_IpAddr === '127.0.0.1' || 
+                $vnp_IpAddr === '::1' || 
+                $vnp_IpAddr === 'localhost' ||
+                $vnp_IpAddr === '0.0.0.0') {
+                
+                // Try to get real IP from various sources
+                $realIp = $request->header('X-Forwarded-For') ?: 
+                          $request->header('X-Real-IP') ?: 
+                          $request->header('CF-Connecting-IP') ?: 
+                          '203.205.254.157'; // Fallback to public IP
+                
+                $vnp_IpAddr = $realIp;
+                Log::info('VNPay Payment - Using fallback IP: ' . $vnp_IpAddr);
+            }
+            
+            // Ensure IP is not empty
+            if (empty($vnp_IpAddr)) {
+                $vnp_IpAddr = '203.205.254.157'; // Final fallback
+                Log::warning('VNPay Payment - Using final fallback IP: ' . $vnp_IpAddr);
+            }
+
             $inputData = array(
                 "vnp_Version" => "2.1.0",
                 "vnp_TmnCode" => $vnp_TmnCode,
@@ -56,7 +89,7 @@ class PaymentController extends Controller
                 "vnp_Command" => "pay",
                 "vnp_CreateDate" => date('YmdHis'),
                 "vnp_CurrCode" => $vnp_CurrCode,
-                "vnp_IpAddr" => $request->ip(),
+                "vnp_IpAddr" => $vnp_IpAddr, // Fixed IP address
                 "vnp_Locale" => $vnp_Locale,
                 "vnp_OrderInfo" => $vnp_OrderInfo,
                 "vnp_OrderType" => $vnp_OrderType,
@@ -65,6 +98,10 @@ class PaymentController extends Controller
                 "vnp_TxnRef" => $vnp_TxnRef,
                 "vnp_TxnType" => $vnp_TxnType,
             );
+            
+            // Log final IP address being sent to VNPay
+            Log::info('VNPay Payment - Final IP address: ' . $vnp_IpAddr);
+            Log::info('VNPay Payment - Input data for hash: ' . json_encode($inputData));
 
             ksort($inputData);
             $query = "";
@@ -100,7 +137,6 @@ class PaymentController extends Controller
                     'order_id' => $order->id
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Payment creation error: ' . $e->getMessage());
             return response()->json([
@@ -117,7 +153,7 @@ class PaymentController extends Controller
     {
         try {
             $vnp_HashSecret = config('services.vnpay.hash_secret');
-            
+
             $inputData = array();
             $returnData = array();
             $data = $request->all();
@@ -144,13 +180,13 @@ class PaymentController extends Controller
             }
 
             $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
-            
+
             // Extract order ID from transaction reference
             $vnp_TxnRef = $inputData['vnp_TxnRef'];
             $orderId = explode('_', $vnp_TxnRef)[0];
-            
+
             $order = Order::find($orderId);
-            
+
             if (!$order) {
                 return response()->json([
                     'success' => false,
@@ -201,7 +237,6 @@ class PaymentController extends Controller
                     'message' => 'Invalid signature'
                 ], 400);
             }
-
         } catch (\Exception $e) {
             Log::error('VNPay return error: ' . $e->getMessage());
             return response()->json([
@@ -218,7 +253,7 @@ class PaymentController extends Controller
     {
         try {
             $vnp_HashSecret = config('services.vnpay.hash_secret');
-            
+
             $inputData = array();
             $data = $request->all();
 
@@ -244,13 +279,13 @@ class PaymentController extends Controller
             }
 
             $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
-            
+
             // Extract order ID from transaction reference
             $vnp_TxnRef = $inputData['vnp_TxnRef'];
             $orderId = explode('_', $vnp_TxnRef)[0];
-            
+
             $order = Order::find($orderId);
-            
+
             if (!$order) {
                 Log::error('IPN: Order not found - ' . $orderId);
                 return response('Order not found', 404);
@@ -281,7 +316,6 @@ class PaymentController extends Controller
                 Log::error('IPN: Invalid signature for order ' . $orderId);
                 return response('Invalid signature', 400);
             }
-
         } catch (\Exception $e) {
             Log::error('IPN error: ' . $e->getMessage());
             return response('Error processing IPN', 500);

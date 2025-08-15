@@ -104,6 +104,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/create-payment', [PaymentController::class, 'createPayment']);
     Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
     Route::get('/vnpay-ipn', [PaymentController::class, 'vnpayIpn']);
+    
+    // Test route for VNPay payment (no authentication required)
 
     // Admin routes
     Route::prefix('admin')->group(function () {

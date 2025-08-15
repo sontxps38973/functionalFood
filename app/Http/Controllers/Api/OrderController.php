@@ -375,6 +375,25 @@ class OrderController extends Controller
 
         DB::commit();
 
+        // Nếu thanh toán online, tạo payment URL
+        $paymentData = null;
+        if ($request->payment_method === 'online_payment') {
+            try {
+                $paymentController = new \App\Http\Controllers\Api\PaymentController();
+                $paymentRequest = new Request([
+                    'order_id' => $order->id,
+                    'amount' => $order->total,
+                ]);
+                
+                $paymentResponse = $paymentController->createPayment($paymentRequest);
+                if ($paymentResponse->getStatusCode() === 200) {
+                    $paymentData = json_decode($paymentResponse->getContent(), true);
+                }
+            } catch (\Exception $e) {
+                Log::error('Payment creation error in placeOrder: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'message' => 'Đặt hàng thành công',
             'order_id' => $order->id,
@@ -387,7 +406,8 @@ class OrderController extends Controller
                 'payment_status' => $order->payment_status,
                 'payment_method' => $order->payment_method,
                 'created_at' => $order->created_at
-            ]
+            ],
+            'payment' => $paymentData
         ], 201);
 
     } catch (\Throwable $e) {

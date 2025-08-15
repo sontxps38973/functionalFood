@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test VNPay Payment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .payment-methods {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-method:hover {
+            border-color: #4CAF50;
+            background: #f0f8f0;
+        }
+
+        .payment-method input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .payment-method .icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .payment-method .details h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .payment-method .details p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.3);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .order-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .order-summary h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 18px;
+            color: #4CAF50;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            border-bottom-color: #4CAF50;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .payment-url {
+            background: #e8f5e8;
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+
+        .payment-url a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .payment-url a:hover {
+            text-decoration: underline;
+        }
+
+        .test-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Token Modal */
+        .token-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .token-modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .token-modal h3 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .token-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+
+        .token-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .token-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .token-actions .btn {
+            width: auto;
+            padding: 12px 25px;
+        }
+
+        .current-token {
+            background: #e8f5e8;
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .current-token .token-display {
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .quick-test {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .quick-test h4 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .quick-test-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .quick-test-buttons .btn {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .test-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Test VNPay Payment</h1>
+            <p>Trang test thanh toán online với VNPay</p>
+            <p style="margin: 10px 0; opacity: 0.9; font-size: 14px;">
+                💡 <strong>Tip:</strong> Token sẽ được yêu cầu nhập qua alert khi gửi request
+            </p>
+            <button onclick="openTokenModal()" class="btn" style="margin-top: 15px; width: auto; padding: 10px 20px;">
+                🔑 Cài đặt Token
+            </button>
+        </div>
+
+        <div class="content">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('order')">📦 Tạo đơn hàng</div>
+                <div class="tab" onclick="switchTab('payment')">💳 Test Payment</div>
+                <div class="tab" onclick="switchTab('status')">📊 Trạng thái</div>
+            </div>
+
+            <!-- Tab 1: Tạo đơn hàng -->
+            <div id="order-tab" class="tab-content active">
+                <div class="current-token">
+                    <strong>🔑 Token hiện tại:</strong>
+                    <div class="token-display" id="currentTokenDisplay">Chưa có token</div>
+                    <button onclick="openTokenModal()" class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;">
+                        🔄 Thay đổi Token
+                    </button>
+                </div>
+
+                <div class="quick-test">
+                    <h4>🚀 Quick Test - Test nhanh với dữ liệu mẫu:</h4>
+                    <div class="quick-test-buttons">
+                        <button onclick="quickTest('cod')" class="btn">💰 Test COD Order</button>
+                        <button onclick="quickTest('online_payment')" class="btn">💳 Test VNPay Order</button>
+                        <button onclick="quickTest('test_payment')" class="btn">🔗 Test Payment URL</button>
+                        <button onclick="quickTest('check_status')" class="btn">📊 Test Check Status</button>
+                                                 <button onclick="testApiEndpoint()" class="btn" style="background: #17a2b8;">🔍 Test API Endpoint</button>
+                         <button onclick="testVnpayPayment()" class="btn" style="background: #ffc107; color: #000;">💳 Test VNPay Payment</button>
+                    </div>
+                </div>
+
+                <h2>📦 Tạo đơn hàng mới</h2>
+                                 <form id="orderForm">
+                     <div class="form-row">
+                         <div class="form-group">
+                             <label for="name">Tên người nhận:</label>
+                             <input type="text" id="name" name="name" value="Nguyễn Văn Test" required>
+                         </div>
+                         <div class="form-group">
+                             <label for="email">Email:</label>
+                             <input type="email" id="email" name="email" value="test@example.com" required>
+                         </div>
+                     </div>
+
+                     <div class="form-row">
+                         <div class="form-group">
+                             <label for="phone">Số điện thoại:</label>
+                             <input type="tel" id="phone" name="phone" value="0123456789" required>
+                         </div>
+                         <div class="form-group">
+                             <label for="total">Tổng tiền (VND):</label>
+                             <input type="number" id="total" name="total" value="100000" min="1000" required>
+                         </div>
+                     </div>
+
+                     <div class="form-group">
+                         <label for="address">Địa chỉ giao hàng:</label>
+                         <textarea id="address" name="address" rows="3" placeholder="Nhập địa chỉ giao hàng..." required>123 Đường ABC, Quận 1, TP.HCM</textarea>
+                     </div>
+
+                     <div class="form-group">
+                         <label for="notes">Ghi chú:</label>
+                         <textarea id="notes" name="notes" rows="2" placeholder="Ghi chú cho đơn hàng...">Test order for VNPay payment</textarea>
+                     </div>
+
+                    <div class="payment-methods">
+                        <h3>💳 Chọn phương thức thanh toán:</h3>
+                        
+                        <div class="payment-method">
+                            <input type="radio" id="cod" name="payment_method" value="cod" checked>
+                            <span class="icon">💰</span>
+                            <div class="details">
+                                <h4>Thanh toán khi nhận hàng (COD)</h4>
+                                <p>Thanh toán bằng tiền mặt khi nhận hàng</p>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-method">
+                            <input type="radio" id="online_payment" name="payment_method" value="online_payment">
+                            <span class="icon">💳</span>
+                            <div class="details">
+                                <h4>Thanh toán online (VNPay)</h4>
+                                <p>Thanh toán qua thẻ ATM, thẻ quốc tế, ví điện tử</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">🚀 Tạo đơn hàng</button>
+                </form>
+
+                <div id="orderResult" class="result"></div>
+            </div>
+
+            <!-- Tab 2: Test Payment -->
+            <div id="payment-tab" class="tab-content">
+                <h2>💳 Test VNPay Payment</h2>
+                
+                <div class="form-group">
+                    <label for="test_order_id">Order ID:</label>
+                    <input type="number" id="test_order_id" name="test_order_id" placeholder="Nhập Order ID để test payment..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="test_amount">Số tiền (VND):</label>
+                    <input type="number" id="test_amount" name="test_amount" value="100000" min="1000" required>
+                </div>
+
+                <div class="test-buttons">
+                    <button onclick="testCreatePayment()" class="btn">🔗 Tạo Payment URL</button>
+                    <button onclick="testPaymentReturn()" class="btn btn-secondary">🔄 Test Return URL</button>
+                </div>
+
+                <div id="paymentResult" class="result"></div>
+                <div id="paymentLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Đang xử lý...</p>
+                </div>
+            </div>
+
+            <!-- Tab 3: Trạng thái -->
+            <div id="status-tab" class="tab-content">
+                <h2>📊 Kiểm tra trạng thái</h2>
+                
+                <div class="form-group">
+                    <label for="check_order_id">Order ID:</label>
+                    <input type="number" id="check_order_id" name="check_order_id" placeholder="Nhập Order ID để kiểm tra..." required>
+                </div>
+
+                <button onclick="checkOrderStatus()" class="btn">🔍 Kiểm tra trạng thái</button>
+
+                <div id="statusResult" class="result"></div>
+                <div id="statusLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Đang kiểm tra...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token Modal -->
+    <div id="tokenModal" class="token-modal">
+        <div class="token-modal-content">
+            <h3>🔑 Cài đặt Token Authentication</h3>
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                Nhập token để test API. Có thể sử dụng token thật hoặc token test.
+            </p>
+            
+            <input type="text" id="tokenInput" class="token-input" placeholder="Nhập Bearer token (ví dụ: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...)">
+            
+            <div class="token-actions">
+                <button onclick="saveToken()" class="btn">💾 Lưu Token</button>
+                <button onclick="closeTokenModal()" class="btn btn-secondary">❌ Hủy</button>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <h4>💡 Token mẫu để test:</h4>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li><strong>Test Token:</strong> <code>Bearer test-token</code></li>
+                    <li><strong>Real Token:</strong> <code>Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></li>
+                    <li><strong>No Token:</strong> Để trống để test không có authentication</li>
+                </ul>
+                
+                <h4>🔍 Debug Tips:</h4>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li><strong>Mở Console (F12):</strong> Xem log debug chi tiết</li>
+                    <li><strong>Kiểm tra Network tab:</strong> Xem request/response headers</li>
+                    <li><strong>Token format:</strong> Phải bắt đầu bằng "Bearer " (có dấu cách)</li>
+                </ul>
+                
+                <h4>⌨️ Keyboard Shortcuts:</h4>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li><strong>Ctrl+Enter:</strong> Submit form tạo đơn hàng</li>
+                    <li><strong>Ctrl+T:</strong> Mở modal cài đặt token</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentOrder = null;
+        let currentToken = 'Bearer test-token'; // Default token
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Handle order form submission
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Hiển thị alert để nhập token
+            const token = prompt('🔑 Nhập Bearer Token để gửi request:', currentToken || 'Bearer ');
+            if (token === null) return; // User cancel
+            
+            // Debug: Hiển thị token đang sử dụng
+            console.log('🔑 Token đang sử dụng:', token);
+            console.log('📤 Request headers:', {
+                'Content-Type': 'application/json',
+                'Authorization': token,
+                'Accept': 'application/json'
+            });
+            
+                         const formData = new FormData(this);
+             const orderData = {
+                 name: formData.get('name'),
+                 email: formData.get('email'),
+                 phone: formData.get('phone'),
+                 address: formData.get('address'),
+                 notes: formData.get('notes'),
+                 payment_method: formData.get('payment_method'),
+                 subtotal: parseInt(formData.get('total')),
+                 total: parseInt(formData.get('total')),
+                 items: [
+                     {
+                         product_id: 2,
+                         variant_id: 1,
+                         quantity: 1,
+                         price: parseInt(formData.get('total'))
+                     }
+                 ]
+             };
+
+            console.log('📦 Order data:', orderData);
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/user/orders/place-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+                
+                console.log('📥 Response status:', response.status);
+                console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+                console.log('📥 Response body:', result);
+                
+                if (response.ok) {
+                    currentOrder = result;
+                                         showResult('orderResult', 'success', `
+                         <h3>✅ Đơn hàng tạo thành công!</h3>
+                         <div class="order-summary">
+                             <h3>Thông tin đơn hàng:</h3>
+                             <div class="summary-item">
+                                 <span>Order ID:</span>
+                                 <span>#${result.order_id}</span>
+                             </div>
+                             <div class="summary-item">
+                                 <span>Order Number:</span>
+                                 <span>${result.order_number}</span>
+                             </div>
+                             <div class="summary-item">
+                                 <span>Phương thức thanh toán:</span>
+                                 <span>${result.order.payment_method === 'online_payment' ? 'VNPay' : 'COD'}</span>
+                             </div>
+                             <div class="summary-item">
+                                 <span>Tổng tiền:</span>
+                                 <span>${result.order.total.toLocaleString('vi-VN')} VND</span>
+                             </div>
+                         </div>
+                         
+                         <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
+                             <strong>🔍 Debug Response Data:</strong><br>
+                             <code style="font-size: 11px; word-break: break-all;">${JSON.stringify(result, null, 2)}</code>
+                         </div>
+                         
+                         ${result.payment ? `
+                             <div class="payment-url">
+                                 <strong>🔗 Payment URL:</strong><br>
+                                 <a href="${result.payment.payment_url || result.payment.data?.payment_url || '#'}" target="_blank">${result.payment.payment_url || result.payment.data?.payment_url || 'Payment URL không khả dụng'}</a>
+                             </div>
+                             <button onclick="window.open('${result.payment.payment_url || result.payment.data?.payment_url || '#'}', '_blank')" class="btn" ${!result.payment.payment_url && !result.payment.data?.payment_url ? 'disabled' : ''}>
+                                 🚀 Mở VNPay Payment
+                             </button>
+                             <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 12px;">
+                                 <strong>🔍 Debug Payment Data:</strong><br>
+                                 <code>${JSON.stringify(result.payment, null, 2)}</code>
+                             </div>
+                         ` : '<div style="margin-top: 15px; padding: 10px; background: #f8d7da; border-radius: 5px; color: #721c24;"><strong>⚠️ Không có payment data</strong><br>Đơn hàng COD không cần payment URL</div>'}
+                     `);
+                    
+                    // Auto-fill test fields
+                    document.getElementById('test_order_id').value = result.order_id;
+                    document.getElementById('test_amount').value = result.order.total;
+                    document.getElementById('check_order_id').value = result.order_id;
+                } else {
+                    showResult('orderResult', 'error', `
+                        <h3>❌ Lỗi tạo đơn hàng (HTTP ${response.status})</h3>
+                        <p><strong>Status:</strong> ${response.status} - ${response.statusText}</p>
+                        <p><strong>Message:</strong> ${result.message || 'Unknown error'}</p>
+                        ${result.errors ? `<p><strong>Errors:</strong> ${JSON.stringify(result.errors)}</p>` : ''}
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>🔍 Debug Info:</strong><br>
+                            <strong>Token:</strong> ${token}<br>
+                            <strong>URL:</strong> http://localhost:8000/api/v1/user/orders/place-order<br>
+                            <strong>Method:</strong> POST
+                        </div>
+                    `);
+                }
+            } catch (error) {
+                                 showResult('orderResult', 'error', `
+                     <h3>❌ Lỗi kết nối</h3>
+                     <p><strong>Error:</strong> ${error.message}</p>
+                     <p>Vui lòng kiểm tra:</p>
+                     <ul style="text-align: left; margin: 10px 0;">
+                         <li>Laravel server có đang chạy trên port 8000 không?</li>
+                         <li>Có bị lỗi CORS không?</li>
+                         <li>API routes có được định nghĩa đúng không?</li>
+                     </ul>
+                 `);
+            }
+        });
+
+        // Test create payment
+        async function testCreatePayment() {
+            const orderId = document.getElementById('test_order_id').value;
+            const amount = document.getElementById('test_amount').value;
+            
+            if (!orderId || !amount) {
+                showResult('paymentResult', 'error', '<h3>❌ Vui lòng nhập Order ID và số tiền</h3>');
+                return;
+            }
+
+            // Hiển thị alert để nhập token
+            const token = prompt('🔑 Nhập Bearer Token để gửi request:', currentToken || 'Bearer ');
+            if (token === null) return; // User cancel
+
+            showLoading('paymentLoading', true);
+            showResult('paymentResult', '', '');
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        order_id: parseInt(orderId),
+                        amount: parseInt(amount)
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult('paymentResult', 'success', `
+                        <h3>✅ Tạo Payment URL thành công!</h3>
+                        <div class="payment-url">
+                            <strong>🔗 Payment URL:</strong><br>
+                            <a href="${result.data.payment_url}" target="_blank">${result.data.payment_url}</a>
+                        </div>
+                        <div class="test-buttons">
+                            <button onclick="window.open('${result.data.payment_url}', '_blank')" class="btn">
+                                🚀 Mở VNPay Payment
+                            </button>
+                            <button onclick="testPaymentReturn()" class="btn btn-secondary">
+                                🔄 Test Return URL
+                            </button>
+                        </div>
+                    `);
+                } else {
+                    showResult('paymentResult', 'error', `
+                        <h3>❌ Lỗi tạo Payment URL</h3>
+                        <p><strong>Message:</strong> ${result.message || 'Unknown error'}</p>
+                    `);
+                }
+            } catch (error) {
+                showResult('paymentResult', 'error', `
+                    <h3>❌ Lỗi kết nối</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `);
+            } finally {
+                showLoading('paymentLoading', false);
+            }
+        }
+
+        // Test payment return
+        async function testPaymentReturn() {
+            const orderId = document.getElementById('test_order_id').value;
+            
+            if (!orderId) {
+                showResult('paymentResult', 'error', '<h3>❌ Vui lòng nhập Order ID</h3>');
+                return;
+            }
+
+            // Simulate VNPay return with success
+            const testParams = new URLSearchParams({
+                vnp_ResponseCode: '00',
+                vnp_TxnRef: orderId,
+                vnp_Amount: '10000000', // 100,000 VND * 100
+                vnp_TransactionNo: 'TEST_' + Date.now(),
+                vnp_OrderInfo: 'Test payment',
+                vnp_TransactionStatus: '00'
+            });
+
+            const returnUrl = `http://localhost:8000/payment/return?${testParams.toString()}`;
+            
+            showResult('paymentResult', 'info', `
+                <h3>🔄 Test Return URL</h3>
+                <p><strong>Test URL:</strong> <a href="${returnUrl}" target="_blank">${returnUrl}</a></p>
+                <button onclick="window.open('${returnUrl}', '_blank')" class="btn">
+                    🔄 Test Return URL
+                </button>
+            `);
+        }
+
+        // Check order status
+        async function checkOrderStatus() {
+            const orderId = document.getElementById('check_order_id').value;
+            
+            if (!orderId) {
+                showResult('statusResult', 'error', '<h3>❌ Vui lòng nhập Order ID</h3>');
+                return;
+            }
+
+            // Hiển thị alert để nhập token
+            const token = prompt('🔑 Nhập Bearer Token để gửi request:', currentToken || 'Bearer ');
+            if (token === null) return; // User cancel
+
+            showLoading('statusLoading', true);
+            showResult('statusResult', '', '');
+
+            try {
+                const response = await fetch(`http://localhost:8000/api/v1/user/orders/${orderId}`, {
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const order = result.data;
+                    showResult('statusResult', 'success', `
+                        <h3>✅ Thông tin đơn hàng</h3>
+                        <div class="order-summary">
+                            <div class="summary-item">
+                                <span>Order ID:</span>
+                                <span>#${order.id}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Status:</span>
+                                <span>${order.status}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Payment Method:</span>
+                                <span>${order.payment_method}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Payment Status:</span>
+                                <span>${order.payment_status || 'N/A'}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Total:</span>
+                                <span>${order.total.toLocaleString('vi-VN')} VND</span>
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    showResult('statusResult', 'error', `
+                        <h3>❌ Lỗi kiểm tra đơn hàng</h3>
+                        <p><strong>Message:</strong> ${result.message || 'Unknown error'}</p>
+                    `);
+                }
+            } catch (error) {
+                showResult('statusResult', 'error', `
+                    <h3>❌ Lỗi kết nối</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `);
+            } finally {
+                showLoading('statusLoading', false);
+            }
+        }
+
+        // Helper functions
+        function showResult(elementId, type, content) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            element.innerHTML = content;
+            element.style.display = content ? 'block' : 'none';
+        }
+
+        function showLoading(elementId, show) {
+            const element = document.getElementById(elementId);
+            element.style.display = show ? 'block' : 'none';
+        }
+
+        // Token Modal Functions
+        function openTokenModal() {
+            document.getElementById('tokenModal').style.display = 'block';
+            document.getElementById('tokenInput').value = currentToken;
+            document.getElementById('tokenInput').focus();
+        }
+
+        function closeTokenModal() {
+            document.getElementById('tokenModal').style.display = 'none';
+        }
+
+        function saveToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (token) {
+                currentToken = token;
+                updateTokenDisplay();
+                closeTokenModal();
+                showResult('orderResult', 'success', `
+                    <h3>✅ Token đã được cập nhật!</h3>
+                    <p>Token mới: <code>${token}</code></p>
+                `);
+            } else {
+                currentToken = '';
+                updateTokenDisplay();
+                closeTokenModal();
+                showResult('orderResult', 'info', `
+                    <h3>ℹ️ Token đã được xóa</h3>
+                    <p>API calls sẽ không có Authorization header</p>
+                `);
+            }
+        }
+
+        function updateTokenDisplay() {
+            const display = document.getElementById('currentTokenDisplay');
+            if (currentToken) {
+                display.textContent = currentToken;
+                display.style.color = '#28a745';
+            } else {
+                display.textContent = 'Không có token';
+                display.style.color = '#dc3545';
+            }
+        }
+
+        // Quick Test Functions
+        function quickTest(type) {
+            switch(type) {
+                                 case 'cod':
+                     // Test COD order
+                     document.getElementById('cod').checked = true;
+                     document.getElementById('name').value = 'Quick Test User';
+                     document.getElementById('email').value = 'quicktest@example.com';
+                     document.getElementById('total').value = '50000';
+                     document.getElementById('address').value = 'Quick Test - COD Order';
+                     document.getElementById('phone').value = '0987654321';
+                     document.getElementById('notes').value = 'Quick test COD order';
+                     showResult('orderResult', 'info', '<h3>🚀 Quick Test COD Order</h3><p>Form đã được điền sẵn. Click "🚀 Tạo đơn hàng" để test!</p>');
+                     break;
+                     
+                 case 'online_payment':
+                     // Test VNPay order
+                     document.getElementById('online_payment').checked = true;
+                     document.getElementById('name').value = 'Quick Test User';
+                     document.getElementById('email').value = 'quicktest@example.com';
+                     document.getElementById('total').value = '100000';
+                     document.getElementById('address').value = 'Quick Test - VNPay Order';
+                     document.getElementById('phone').value = '0987654321';
+                     document.getElementById('notes').value = 'Quick test VNPay order';
+                     showResult('orderResult', 'info', '<h3>🚀 Quick Test VNPay Order</h3><p>Form đã được điền sẵn. Click "🚀 Tạo đơn hàng" để test!</p>');
+                     break;
+                    
+                case 'test_payment':
+                    // Test payment URL
+                    document.getElementById('test_order_id').value = '1';
+                    document.getElementById('test_amount').value = '100000';
+                    switchTab('payment');
+                    showResult('paymentResult', 'info', '<h3>🚀 Quick Test Payment</h3><p>Form đã được điền sẵn. Click "🔗 Tạo Payment URL" để test!</p>');
+                    break;
+                    
+                case 'check_status':
+                    // Test check status
+                    document.getElementById('check_order_id').value = '1';
+                    switchTab('status');
+                    showResult('statusResult', 'info', '<h3>🚀 Quick Test Check Status</h3><p>Form đã được điền sẵn. Click "🔍 Kiểm tra trạng thái" để test!</p>');
+                    break;
+            }
+        }
+
+        // Test API Endpoint Function
+        async function testApiEndpoint() {
+            const token = prompt('🔑 Nhập Bearer Token để test API endpoint:', currentToken || 'Bearer ');
+            if (token === null) return;
+
+            showResult('orderResult', 'info', '<h3>🔍 Đang test API endpoint...</h3><p>Kiểm tra console để xem chi tiết</p>');
+
+            try {
+                console.log('🔍 Testing API endpoint...');
+                console.log('🔑 Token:', token);
+                console.log('🌐 URL: http://localhost:8000/api/v1/user/orders/place-order');
+
+                                 // Test với request đơn giản
+                 const testData = {
+                     name: 'Test User',
+                     email: 'test@example.com',
+                     phone: '0123456789',
+                     address: 'Test API Endpoint',
+                     notes: 'Test API endpoint',
+                     payment_method: 'cod',
+                     subtotal: 100000,
+                     total: 100000,
+                     items: [
+                         {
+                             product_id: 1,
+                             variant_id: 1,
+                             quantity: 1,
+                             price: 100000
+                         }
+                     ]
+                 };
+
+                console.log('📤 Test data:', testData);
+
+                const response = await fetch('http://localhost:8000/api/v1/user/orders/place-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                console.log('📥 Response status:', response.status);
+                console.log('📥 Response status text:', response.statusText);
+                console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+
+                const result = await response.json();
+                console.log('📥 Response body:', result);
+
+                if (response.ok) {
+                    showResult('orderResult', 'success', `
+                        <h3>✅ API Endpoint hoạt động!</h3>
+                        <p><strong>Status:</strong> ${response.status} - ${response.statusText}</p>
+                        <p><strong>Order ID:</strong> ${result.order_id}</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
+                            <strong>🔍 Debug Info:</strong><br>
+                            <strong>Token:</strong> ${token}<br>
+                            <strong>Response Headers:</strong> ${JSON.stringify(Object.fromEntries(response.headers.entries()))}
+                        </div>
+                    `);
+                } else {
+                    showResult('orderResult', 'error', `
+                        <h3>❌ API Endpoint lỗi (HTTP ${response.status})</h3>
+                        <p><strong>Status:</strong> ${response.status} - ${response.statusText}</p>
+                        <p><strong>Message:</strong> ${result.message || 'Unknown error'}</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #f8d7da; border-radius: 5px;">
+                            <strong>🔍 Debug Info:</strong><br>
+                            <strong>Token:</strong> ${token}<br>
+                            <strong>Response Headers:</strong> ${JSON.stringify(Object.fromEntries(response.headers.entries()))}<br>
+                            <strong>Response Body:</strong> ${JSON.stringify(result)}
+                        </div>
+                    `);
+                }
+            } catch (error) {
+                console.error('❌ Error testing API endpoint:', error);
+                showResult('orderResult', 'error', `
+                    <h3>❌ Lỗi kết nối API endpoint</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <div style="margin-top: 15px; padding: 10px; background: #f8d7da; border-radius: 5px;">
+                        <strong>🔍 Debug Info:</strong><br>
+                        <strong>Error Type:</strong> ${error.name}<br>
+                        <strong>Error Message:</strong> ${error.message}<br>
+                        <strong>Stack Trace:</strong> ${error.stack}
+                    </div>
+                `);
+            }
+                 }
+
+         // Test VNPay Payment Function
+         async function testVnpayPayment() {
+             const token = prompt('🔑 Nhập Bearer Token để test VNPay payment:', currentToken || 'Bearer ');
+             if (token === null) return;
+
+             showResult('orderResult', 'info', '<h3>💳 Đang test VNPay payment...</h3><p>Kiểm tra console để xem chi tiết</p>');
+
+             try {
+                 console.log('💳 Testing VNPay payment...');
+                 console.log('🔑 Token:', token);
+
+                 // Test với VNPay order
+                 const testData = {
+                     name: 'VNPay Test User',
+                     email: 'vnpay@example.com',
+                     phone: '0123456789',
+                     address: 'Test VNPay Payment',
+                     notes: 'Test VNPay payment order',
+                     payment_method: 'online_payment',
+                     subtotal: 100000,
+                     total: 100000,
+                     items: [
+                         {
+                             product_id: 2,
+                             variant_id: 1,
+                             quantity: 1,
+                             price: 100000
+                         }
+                     ]
+                 };
+
+                 console.log('📤 VNPay test data:', testData);
+
+                 const response = await fetch('http://localhost:8000/api/v1/user/orders/place-order', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         'Authorization': token,
+                         'Accept': 'application/json'
+                     },
+                     body: JSON.stringify(testData)
+                 });
+
+                 console.log('📥 VNPay Response status:', response.status);
+                 console.log('📥 VNPay Response status text:', response.statusText);
+                 console.log('📥 VNPay Response headers:', Object.fromEntries(response.headers.entries()));
+
+                 const result = await response.json();
+                 console.log('📥 VNPay Response body:', result);
+
+                 if (response.ok) {
+                     showResult('orderResult', 'success', `
+                         <h3>✅ VNPay Payment Test thành công!</h3>
+                         <p><strong>Status:</strong> ${response.status} - ${response.statusText}</p>
+                         <p><strong>Order ID:</strong> ${result.order_id}</p>
+                         <p><strong>Payment Method:</strong> ${result.order?.payment_method || 'N/A'}</p>
+                         
+                         <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
+                             <strong>🔍 Full Response Data:</strong><br>
+                             <code style="font-size: 11px; word-break: break-all;">${JSON.stringify(result, null, 2)}</code>
+                         </div>
+                         
+                         ${result.payment ? `
+                             <div class="payment-url" style="margin-top: 15px;">
+                                 <strong>🔗 Payment Data Found:</strong><br>
+                                 <code style="font-size: 11px; word-break: break-all;">${JSON.stringify(result.payment, null, 2)}</code>
+                             </div>
+                             
+                             <div class="payment-url" style="margin-top: 15px;">
+                                 <strong>🔗 Payment URL:</strong><br>
+                                 <a href="${result.payment.payment_url || result.payment.data?.payment_url || '#'}" target="_blank">${result.payment.payment_url || result.payment.data?.payment_url || 'Payment URL không khả dụng'}</a>
+                             </div>
+                             
+                             <button onclick="window.open('${result.payment.payment_url || result.payment.data?.payment_url || '#'}', '_blank')" class="btn" style="margin-top: 10px;" ${!result.payment.payment_url && !result.payment.data?.payment_url ? 'disabled' : ''}>
+                                 🚀 Mở VNPay Payment
+                             </button>
+                         ` : '<div style="margin-top: 15px; padding: 10px; background: #f8d7da; border-radius: 5px; color: #721c24;"><strong>⚠️ Không có payment data</strong><br>Kiểm tra console để xem response chi tiết</div>'}
+                     `);
+                 } else {
+                     showResult('orderResult', 'error', `
+                         <h3>❌ VNPay Payment Test lỗi (HTTP ${response.status})</h3>
+                         <p><strong>Status:</strong> ${response.status} - ${response.statusText}</p>
+                         <p><strong>Message:</strong> ${result.message || 'Unknown error'}</p>
+                         <div style="margin-top: 15px; padding: 10px; background: #f8d7da; border-radius: 5px;">
+                             <strong>🔍 Debug Info:</strong><br>
+                             <strong>Token:</strong> ${token}<br>
+                             <strong>Response Headers:</strong> ${JSON.stringify(Object.fromEntries(response.headers.entries()))}<br>
+                             <strong>Response Body:</strong> ${JSON.stringify(result)}
+                         </div>
+                     `);
+                 }
+             } catch (error) {
+                 console.error('❌ Error testing VNPay payment:', error);
+                 showResult('orderResult', 'error', `
+                     <h3>❌ Lỗi kết nối VNPay payment</h3>
+                     <p><strong>Error:</strong> ${error.message}</p>
+                     <div style="margin-top: 15px; padding: 10px; background: #f8d7da; border-radius: 5px;">
+                         <strong>🔍 Debug Info:</strong><br>
+                         <strong>Error Type:</strong> ${error.name}<br>
+                         <strong>Error Message:</strong> ${error.message}<br>
+                         <strong>Stack Trace:</strong> ${error.stack}
+                     </div>
+                 `);
+             }
+         }
+
+         // Auto-fill test data
+         document.addEventListener('DOMContentLoaded', function() {
+             // Set default values
+             document.getElementById('name').value = 'Nguyễn Văn Test';
+             document.getElementById('email').value = 'test@example.com';
+             document.getElementById('total').value = '100000';
+             document.getElementById('address').value = '123 Đường ABC, Quận 1, TP.HCM';
+             document.getElementById('phone').value = '0123456789';
+             document.getElementById('notes').value = 'Test order for VNPay payment';
+            
+            // Initialize token display
+            updateTokenDisplay();
+            
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                const modal = document.getElementById('tokenModal');
+                if (event.target === modal) {
+                    closeTokenModal();
+                }
+            }
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Enter to submit order form
+                if (e.ctrlKey && e.key === 'Enter') {
+                    document.getElementById('orderForm').dispatchEvent(new Event('submit'));
+                }
+                // Ctrl+T to open token modal
+                if (e.ctrlKey && e.key === 't') {
+                    e.preventDefault();
+                    openTokenModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
