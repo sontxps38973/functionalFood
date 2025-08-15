@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\ReviewReportController;
 use App\Http\Controllers\Api\ProductReviewAdminController;
 use App\Http\Controllers\Api\StatsController;
 use App\Http\Controllers\Api\PaymentController;
+use Illuminate\Http\Request;
 
 
 Route::prefix('v1')->group(function () {
@@ -106,6 +107,34 @@ Route::prefix('v1')->group(function () {
     Route::get('/vnpay-ipn', [PaymentController::class, 'vnpayIpn']);
     
     // Test route for VNPay payment (no authentication required)
+    Route::post('/test-vnpay-payment', [PaymentController::class, 'testPayment']);
+    
+    // Test route for debugging (no authentication required)
+    Route::get('/test-health', function() {
+        return response()->json([
+            'status' => 'ok',
+            'message' => 'API is working',
+            'timestamp' => now(),
+            'cors_enabled' => true
+        ]);
+    });
+    
+    Route::post('/test-order', function(Request $request) {
+        try {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Test order endpoint working',
+                'data' => $request->all(),
+                'timestamp' => now()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    });
 
     // Admin routes
     Route::prefix('admin')->group(function () {
