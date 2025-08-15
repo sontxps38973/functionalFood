@@ -38,5 +38,27 @@ php artisan l5-swagger:generate || true
 echo "🗄 Running migrations..."
 php artisan migrate --force
 
-echo "✅ Laravel ready. Starting Supervisor..."
+# Chạy seeding để tạo data cần thiết
+echo "🌱 Running seeders..."
+php artisan db:seed --force || true
+
+# Tạo tài khoản admin mặc định nếu chưa có
+echo "👑 Creating default admin account..."
+php artisan tinker --execute="
+    if (!\App\Models\Admin::where('email', 'admin@functionalFood.com')->exists()) {
+        \App\Models\Admin::create([
+            'name' => 'Super Admin',
+            'email' => 'admin@functionalFood.com',
+            'password' => bcrypt('admin123'),
+            'role' => 'super_admin',
+            'status' => 'active',
+            'last_login' => now()
+        ]);
+        echo 'Default admin created: admin@functionalFood.com / admin123';
+    } else {
+        echo 'Admin account already exists';
+    }
+" || true
+
+
 exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
