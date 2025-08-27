@@ -210,84 +210,97 @@ public function show(Product $product)
 
 
 
-    public function update(UpdateProductRequest $request, Product $product)
-{
-    DB::beginTransaction();
-    try {
-        $data = $request->validated();
-        $data['slug'] = Str::slug($data['name']);
-
-        // Đảm bảo status là boolean
-        if (isset($data['status'])) {
-            $data['status'] = (int) $data['status'];
-        }
-
-        // Cập nhật thông tin cơ bản sản phẩm
-        $product->update($data);
-
-        // Xử lý ảnh sản phẩm
-        if ($request->hasFile('images')) {
-            // Xóa ảnh cũ
-            $product->images()->delete();
-
-            foreach ($request->file('images') as $index => $imageFile) {
-                $path = $imageFile->store('products', 'public');
-
-                $product->images()->create([
-                    'image_path' => $path
-                ]);
-
-                // Cập nhật ảnh đại diện là ảnh đầu tiên
-                if ($index === 0) {
-                    $product->image = $path;
-                    $product->save();
-                }
-            }
-        }
-
-        // Xử lý biến thể
-        if ($request->has('variants')) {
-            // Xóa biến thể cũ
-            $product->variants()->delete();
-
-            foreach ($request->input('variants', []) as $index => $variantData) {
-                $variant = $product->variants()->create([
-                    'sku' => $variantData['sku'] ?? null,
-                    'name' => $variantData['name'] ?? null,
-                    'price' => $variantData['price'] ?? 0,
-                    'stock_quantity' => $variantData['stock_quantity'] ?? 0,
-                    'discount' => $variantData['discount'] ?? 0,
-                    'attribute_json' => isset($variantData['attributes']) ? json_encode($variantData['attributes']) : '{}',
-                ]);
-
-                // Lưu ảnh biến thể nếu có
-                if ($request->hasFile("variants.$index.image")) {
-                    $variantImage = $request->file("variants.$index.image")->store('variants', 'public');
-                    $variant->image = $variantImage;
-                    $variant->save();
-                }
-            }
-        }
-
-        DB::commit();
-        return new ProductResource($product->fresh([
-            'category', 'images', 'variants', 'reviews', 'views'
-        ]));
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'message' => 'Lỗi khi cập nhật sản phẩm.',
-            'error' => $e->getMessage(),
-        ], 500);
-    }
-}
-
-
-    public function destroy(Product $product)
+    public function update(UpdateProductRequest $request, $id)
     {
-        $product->delete();
-        return response()->noContent();
+        DB::beginTransaction();
+        try {
+            $product = Product::findOrFail($id);
+            
+            $data = $request->validated();
+            $data['slug'] = Str::slug($data['name']);
+
+            // Đảm bảo status là boolean
+            if (isset($data['status'])) {
+                $data['status'] = (int) $data['status'];
+            }
+
+            // Cập nhật thông tin cơ bản sản phẩm
+            $product->update($data);
+
+            // Xử lý ảnh sản phẩm
+            if ($request->hasFile('images')) {
+                // Xóa ảnh cũ
+                $product->images()->delete();
+
+                foreach ($request->file('images') as $index => $imageFile) {
+                    $path = $imageFile->store('products', 'public');
+
+                    $product->images()->create([
+                        'image_path' => $path
+                    ]);
+
+                    // Cập nhật ảnh đại diện là ảnh đầu tiên
+                    if ($index === 0) {
+                        $product->image = $path;
+                        $product->save();
+                    }
+                }
+            }
+
+            // Xử lý biến thể
+            if ($request->has('variants')) {
+                // Xóa biến thể cũ
+                $product->variants()->delete();
+
+                foreach ($request->input('variants', []) as $index => $variantData) {
+                    $variant = $product->variants()->create([
+                        'sku' => $variantData['sku'] ?? null,
+                        'name' => $variantData['name'] ?? null,
+                        'price' => $variantData['price'] ?? 0,
+                        'stock_quantity' => $variantData['stock_quantity'] ?? 0,
+                        'discount' => $variantData['discount'] ?? 0,
+                        'attribute_json' => isset($variantData['attributes']) ? json_encode($variantData['attributes']) : '{}',
+                    ]);
+
+                    // Lưu ảnh biến thể nếu có
+                    if ($request->hasFile("variants.$index.image")) {
+                        $variantImage = $request->file("variants.$index.image")->store('variants', 'public');
+                        $variant->image = $variantImage;
+                        $variant->save();
+                    }
+                }
+            }
+
+            DB::commit();
+            return new ProductResource($product->fresh([
+                'category', 'images', 'variants', 'reviews', 'views'
+            ]));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Lỗi khi cập nhật sản phẩm.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    public function destroy($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa sản phẩm thành công'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi xóa sản phẩm: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
   public function search(Request $request)

@@ -117,6 +117,63 @@ class Order extends Model
     {
         return in_array($this->status, ['confirmed', 'processing']) && $this->payment_status === 'paid';
     }
+    
+    /**
+     * Kiểm tra xem đơn hàng có thể tự động thanh toán không
+     */
+    public function canAutoCompletePayment(): bool
+    {
+        return $this->payment_status === 'pending' && 
+               in_array($this->payment_method, ['cod', 'bank_transfer']);
+    }
+    
+    /**
+     * Kiểm tra xem đơn hàng có phải là COD không
+     */
+    public function isCodOrder(): bool
+    {
+        return $this->payment_method === 'cod';
+    }
+    
+    /**
+     * Kiểm tra xem đơn hàng có phải là chuyển khoản không
+     */
+    public function isBankTransferOrder(): bool
+    {
+        return $this->payment_method === 'bank_transfer';
+    }
+    
+    /**
+     * Kiểm tra xem đơn hàng có thể tự động thanh toán khi thay đổi trạng thái không
+     */
+    public function canAutoCompletePaymentOnStatusChange(string $newStatus): bool
+    {
+        if (!$this->canAutoCompletePayment()) {
+            return false;
+        }
+        
+        // Tự động thanh toán khi giao hàng thành công
+        if ($newStatus === 'delivered') {
+            return true;
+        }
+        
+        // Tự động thanh toán khi xác nhận đơn hàng
+        if ($newStatus === 'confirmed' && $this->status === 'pending') {
+            return true;
+        }
+        
+        // Tự động thanh toán khi bắt đầu xử lý
+        if ($newStatus === 'processing' && in_array($this->status, ['pending', 'confirmed'])) {
+            return true;
+        }
+        
+        // Tự động thanh toán khi gửi hàng
+        if ($newStatus === 'shipped' && in_array($this->status, ['confirmed', 'processing'])) {
+            return true;
+        }
+        
+        return false;
+    }
 
     public function getStatusTextAttribute(): string
     {

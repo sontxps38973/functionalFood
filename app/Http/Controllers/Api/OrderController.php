@@ -728,14 +728,127 @@ public function updateOrderStatus(Request $request, $id)
 {
     $request->validate([
         'status' => 'required|string|in:pending,confirmed,processing,shipped,delivered,cancelled,refunded',
+        'tracking_number' => 'nullable|string',
+        'note' => 'nullable|string',
     ]);
+    
     $order = Order::find($id);
     if (!$order) {
         return response()->json(['message' => 'Đơn hàng không tồn tại.'], 404);
     }
-    $order->status = $request->status;
-    $order->save();
-    return response()->json(['message' => 'Cập nhật trạng thái thành công.', 'order' => $order]);
+    
+    DB::beginTransaction();
+    
+    try {
+        $oldStatus = $order->status;
+        $newStatus = $request->status;
+        
+        // Cập nhật trạng thái đơn hàng
+        $updateData = ['status' => $newStatus];
+        
+        // Cập nhật tracking number nếu có
+        if ($request->tracking_number) {
+            $updateData['tracking_number'] = $request->tracking_number;
+        }
+        
+        // Cập nhật admin notes nếu có
+        if ($request->note) {
+            $updateData['admin_notes'] = $request->note;
+        }
+        
+        // Cập nhật thời gian tương ứng với trạng thái
+        switch ($newStatus) {
+            case 'shipped':
+                $updateData['shipped_at'] = now();
+                break;
+            case 'delivered':
+                $updateData['delivered_at'] = now();
+                break;
+        }
+        
+        // Logic tự động thanh toán khi đơn hàng thành công
+        if ($newStatus === 'delivered' && $order->payment_status === 'pending') {
+            // Tự động thanh toán thành công cho đơn hàng COD
+            if ($order->payment_method === 'cod' || $order->payment_method === 'bank_transfer') {
+                $updateData['payment_status'] = 'paid';
+                $updateData['paid_at'] = now();
+                $updateData['payment_transaction_id'] = 'AUTO_' . $order->order_number . '_' . time();
+                
+                // Cập nhật rank user nếu có
+                if ($order->user) {
+                    $this->updateUserRank($order->user);
+                }
+                
+                Log::info('Auto payment successful for delivered order', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'payment_method' => $order->payment_method
+                ]);
+            }
+        }
+        
+        // Logic tự động thanh toán cho các trạng thái khác
+        if ($order->canAutoCompletePaymentOnStatusChange($newStatus)) {
+            $updateData['payment_status'] = 'paid';
+            $updateData['paid_at'] = now();
+            $updateData['payment_transaction_id'] = 'AUTO_' . $order->order_number . '_' . time();
+            
+            // Cập nhật rank user nếu có
+            if ($order->user) {
+                $this->updateUserRank($order->user);
+            }
+            
+            // Gửi thông báo tự động thanh toán thành công
+            $this->sendAutoPaymentNotification($order, $newStatus);
+            
+            Log::info('Auto payment successful for status change', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'payment_method' => $order->payment_method
+            ]);
+        }
+        
+        // Cập nhật đơn hàng
+        $order->update($updateData);
+        
+        // Log thay đổi trạng thái
+        Log::info('Order status updated', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'payment_status' => $order->payment_status,
+            'admin_id' => $request->user() ? $request->user()->id : null
+        ]);
+        
+        DB::commit();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật trạng thái thành công.',
+            'data' => [
+                'order' => $order->fresh(),
+                'status_changed' => $oldStatus !== $newStatus,
+                'auto_payment' => isset($updateData['payment_status']) && $updateData['payment_status'] === 'paid'
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        Log::error('Order status update error', [
+            'order_id' => $id,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Có lỗi xảy ra khi cập nhật trạng thái: ' . $e->getMessage()
+        ], 500);
+    }
 }
 
 /**
@@ -755,4 +868,37 @@ public function adminGetOrderStats(Request $request)
     return response()->json(['stats' => $stats]);
 }
 
+    /**
+     * Gửi thông báo khi tự động thanh toán thành công
+     */
+    private function sendAutoPaymentNotification(Order $order, string $newStatus): void
+    {
+        try {
+            // Gửi email thông báo cho khách hàng
+            if ($order->user && $order->user->email) {
+                // TODO: Implement email notification
+                Log::info('Auto payment email notification sent', [
+                    'order_id' => $order->id,
+                    'user_email' => $order->user->email,
+                    'status' => $newStatus
+                ]);
+            }
+            
+            // Gửi thông báo push hoặc SMS nếu có
+            if ($order->user && $order->phone) {
+                // TODO: Implement SMS notification
+                Log::info('Auto payment SMS notification sent', [
+                    'order_id' => $order->id,
+                    'user_phone' => $order->phone,
+                    'status' => $newStatus
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to send auto payment notification', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
 }

@@ -1007,18 +1007,35 @@ class OpenApiSpec extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"status"},
-     *             @OA\Property(property="status", type="string", enum={"pending","confirmed","processing","shipped","delivered","cancelled"}),
-     *             @OA\Property(property="tracking_number", type="string"),
-     *             @OA\Property(property="note", type="string")
+     *             @OA\Property(property="status", type="string", enum={"pending","confirmed","processing","shipped","delivered","cancelled","refunded"}, example="confirmed"),
+     *             @OA\Property(property="tracking_number", type="string", example="GHN123456789"),
+     *             @OA\Property(property="note", type="string", example="Ghi chú admin")
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Order status updated successfully",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="order", type="object")
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Cập nhật trạng thái thành công."),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="order", type="object"),
+     *                 @OA\Property(property="status_changed", type="boolean", example=true),
+     *                 @OA\Property(property="auto_payment", type="boolean", example=true)
+     *             )
      *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Order not found"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
      *     )
      * )
      */
