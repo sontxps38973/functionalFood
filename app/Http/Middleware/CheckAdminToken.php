@@ -16,19 +16,11 @@ class CheckAdminToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Sử dụng guard 'admin' đã cấu hình trong config/auth.php
-        $admin = Auth::guard('admin')->user();
-
-        if (!$admin) {
+        if (!Auth::guard('admin')->check()) {
             return response()->json([
                 'message' => 'Bạn không phải là quản trị viên hoặc token không hợp lệ.'
             ], 401);
         }
-
-        // Gán user cho request để controller nhận đúng admin
-        $request->setUserResolver(function () use ($admin) {
-            return $admin;
-        });
 
         return $next($request);
     }

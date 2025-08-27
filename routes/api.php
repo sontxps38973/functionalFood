@@ -22,8 +22,6 @@ use Illuminate\Http\Request;
 
 
 Route::prefix('v1')->group(function () {
-    // Apply CORS middleware to all API routes
-    Route::middleware(\App\Http\Middleware\Cors::class)->group(function () {
     // Public routes
     Route::prefix('public')->group(function () {
         // Category CRUD
@@ -261,5 +259,4 @@ Route::prefix('v1')->group(function () {
         Route::delete('posts/{id}', [\App\Http\Controllers\Api\AdminPostController::class, 'destroy'])->name('admin-posts.destroy');
         Route::patch('posts/{id}/toggle-status', [\App\Http\Controllers\Api\AdminPostController::class, 'toggleStatus'])->name('admin-posts.toggle-status');
     });
-    }); // Close CORS middleware group
 }); // Close v1 prefix group
