@@ -33,7 +33,7 @@ class ProductReviewController extends Controller
         $user = Auth::user();
         // Kiểm tra đã mua hàng
         $hasBought = OrderItem::whereHas('order', function($q) use ($user) {
-            $q->where('user_id', $user->id)->where('status', 'completed');
+            $q->where('user_id', $user->id)->where('status', 'delivered');
         })->where('product_id', $product_id)->exists();
         if (!$hasBought) {
             return response()->json(['message' => 'You can only review products you have purchased.'], 403);
