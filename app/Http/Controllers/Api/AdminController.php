@@ -281,12 +281,12 @@ class AdminController extends Controller
             ], 422);
         }
 
-        // Không cho phép vô hiệu hóa super_admin
-        if ($admin->role === 'super_admin') {
-            return response()->json([
-                'message' => 'Không thể vô hiệu hóa tài khoản super admin.'
-            ], 422);
-        }
+        // // Không cho phép vô hiệu hóa super_admin
+        // if ($admin->role === 'super_admin') {
+        //     return response()->json([
+        //         'message' => 'Không thể vô hiệu hóa tài khoản super admin.'
+        //     ], 422);
+        // }
 
         $admin->update(['status' => $admin->status === 'active' ? 'inactive' : 'active']);
 
