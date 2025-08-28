@@ -266,7 +266,7 @@ class OrderController extends Controller
                     'product_name' => $item['product_name'] ?? $product->name,
                     'variant_name' => $variant ? $variant->name : null,
                     'sku' => $variant ? $variant->sku : $product->sku,
-                    'product_image' => $product->images->first() ? $product->images->first()->image_path : null,
+                    'product_image' => $product->image ? $product->image : ($product->images->first() ? $product->images->first()->image_path : null),
                     'price' => $item['price'],
                     'discount_price' => 0, // Default discount price
                     'final_price' => $item['price'],
@@ -432,6 +432,7 @@ public function getOrderDetail(Request $request, $orderId)
                         'id' => $item->product->id,
                         'name' => $item->product->name,
                         'image' => $item->product->image ? asset('storage/' . $item->product->image) : null,
+                        'image_url' => $item->product->image ? asset('storage/' . $item->product->image) : null,
                     ] : null,
                     'variant' => $item->variant ? [
                         'id' => $item->variant->id,
@@ -619,7 +620,7 @@ public function adminGetOrders(Request $request)
                         'id' => $item->product->id,
                         'name' => $item->product->name,
                         'image' => $item->product->image ? asset('storage/' . $item->product->image) : null,
-                        'image_url' => $item->product->image ? Storage::url($item->product->image) : null,
+                        'image_url' => $item->product->image ? asset('storage/' . $item->product->image) : null,
                     ] : null,
                     'variant' => $item->variant ? [
                         'id' => $item->variant->id,
