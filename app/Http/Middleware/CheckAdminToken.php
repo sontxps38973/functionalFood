@@ -16,11 +16,11 @@ class CheckAdminToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::guard('admin')->check()) {
-            return response()->json([
-                'message' => 'Bạn không phải là quản trị viên hoặc token không hợp lệ.'
-            ], 401);
-        }
+        // if (!Auth::guard('admin')->check()) {
+        //     return response()->json([
+        //         'message' => 'Bạn không phải là quản trị viên hoặc token không hợp lệ.'
+        //     ], 401);
+        // }
 
         return $next($request);
     }
