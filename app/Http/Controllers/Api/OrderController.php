@@ -193,7 +193,7 @@ class OrderController extends Controller
                 'email' => 'required|email',
                 'phone' => 'required|string|max:20',
                 'address' => 'required|string',
-                'payment_method' => 'required|in:cod,online_payment',
+                'payment_method' => 'required|in:cod,bank_transfer,online_payment',
                 'subtotal' => 'required|numeric|min:0',
                 'shipping_fee' => 'required|numeric|min:0',
                 'tax' => 'required|numeric|min:0',
@@ -313,63 +313,7 @@ class OrderController extends Controller
                 }
             }
 
-            // If payment method is online_payment, create VNPay payment URL
-            $paymentData = null;
-            if ($request->payment_method === 'online_payment') {
-                try {
-                    $vnpayService = app(VnpayService::class);
-                    
-                    // Prepare payment data
-                    $paymentRequest = [
-                        'amount' => $order->total,
-                        'order_info' => "Thanh toan don hang #{$order->order_number}",
-                        'txn_ref' => $order->order_number,
-                        'locale' => 'vn',
-                        'order_type' => 'billpayment',
-                        'billing' => [
-                            'mobile' => $order->phone,
-                            'email' => $order->email,
-                            'fullname' => $order->name,
-                            'address' => $order->address,
-                            'city' => 'Đà Nẵng', // You can make this dynamic
-                            'country' => 'VN'
-                        ],
-                        'invoice' => [
-                            'phone' => $order->phone,
-                            'email' => $order->email,
-                            'customer' => $order->name,
-                            'address' => $order->address,
-                            'company' => 'Functional Food',
-                            'taxcode' => '123456789', // You can make this dynamic
-                            'type' => 'I'
-                        ]
-                    ];
-
-                    $paymentResult = $vnpayService->createPaymentUrl($paymentRequest);
-                    
-                    if ($paymentResult['code'] === '00') {
-                        // Update order with payment reference
-                        $order->update([
-                            'payment_reference' => $paymentResult['data']['txn_ref'],
-                            'payment_method' => 'vnpay'
-                        ]);
-
-                        $paymentData = $paymentResult['data'];
-                    } else {
-                        // Payment URL creation failed
-                        $order->update([
-                            'status' => 'payment_failed',
-                            'payment_error' => $paymentResult['message']
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Payment creation error in placeOrder: ' . $e->getMessage());
-                    $order->update([
-                        'status' => 'payment_failed',
-                        'payment_error' => 'Payment service error: ' . $e->getMessage()
-                    ]);
-                }
-            }
+            // Payment processing removed - VNPay integration disabled
 
             return response()->json([
                 'success' => true,
@@ -380,8 +324,6 @@ class OrderController extends Controller
                     'total' => $order->total,
                     'status' => $order->status,
                     'payment_method' => $order->payment_method,
-                    'payment_url' => $paymentData['payment_url'] ?? null,
-                    'payment_reference' => $paymentData['txn_ref'] ?? null,
                 ]
             ], 201);
 

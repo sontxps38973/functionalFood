@@ -124,8 +124,8 @@ public function store(StoreProductRequest $request)
             ]);
             // Ảnh biến thể nếu có
             if ($request->hasFile("variants.$index.image")) {
-                $variantImage = $request->file("variants.$index.image")->store('public/variants');
-                $variant->image = Storage::url($variantImage);
+                $variantImage = $request->file("variants.$index.image")->store('variants', 'public');
+                $variant->image = $variantImage;
                 $variant->save();
             }
         }
