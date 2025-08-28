@@ -713,7 +713,6 @@ public function updateOrderStatus(Request $request, $id)
             // Tự động thanh toán thành công cho đơn hàng COD
             if ($order->payment_method === 'cod' || $order->payment_method === 'bank_transfer') {
                 $updateData['payment_status'] = 'paid';
-                $updateData['paid_at'] = now();
                 $updateData['payment_transaction_id'] = 'AUTO_' . $order->order_number . '_' . time();
                 
                 // Cập nhật rank user nếu có
@@ -732,7 +731,6 @@ public function updateOrderStatus(Request $request, $id)
         // Logic tự động thanh toán cho các trạng thái khác
         if ($order->canAutoCompletePaymentOnStatusChange($newStatus)) {
             $updateData['payment_status'] = 'paid';
-            $updateData['paid_at'] = now();
             $updateData['payment_transaction_id'] = 'AUTO_' . $order->order_number . '_' . time();
             
             // Cập nhật rank user nếu có
