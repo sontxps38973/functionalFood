@@ -67,7 +67,7 @@ class AdminPostController extends Controller
             Log::info('Validated data for post creation:', $data);
             
             if ($request->hasFile('image')) {
-                $data['image'] = $request->file('image')->store('public/posts');
+                $data['image'] = $request->file('image')->store('posts', 'public');
                 Log::info('Image stored for new post:', ['image_path' => $data['image']]);
             }
             
@@ -143,7 +143,9 @@ class AdminPostController extends Controller
             Log::info('Post update request:', [
                 'post_id' => $id,
                 'request_data' => $request->all(),
-                'request_files' => $request->hasFile('image') ? 'Has image file' : 'No image file'
+                'request_input' => $request->input(),
+                'request_files' => $request->hasFile('image') ? 'Has image file' : 'No image file',
+                'content_type' => $request->header('Content-Type')
             ]);
             
             $post = Post::findOrFail($id);
@@ -157,33 +159,66 @@ class AdminPostController extends Controller
                 'current_image' => $post->image
             ]);
             
-            // Validation rules cho cập nhật
-            $data = $request->validate([
-                'title' => 'nullable|string|max:255',
-                'content' => 'nullable|string',
-                'image' => 'nullable|file|image|max:2048',
-                'status' => 'nullable|in:public,draft',
+            // Log dữ liệu raw để debug
+            Log::info('Raw request data:', [
+                'all' => $request->all(),
+                'input' => $request->input(),
+                'has_title' => $request->has('title'),
+                'has_content' => $request->has('content'),
+                'has_status' => $request->has('status'),
+                'title_value' => $request->input('title'),
+                'content_value' => $request->input('content'),
+                'status_value' => $request->input('status')
             ]);
             
-            // Log dữ liệu sau validation
-            Log::info('Validated data:', $data);
-            
-            // Chỉ cập nhật các trường có dữ liệu
+            // Xử lý dữ liệu từ cả JSON và FormData
             $updateData = [];
             
-            if ($request->filled('title')) {
-                $updateData['title'] = $data['title'];
-                Log::info('Title will be updated:', ['new_title' => $data['title']]);
+            // Lấy dữ liệu từ request body
+            $requestBody = $request->getContent();
+            Log::info('Request body content:', ['body' => $requestBody]);
+            
+            // Thử parse JSON nếu có
+            if ($requestBody && $request->header('Content-Type') === 'application/json') {
+                $jsonData = json_decode($requestBody, true);
+                Log::info('Parsed JSON data:', $jsonData);
+                
+                if (is_array($jsonData)) {
+                    if (isset($jsonData['title']) && $jsonData['title'] !== null && $jsonData['title'] !== '') {
+                        $updateData['title'] = $jsonData['title'];
+                        Log::info('Title from JSON will be updated:', ['new_title' => $jsonData['title']]);
+                    }
+                    
+                    if (isset($jsonData['content']) && $jsonData['content'] !== null && $jsonData['content'] !== '') {
+                        $updateData['content'] = $jsonData['content'];
+                        Log::info('Content from JSON will be updated:', ['new_content' => $jsonData['content']]);
+                    }
+                    
+                    if (isset($jsonData['status']) && $jsonData['status'] !== null && $jsonData['status'] !== '') {
+                        $updateData['status'] = $jsonData['status'];
+                        Log::info('Status from JSON will be updated:', ['new_status' => $jsonData['status']]);
+                    }
+                }
             }
             
-            if ($request->filled('content')) {
-                $updateData['content'] = $data['content'];
-                Log::info('Content will be updated:', ['new_content' => $data['content']]);
-            }
-            
-            if ($request->filled('status')) {
-                $updateData['status'] = $data['status'];
-                Log::info('Status will be updated:', ['new_status' => $data['status']]);
+            // Nếu không có dữ liệu từ JSON, thử lấy từ FormData
+            if (empty($updateData)) {
+                Log::info('No JSON data, trying FormData...');
+                
+                if ($request->has('title') && $request->input('title') !== null && $request->input('title') !== '') {
+                    $updateData['title'] = $request->input('title');
+                    Log::info('Title from FormData will be updated:', ['new_title' => $request->input('title')]);
+                }
+                
+                if ($request->has('content') && $request->input('content') !== null && $request->input('content') !== '') {
+                    $updateData['content'] = $request->input('content');
+                    Log::info('Content from FormData will be updated:', ['new_content' => $request->input('content')]);
+                }
+                
+                if ($request->has('status') && $request->input('status') !== null && $request->input('status') !== '') {
+                    $updateData['status'] = $request->input('status');
+                    Log::info('Status from FormData will be updated:', ['new_status' => $request->input('status')]);
+                }
             }
             
             // Xử lý ảnh nếu có
@@ -193,7 +228,7 @@ class AdminPostController extends Controller
                     Storage::delete($post->image);
                     Log::info('Old image deleted:', ['old_image' => $post->image]);
                 }
-                $updateData['image'] = $request->file('image')->store('public/posts');
+                $updateData['image'] = $request->file('image')->store('posts', 'public');
                 Log::info('New image stored:', ['new_image' => $updateData['image']]);
             }
             
