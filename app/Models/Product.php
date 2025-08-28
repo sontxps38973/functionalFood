@@ -92,4 +92,9 @@ class Product extends Model
             ]
         ];
     }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
+    }
 }

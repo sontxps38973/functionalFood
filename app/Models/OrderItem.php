@@ -88,8 +88,5 @@ class OrderItem extends Model
                $this->order->delivered_at->diffInDays(now()) <= 7; // 7 ngày từ khi giao hàng
     }
 
-    public function getProductImageUrlAttribute()
-    {
-        return $this->product_image ? asset('storage/' . $this->product_image) : null;
-    }
+
 }

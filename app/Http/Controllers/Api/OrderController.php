@@ -266,7 +266,7 @@ class OrderController extends Controller
                     'product_name' => $item['product_name'] ?? $product->name,
                     'variant_name' => $variant ? $variant->name : null,
                     'sku' => $variant ? $variant->sku : $product->sku,
-                    'product_image' => $product->image ? $product->image : ($product->images->first() ? $product->images->first()->image_path : null),
+                    'product_image' => $variant && $variant->image ? $variant->image : ($product->image ? $product->image : ($product->images->first() ? $product->images->first()->image_path : null)),
                     'price' => $item['price'],
                     'discount_price' => 0, // Default discount price
                     'final_price' => $item['price'],
@@ -427,7 +427,7 @@ public function getOrderDetail(Request $request, $orderId)
                     'price' => Currency::toVndInt($item->price),
                     'quantity' => $item->quantity,
                     'total' => Currency::toVndInt($item->total),
-                    'product_image' => $item->product_image_url,
+                    'product_image' => $item->product_image ? asset('storage/' . $item->product_image) : null,
                     'product' => $item->product ? [
                         'id' => $item->product->id,
                         'name' => $item->product->name,
@@ -436,7 +436,8 @@ public function getOrderDetail(Request $request, $orderId)
                     ] : null,
                     'variant' => $item->variant ? [
                         'id' => $item->variant->id,
-                        'image' => $item->variant->image_url,
+                        'image' => $item->variant->image ? asset('storage/' . $item->variant->image) : null,
+                        'image_url' => $item->variant->image ? asset('storage/' . $item->variant->image) : null,
                     ] : null,
                 ];
             }),
@@ -604,8 +605,8 @@ public function adminGetOrders(Request $request)
                     'product_name' => $item->product_name,
                     'variant_name' => $item->variant_name,
                     'sku' => $item->sku,
-                    'product_image' => $item->product_image_url, // trả về full URL
-                    'product_image_url' => $item->product_image_url,
+                    'product_image' => $item->product_image ? asset('storage/' . $item->product_image) : null,
+                    'product_image_url' => $item->product_image ? asset('storage/' . $item->product_image) : null,
                     'price' => Currency::toVndInt($item->price),
                     'discount_price' => Currency::toVndInt($item->discount_price),
                     'final_price' => Currency::toVndInt($item->final_price),
@@ -630,11 +631,12 @@ public function adminGetOrders(Request $request)
                         'price' => Currency::toVndInt($item->variant->price),
                         'discount' => Currency::toVndInt($item->variant->discount),
                         'stock_quantity' => $item->variant->stock_quantity,
-                        'image' => $item->variant->image,
-                        'image_url' => $item->variant->image_url,
+                        'image' => $item->variant->image ? asset('storage/' . $item->variant->image) : null,
+                        'image_url' => $item->variant->image ? asset('storage/' . $item->variant->image) : null,
                         'created_at' => $item->variant->created_at,
                         'updated_at' => $item->variant->updated_at,
                     ] : null,
+
                 ];
             }),
             'coupon' => $order->coupon,
